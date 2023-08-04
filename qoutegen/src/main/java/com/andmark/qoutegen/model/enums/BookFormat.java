@@ -3,7 +3,8 @@
     public enum BookFormat {
         FB2("fb2"),
         EPUB("epub"),
-        DOC("doc");
+        DOC("doc"),
+        PDF("pdf");
 
         private final String format;
 
