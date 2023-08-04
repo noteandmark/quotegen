@@ -24,7 +24,7 @@ public class Book {
     private String filePath;
 
     // "book" refers to the field name in the Quote (or Paragraph) entity that maps back to this Book entity
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "bookSource", fetch = FetchType.LAZY)
     private List<Quote> quotes;
 
 }

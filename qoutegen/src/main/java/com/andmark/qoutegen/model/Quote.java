@@ -23,6 +23,6 @@ public class Quote {
     @ManyToOne
     // Join with the Book entity using "book_id" column, and it is mandatory (not nullable)
     @JoinColumn(name = "book_id", nullable = false, referencedColumnName = "id")
-    private Book book;
+    private Book bookSource;
 
 }
