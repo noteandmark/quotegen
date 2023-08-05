@@ -4,32 +4,44 @@
         FB2("fb2"),
         EPUB("epub"),
         DOC("doc"),
-        PDF("pdf");
+        DOCX("docx"),
+        PDF("pdf"),
+        NOT_FOUND("not_found");
 
-        private final String format;
+        private final String value;
 
-        BookFormat(String format) {
-            this.format = format;
+        BookFormat(final String value) {
+            this.value = value;
         }
 
-        public String getFormat() {
-            return format;
+        public String getValue() {
+            return value;
         }
 
-        public boolean equalsFormat(String otherFormat) {
-            return format.equals(otherFormat);
-        }
+//        public boolean equalsFormat(String otherFormat) {
+//            return format.equals(otherFormat);
+//        }
 
+        @Override
         public String toString() {
-            return format;
+            return value;
         }
 
         public static BookFormat fromString(String text) {
-            for (BookFormat format : BookFormat.values()) {
-                if (format.format.equalsIgnoreCase(text)) {
-                    return format;
+            for (final BookFormat bookFormat : values()) {
+                if (bookFormat.value.equalsIgnoreCase(text)) {
+                    return bookFormat;
                 }
             }
-            throw new IllegalArgumentException("Invalid BookFormat: " + text);
+            return NOT_FOUND;
         }
+
+//        public static BookFormat fromString(String text) {
+//            for (BookFormat format : BookFormat.values()) {
+//                if (format.format.equalsIgnoreCase(text)) {
+//                    return format;
+//                }
+//            }
+//            throw new IllegalArgumentException("Invalid BookFormat: " + text);
+//        }
     }
