@@ -1,47 +1,39 @@
-    package com.andmark.qoutegen.model.enums;
+package com.andmark.qoutegen.model.enums;
 
-    public enum BookFormat {
-        FB2("fb2"),
-        EPUB("epub"),
-        DOC("doc"),
-        DOCX("docx"),
-        PDF("pdf"),
-        NOT_FOUND("not_found");
+public enum BookFormat {
+    FB2("fb2"),
+    EPUB("epub"),
+    DOC("doc"),
+    DOCX("docx"),
+    PDF("pdf"),
+    NOT_FOUND("not_found");
 
-        private final String value;
+    private final String value;
 
-        BookFormat(final String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-//        public boolean equalsFormat(String otherFormat) {
-//            return format.equals(otherFormat);
-//        }
-
-        @Override
-        public String toString() {
-            return value;
-        }
-
-        public static BookFormat fromString(String text) {
-            for (final BookFormat bookFormat : values()) {
-                if (bookFormat.value.equalsIgnoreCase(text)) {
-                    return bookFormat;
-                }
-            }
-            return NOT_FOUND;
-        }
-
-//        public static BookFormat fromString(String text) {
-//            for (BookFormat format : BookFormat.values()) {
-//                if (format.format.equalsIgnoreCase(text)) {
-//                    return format;
-//                }
-//            }
-//            throw new IllegalArgumentException("Invalid BookFormat: " + text);
-//        }
+    BookFormat(final String value) {
+        this.value = value;
     }
+
+    public String getValue() {
+        return value;
+    }
+
+    public boolean equalsFormat(String otherFormat) {
+        return value.equals(otherFormat);
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
+
+    public static BookFormat fromString(String text) {
+        for (final BookFormat bookFormat : values()) {
+            if (bookFormat.value.equalsIgnoreCase(text)) {
+                return bookFormat;
+            }
+        }
+        return NOT_FOUND;
+    }
+
+}

@@ -20,6 +20,7 @@ import org.apache.xmlbeans.XmlException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,12 +29,17 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.andmark.qoutegen.model.enums.BookFormat.*;
+import static com.andmark.qoutegen.model.enums.Status.ACTIVE;
+import static com.andmark.qoutegen.model.enums.Status.DELETED;
 
 @Service
+@Transactional(readOnly = true)
 public class ScanService {
 
     private final BooksRepository booksRepository;
@@ -45,34 +51,57 @@ public class ScanService {
         this.mapper = mapper;
     }
 
+    @Transactional
     public List<BookDTO> scanBooks(String directoryPath) {
         File rootDirectory = new File(directoryPath);
-
         if (!rootDirectory.exists() || !rootDirectory.isDirectory()) {
             throw new IllegalArgumentException("Invalid directory path: " + directoryPath);
         }
 
-        List<BookDTO> scannedBooks = getBookDTOList(rootDirectory);
+        //scan and find files in folder and subfolders
+        List<Book> scannedBooks = getBookList(rootDirectory);
 
-        return scannedBooks;
+        //check if the database is up to date - if you have deleted a file from the disc
+        // - put the status deleted in the database
+        cleanUpDatabase(scannedBooks);
+
+        // Save all books in a single transaction
+        booksRepository.saveAll(scannedBooks);
+
+        return scannedBooks.stream()
+                .map(book -> mapper.map(book, BookDTO.class))
+                .collect(Collectors.toList());
     }
 
-    public List<BookDTO> getBookDTOList(File rootDirectory) {
-        List<BookDTO> scannedBooks = new ArrayList<>();
+    @Transactional
+    public void cleanUpDatabase(List<Book> scannedBooks) {
+        List<Book> booksInDatabase = booksRepository.findByStatus(ACTIVE);
+        booksInDatabase.removeAll(scannedBooks);
+        if (!booksInDatabase.isEmpty()) {
+            for (Book bookToDelete : booksInDatabase) {
+                // mark the book as deleted
+                bookToDelete.setStatus(DELETED);
+                booksRepository.save(bookToDelete);
+            }
+        }
+    }
+
+    private List<Book> getBookList(File rootDirectory) {
+        List<Book> scannedBooks = new ArrayList<>();
+        //recursively go through the directory and all subfolders looking for files
         scanBooksRecursive(rootDirectory, scannedBooks);
         return scannedBooks;
     }
 
-    protected void scanBooksRecursive(File directory, List<BookDTO> scannedBooks) {
+    private void scanBooksRecursive(File directory, List<Book> scannedBooks) {
         File[] files = directory.listFiles();
 
         if (files != null) {
             for (File file : files) {
                 if (file.isFile()) {
-                    BookDTO bookDTO = processBookFile(file);
-                    if (bookDTO != null) {
-                        bookDTO.setAuthor(directory.getName());
-                        scannedBooks.add(bookDTO);
+                    Book book = processBookFile(file);
+                    if (book != null) {
+                        scannedBooks.add(book);
                     }
                 } else if (file.isDirectory()) {
                     scanBooksRecursive(file, scannedBooks);
@@ -81,16 +110,16 @@ public class ScanService {
         }
     }
 
-    private BookDTO processBookFile(File file) {
+    private Book processBookFile(File file) {
         Book book = checkExistingBook(file);
 
         if (book == null) {
-
             BookFormat bookFormat = getBookFormat(file.getName());
             book = new Book();
             book.setAuthor(file.getParentFile().getName());
             book.setFilePath(file.getPath());
             book.setTitle(removeExtension(file));
+            book.setStatus(ACTIVE);
 
             switch (bookFormat) {
                 case FB2 -> book = scanFB2Book(book, file);
@@ -102,8 +131,11 @@ public class ScanService {
                     return null;
                 }
             }
+        } else {
+            if (book.getStatus().equals(DELETED))
+                book.setStatus(ACTIVE);
         }
-        return mapper.map(book, BookDTO.class);
+        return book;
     }
 
     private Book checkExistingBook(File file) {
@@ -132,8 +164,7 @@ public class ScanService {
 
         book.setFormat(EPUB);
 //        book.setFormat(BookFormat.valueOf(setExtension(file)));
-
-        return booksRepository.save(book);
+        return book;
     }
 
     private String extractPlainTextFromHtml(String html) {
@@ -156,8 +187,7 @@ public class ScanService {
         }
 
         book.setFormat(DOC);
-
-        return booksRepository.save(book);
+        return book;
     }
 
     private Book scanDOCXBook(Book book, File file) {
@@ -171,8 +201,7 @@ public class ScanService {
         }
 
         book.setFormat(DOCX);
-
-        return booksRepository.save(book);
+        return book;
     }
 
     private Book scanPDFBook(Book book, File file) {
@@ -187,37 +216,17 @@ public class ScanService {
         }
 
         book.setFormat(PDF);
-
-        Book savedBook = booksRepository.save(book);
-
-        return savedBook;
+        return book;
     }
 
-    private Book scanFB2Book(Book newBook, File file) {
-        String filePath = file.getPath();
-        Optional<Book> existingBook = booksRepository.findByFilePath(filePath);
-
-        if (!existingBook.isEmpty()) {
-            // Book with the same filePath already exists, return its DTO
-            return existingBook.get();
-        }
+    private Book scanFB2Book(Book book, File file) {
 
         try {
             FictionBook fb2 = new FictionBook(new File(file.getAbsolutePath()));
-
             Body body = fb2.getBody();
 
-            Book book = new Book();
-
-            book.setAuthor(file.getParentFile().getName());
-            book.setFilePath(file.getPath());
-            book.setTitle(file.getName());
-
             book.setFormat(FB2);
-
-            Book savedBook = booksRepository.save(book);
-
-            return savedBook;
+            return book;
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
             return null; //TODO make exseptions
