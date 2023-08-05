@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
@@ -53,32 +52,29 @@ public class ScanService {
             throw new IllegalArgumentException("Invalid directory path: " + directoryPath);
         }
 
-        List<BookDTO> scannedBooks = new ArrayList<>();
-        scanBooksRecursive(rootDirectory, scannedBooks);
-
-        for (BookDTO scannedBook : scannedBooks) {
-            System.out.println("scannedBook :");
-            System.out.println(scannedBook);
-        }
+        List<BookDTO> scannedBooks = getBookDTOList(rootDirectory);
 
         return scannedBooks;
     }
 
+    public List<BookDTO> getBookDTOList(File rootDirectory) {
+        List<BookDTO> scannedBooks = new ArrayList<>();
+        scanBooksRecursive(rootDirectory, scannedBooks);
+        return scannedBooks;
+    }
+
     protected void scanBooksRecursive(File directory, List<BookDTO> scannedBooks) {
-        System.out.println("in scanBooksRecursive with directory = " + directory.getName());
         File[] files = directory.listFiles();
 
         if (files != null) {
             for (File file : files) {
                 if (file.isFile()) {
-                    System.out.println("find file : " + file.getName());
                     BookDTO bookDTO = processBookFile(file);
                     if (bookDTO != null) {
                         bookDTO.setAuthor(directory.getName());
                         scannedBooks.add(bookDTO);
                     }
                 } else if (file.isDirectory()) {
-                    System.out.println("file is directory: " + file.getName());
                     scanBooksRecursive(file, scannedBooks);
                 }
             }
@@ -86,42 +82,42 @@ public class ScanService {
     }
 
     private BookDTO processBookFile(File file) {
-        BookDTO foundBook = new BookDTO();
+        Book book = checkExistingBook(file);
 
-        String fileFormat;
-        String fileName = file.getName();
+        if (book == null) {
 
-        System.out.println("file = " + file);
-        System.out.println("fileName = " + fileName);
+            BookFormat bookFormat = getBookFormat(file.getName());
+            book = new Book();
+            book.setAuthor(file.getParentFile().getName());
+            book.setFilePath(file.getPath());
+            book.setTitle(removeExtension(file));
 
-        int lastDotIndex = fileName.lastIndexOf(".");
-        fileFormat = fileName.substring(lastDotIndex + 1);
-
-        BookFormat bookFormat = fromString(fileFormat);
-        System.out.println("bookFormat = " + bookFormat);
-
-        foundBook = switch (bookFormat) {
-            case FB2 -> scanFB2Book(file);
-            case EPUB -> scanEPUBBook(file);
-            case DOC -> scanDOCBook(file);
-            case DOCX -> scanDOCXBook(file);
-            case PDF -> scanPDFBook(file);
-            case NOT_FOUND -> null;
-        };
-
-        System.out.println("foundBook: ");
-        System.out.println(foundBook);
-        return foundBook;
+            switch (bookFormat) {
+                case FB2 -> book = scanFB2Book(book, file);
+                case EPUB -> book = scanEPUBBook(book, file);
+                case DOC -> book = scanDOCBook(book, file);
+                case DOCX -> book = scanDOCXBook(book, file);
+                case PDF -> book = scanPDFBook(book, file);
+                case NOT_FOUND -> {
+                    return null;
+                }
+            }
+        }
+        return mapper.map(book, BookDTO.class);
     }
 
-    private BookDTO scanEPUBBook(File file) {
+    private Book checkExistingBook(File file) {
+        String filePath = file.getPath();
+        Optional<Book> existingBook = booksRepository.findByFilePath(filePath);
+
+        return existingBook.orElse(null);
+    }
+
+    private Book scanEPUBBook(Book book, File file) {
         EpubReader epubReader = new EpubReader();
         StringBuilder textBuilder = new StringBuilder();
         try {
             nl.siegmann.epublib.domain.Book epubBook = epubReader.readEpub(new FileInputStream(file));
-            List titles = epubBook.getMetadata().getTitles();
-            System.out.println("epubBook title:" + (titles.isEmpty() ? "epubBook has no title" : titles.get(0)));
-
             TableOfContents tableOfContents = epubBook.getTableOfContents();
             List<Resource> allUniqueResources = tableOfContents.getAllUniqueResources();
             for (Resource allUniqueResource : allUniqueResources) {
@@ -134,16 +130,10 @@ public class ScanService {
             throw new RuntimeException(e);
         }
 
-        com.andmark.qoutegen.model.Book book = new Book();
-        book.setTitle(file.getName());
-        int lastDotIndex = file.getName().lastIndexOf(".");
-        book.setFormat(BookFormat.valueOf(file.getName().substring(lastDotIndex + 1).toUpperCase()));
-        book.setFilePath(file.getPath());
-        book.setAuthor(file.getParentFile().getName());
+        book.setFormat(EPUB);
+//        book.setFormat(BookFormat.valueOf(setExtension(file)));
 
-        Book savedBook = booksRepository.save(book);
-
-        return mapper.map(savedBook, BookDTO.class);
+        return booksRepository.save(book);
     }
 
     private String extractPlainTextFromHtml(String html) {
@@ -151,8 +141,7 @@ public class ScanService {
         return doc.text();
     }
 
-
-    private BookDTO scanDOCBook(File file) {
+    private Book scanDOCBook(Book book, File file) {
 
         POITextExtractor extractor = null;
         try {
@@ -166,20 +155,12 @@ public class ScanService {
             throw new RuntimeException(e);
         }
 
-        Book book = new Book();
-        book.setTitle(file.getName());
-        int lastDotIndex = file.getName().lastIndexOf(".");
-        book.setFormat(BookFormat.valueOf(file.getName().substring(lastDotIndex + 1).toUpperCase()));
-        book.setFilePath(file.getPath());
-        book.setAuthor(file.getParentFile().getName());
+        book.setFormat(DOC);
 
-        Book savedBook = booksRepository.save(book);
-
-        return mapper.map(savedBook, BookDTO.class);
+        return booksRepository.save(book);
     }
 
-
-    private BookDTO scanDOCXBook(File file) {
+    private Book scanDOCXBook(Book book, File file) {
 
         try (FileInputStream fileInputStream = new FileInputStream(file.getAbsolutePath())) {
             XWPFDocument docxFile = new XWPFDocument(OPCPackage.open(fileInputStream));
@@ -189,19 +170,12 @@ public class ScanService {
             ex.printStackTrace();
         }
 
-        Book book = new Book();
-        book.setTitle(file.getName());
-        int lastDotIndex = file.getName().lastIndexOf(".");
-        book.setFormat(BookFormat.valueOf(file.getName().substring(lastDotIndex + 1).toUpperCase()));
-        book.setFilePath(file.getPath());
-        book.setAuthor(file.getParentFile().getName());
+        book.setFormat(DOCX);
 
-        Book savedBook = booksRepository.save(book);
-
-        return mapper.map(savedBook, BookDTO.class);
+        return booksRepository.save(book);
     }
 
-    private BookDTO scanPDFBook(File file) {
+    private Book scanPDFBook(Book book, File file) {
 
         try {
             PDDocument document = PDDocument.load(file);
@@ -212,24 +186,20 @@ public class ScanService {
             throw new RuntimeException(e);  //TODO make exseptions
         }
 
-        Book book = new Book();
-        book.setTitle(file.getName());
         book.setFormat(PDF);
-        book.setFilePath(file.getPath());
-        book.setAuthor(file.getParentFile().getName());
 
         Book savedBook = booksRepository.save(book);
 
-        return mapper.map(savedBook, BookDTO.class);
+        return savedBook;
     }
 
-    private BookDTO scanFB2Book(File file) {
+    private Book scanFB2Book(Book newBook, File file) {
         String filePath = file.getPath();
         Optional<Book> existingBook = booksRepository.findByFilePath(filePath);
 
         if (!existingBook.isEmpty()) {
             // Book with the same filePath already exists, return its DTO
-            return mapper.map(existingBook, BookDTO.class);
+            return existingBook.get();
         }
 
         try {
@@ -238,21 +208,48 @@ public class ScanService {
             Body body = fb2.getBody();
 
             Book book = new Book();
-            book.setTitle(fb2.getTitle());
-            book.setFilePath(file.getPath());
-            book.setFormat(FB2);
+
             book.setAuthor(file.getParentFile().getName());
+            book.setFilePath(file.getPath());
+            book.setTitle(file.getName());
+
+            book.setFormat(FB2);
 
             Book savedBook = booksRepository.save(book);
 
-            return mapper.map(savedBook, BookDTO.class);
+            return savedBook;
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
             return null; //TODO make exseptions
         }
     }
 
+    private BookFormat getBookFormat(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf(".");
+        String fileFormat = fileName.substring(lastDotIndex + 1).toUpperCase();
+        return BookFormat.fromString(fileFormat);
+    }
+
+    private String removeExtension(File file) {
+        String fileName = file.getName();
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex > 0) {
+            return fileName.substring(0, lastDotIndex);
+        }
+        return fileName;
+    }
+
+    private String setExtension(File file) {
+        String fileName = file.getName();
+        int lastDotIndex = file.getName().lastIndexOf(".");
+        if (lastDotIndex > 0) {
+            return fileName.substring(lastDotIndex + 1).toUpperCase();
+        }
+        return fileName;
+    }
+
 }
+
 
 // реализация парсинга fb2 файла, будет использовано в дальнейшем
 //            for (Section section : body.getSections()) {
