@@ -143,7 +143,7 @@ public class ScanService {
         return BookFormat.fromString(fileFormat);
     }
 
-    private String removeExtension(File file) {
+    String removeExtension(File file) {
         String fileName = file.getName();
         int lastDotIndex = fileName.lastIndexOf('.');
         if (lastDotIndex > 0) {

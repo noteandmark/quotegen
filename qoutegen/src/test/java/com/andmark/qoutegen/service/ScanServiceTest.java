@@ -42,13 +42,9 @@ public class ScanServiceTest {
 
     private File tempDirectory;
 
-    @BeforeEach
-    public void setUp() throws IOException {
-        tempDirectory = createTempDirectory();
-    }
-
     @Test
-    public void whenGetRootDirectory_thenShouldCheckThatIsRealDirectory() {
+    public void whenGetRootDirectory_thenShouldCheckThatIsRealDirectory() throws IOException {
+        tempDirectory = createTempDirectory();
         List<Book> expectedBooks = new ArrayList<>();
         // Mock behavior of getBookDTOList
         when(scanService.getBookList(tempDirectory)).thenReturn(expectedBooks);
@@ -69,6 +65,7 @@ public class ScanServiceTest {
 
     @Test
     public void testScanBooks_ValidDirectoryPath() throws IOException {
+        tempDirectory = createTempDirectory();
         // Create temporary files within the temporary directory
         File file1 = new File(tempDirectory, "book1.epub");
         file1.createNewFile();
@@ -143,62 +140,22 @@ public class ScanServiceTest {
     public void whenExistingBookFound_thenShouldReturnBook() {
         File existingFile = new File("existingFile.epub");
 
-        Book expected = new Book();
-        expected.setId(null);
-        expected.setTitle("existingFile");
-        expected.setAuthor("file.getParentFile().getName()");
-        expected.setFilePath("existingFile.epub");
-        expected.setStatus(Status.ACTIVE);
-        expected.setFormat(BookFormat.EPUB);
+        Book existingBook = new Book();
+        existingBook.setId(null);
+        existingBook.setTitle("existingFile");
+        existingBook.setAuthor("file.getParentFile().getName()");
+        existingBook.setFilePath("existingFile.epub");
+        existingBook.setStatus(Status.ACTIVE);
+        existingBook.setFormat(BookFormat.EPUB);
 
-        Book actual = scanService.processBookFile(existingFile);
-        assertThat(actual, notNullValue());
+        Book resultBook = scanService.processBookFile(existingFile);
+        assertThat(resultBook, notNullValue());
         verify(booksRepository).findByFilePath(any());
         verify(scanService, times(1)).checkExistingBook(existingFile);
         verify(scanService, times(1)).getBookFormat(existingFile.getName());
-        assertEquals(expected, actual);
-
-//        File unknownFile = new File("unknownFile.xyz");
-
-        // Mock behavior of checkExistingBook
-//        Book existingBook = new Book();
-//        existingBook.setId(1L);
-//        existingBook.setTitle("Existing Book")
-//        existingBook.setStatus(Status.ACTIVE);
-//        when(scanService.checkExistingBook(existingFile)).thenReturn(existingBook);
-
-        // Mock behavior of getBookFormat
-//        when(scanService.getBookFormat(newFile.getName())).thenReturn(BookFormat.PDF);
-//        when(scanService.getBookFormat(unknownFile.getName())).thenReturn(BookFormat.NOT_FOUND);
-
-        // Act
-//        List<BookDTO> result = scanService.scanBooks(tempDirectory.getAbsolutePath());
-
-//        when(scanService.getBookFormat(existingFile.getName())).thenReturn(BookFormat.EPUB);
-//        when(booksRepository.findByFilePath(existingFile.getPath())).thenReturn(Optional.of(existingBook));
-//        Book existingResult = scanService.processBookFile(existingFile);
-//        Book unknownResult = scanService.processBookFile(unknownFile);
-
-        // Assert
-        // Verify that the checkExistingBook method is called for existingFile and newFile
-//        verify(scanService, times(1)).checkExistingBook(newFile);
-
-        // Verify that the getBookFormat method is called for existingFile, newFile, and unknownFile
-//        verify(scanService, times(1)).getBookFormat(existingFile.getName());
-//        verify(scanService, times(1)).getBookFormat(newFile.getName());
-//        verify(scanService, times(1)).getBookFormat(unknownFile.getName());
-
+        assertEquals(existingBook, resultBook);
         // Verify that the status of existingBook is not changed
-//        assertEquals(Status.ACTIVE, existingResult.getStatus());
-
-        // Verify that a new book is created for newFile
-//        assertNotNull(newResult);
-//        assertEquals("newFile", newResult.getTitle());
-//        assertEquals(BookFormat.PDF, newResult.getFormat());
-//        assertEquals(Status.ACTIVE, newResult.getStatus());
-//
-//        // Verify that null is returned for unknownFile
-//        assertNull(unknownResult);
+        assertEquals(Status.ACTIVE, existingBook.getStatus());
     }
 
     @Test
@@ -207,9 +164,62 @@ public class ScanServiceTest {
 
         when(scanService.checkExistingBook(newFile)).thenReturn(null); // No existing book
         Book newResult = scanService.processBookFile(newFile);
+        assertNotNull(newResult);
+        // Verify that the getBookFormat method is called for newFile
+        verify(scanService, times(1)).getBookFormat(newFile.getName());
+        verify(scanService, times(1)).checkExistingBook(newFile);
 
+        // Verify that a new book is created for newFile
+        assertEquals("newFile", newResult.getTitle());
+        assertEquals(BookFormat.PDF, newResult.getFormat());
+        assertEquals(Status.ACTIVE, newResult.getStatus());
     }
 
+    @Test
+    public void whenUnknownFileFound_thenShouldSkipBook() {
+        File unknownFile = new File("unknownFile.xyz");
+
+        when(scanService.getBookFormat(unknownFile.getName())).thenReturn(BookFormat.NOT_FOUND);
+        Book unknownResult = scanService.processBookFile(unknownFile);
+
+        // Verify that the getBookFormat method is called for existingFile, newFile, and unknownFile
+        verify(scanService, times(1)).getBookFormat(unknownFile.getName());
+        // Verify that null is returned for unknownFile
+        assertNull(unknownResult);
+    }
+
+    @Test
+    public void whenValidBookFormat_thenShouldReturnCorrectEnum() {
+        assertEquals(BookFormat.EPUB, scanService.getBookFormat("book.epub"));
+        assertEquals(BookFormat.FB2, scanService.getBookFormat("book.fb2"));
+        assertEquals(BookFormat.PDF, scanService.getBookFormat("book.pdf"));
+        assertEquals(BookFormat.DOC, scanService.getBookFormat("book.doc"));
+        assertEquals(BookFormat.DOCX, scanService.getBookFormat("book.docx"));
+        assertEquals(BookFormat.NOT_FOUND, scanService.getBookFormat("book.unknown"));
+    }
+
+    @Test
+    public void whenInvalidBookFormat_thenShouldReturnNotFound() {
+        assertEquals(BookFormat.NOT_FOUND, scanService.getBookFormat("book"));
+        assertEquals(BookFormat.NOT_FOUND, scanService.getBookFormat("book."));
+        assertEquals(BookFormat.NOT_FOUND, scanService.getBookFormat("book.epu"));
+    }
+
+    @Test
+    public void whenFileNameWithExtension_thenShouldRemoveExtension() {
+        assertEquals("file", scanService.removeExtension(new File("file.txt")));
+        assertEquals("document", scanService.removeExtension(new File("document.docx")));
+        assertEquals("data", scanService.removeExtension(new File("data.csv")));
+        assertEquals("image", scanService.removeExtension(new File("image.jpg")));
+    }
+
+    @Test
+    public void whenFileNameWithoutExtension_thenShouldReturnOriginalName() {
+        assertEquals("file", scanService.removeExtension(new File("file")));
+        assertEquals("document", scanService.removeExtension(new File("document")));
+        assertEquals("data", scanService.removeExtension(new File("data")));
+        assertEquals("image", scanService.removeExtension(new File("image")));
+    }
 
     private File createTempDirectory() throws IOException {
         return Files.createTempDirectory("testDir").toFile();
