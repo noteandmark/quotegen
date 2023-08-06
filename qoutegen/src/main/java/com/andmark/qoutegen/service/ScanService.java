@@ -1,44 +1,25 @@
 package com.andmark.qoutegen.service;
 
 import com.andmark.qoutegen.dto.BookDTO;
-import com.andmark.qoutegen.model.Book;
-import com.andmark.qoutegen.model.enums.BookFormat;
+import com.andmark.qoutegen.models.Book;
+import com.andmark.qoutegen.models.enums.BookFormat;
 import com.andmark.qoutegen.repository.BooksRepository;
-import com.andmark.qoutegen.util.BookFormatParser;
-import com.andmark.qoutegen.util.impl.*;
-import com.kursx.parser.fb2.*;
-import nl.siegmann.epublib.domain.Resource;
-import nl.siegmann.epublib.domain.TableOfContents;
-import nl.siegmann.epublib.epub.EpubReader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.poi.POITextExtractor;
-import org.apache.poi.extractor.ExtractorFactory;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.xmlbeans.XmlException;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.xml.sax.SAXException;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.andmark.qoutegen.model.enums.BookFormat.*;
-import static com.andmark.qoutegen.model.enums.Status.ACTIVE;
-import static com.andmark.qoutegen.model.enums.Status.DELETED;
+import static com.andmark.qoutegen.models.enums.Status.ACTIVE;
+import static com.andmark.qoutegen.models.enums.Status.DELETED;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class ScanService {
 
     private final BooksRepository booksRepository;
@@ -52,8 +33,10 @@ public class ScanService {
 
     @Transactional
     public List<BookDTO> scanBooks(String directoryPath) {
+        log.debug("in scanBooks with directoryPath = " + directoryPath);
         File rootDirectory = new File(directoryPath);
         if (!rootDirectory.exists() || !rootDirectory.isDirectory()) {
+            log.error("Invalid directory path: " + directoryPath);
             throw new IllegalArgumentException("Invalid directory path: " + directoryPath);
         }
 
@@ -67,6 +50,8 @@ public class ScanService {
         // Save all books in a single transaction
         booksRepository.saveAll(scannedBooks);
 
+        log.info("Scanned and saved {} books", scannedBooks.size());
+
         return scannedBooks.stream()
                 .map(book -> mapper.map(book, BookDTO.class))
                 .collect(Collectors.toList());
@@ -74,18 +59,23 @@ public class ScanService {
 
     @Transactional
     public void cleanUpDatabase(List<Book> scannedBooks) {
+        log.debug("check if needed to set status deleted ");
         List<Book> booksInDatabase = booksRepository.findByStatus(ACTIVE);
         booksInDatabase.removeAll(scannedBooks);
         if (!booksInDatabase.isEmpty()) {
+            log.info("cleaning books with status deleted: {}", booksInDatabase);
             for (Book bookToDelete : booksInDatabase) {
                 // mark the book as deleted
                 bookToDelete.setStatus(DELETED);
+                log.debug("setStatus DELETED to {}", bookToDelete.getFilePath());
                 booksRepository.save(bookToDelete);
+                log.info("booksRepository.save(bookToDelete) perform");
             }
         }
     }
 
     List<Book> getBookList(File rootDirectory) {
+        log.debug("Getting list of books from directory: {}", rootDirectory);
         List<Book> scannedBooks = new ArrayList<>();
         //recursively go through the directory and all subfolders looking for files
         scanBooksRecursive(rootDirectory, scannedBooks);
@@ -93,6 +83,7 @@ public class ScanService {
     }
 
     private void scanBooksRecursive(File directory, List<Book> scannedBooks) {
+        log.debug("Scanning directory: {}", directory);
         File[] files = directory.listFiles();
 
         if (files != null) {
@@ -110,6 +101,7 @@ public class ScanService {
     }
 
     Book processBookFile(File file) {
+        log.debug("Processing book file: {}", file);
         Book book = checkExistingBook(file);
 
         if (book == null) {
@@ -131,6 +123,7 @@ public class ScanService {
     }
 
     Book checkExistingBook(File file) {
+        log.debug("Checking existing book for file: {}", file);
         String filePath = file.getPath();
         Optional<Book> existingBook = booksRepository.findByFilePath(filePath);
 

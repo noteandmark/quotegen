@@ -1,27 +1,29 @@
 package com.andmark.qoutegen.controller;
 
-import com.andmark.qoutegen.dto.BookDTO;
-import com.andmark.qoutegen.service.ScanService;
+import com.andmark.qoutegen.service.BooksService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/books")
+@Slf4j
 public class BookController {
-
-    private final ScanService scanService;
+    private final BooksService booksService;
 
     @Autowired
-    public BookController(ScanService scanService) {
-        this.scanService = scanService;
+    public BookController(BooksService booksService) {
+        this.booksService = booksService;
     }
 
-    @GetMapping("/scan-books")
-    public List<BookDTO> scanBooks(@RequestParam String directoryPath) {
-        List<BookDTO> scannedBooks = scanService.scanBooks(directoryPath);
-        return scannedBooks;
+    @DeleteMapping("/clear-deleted")
+    public ResponseEntity<String> clearDeletedBooks() {
+        log.debug("in clearDeletedBooks");
+        booksService.clearDeletedBooks();
+        log.info("clearDeletedBooks perform");
+        return ResponseEntity.ok("Books with status DELETED cleared");
     }
-
 }

@@ -1,12 +1,14 @@
 package com.andmark.qoutegen.dto;
 
-import com.andmark.qoutegen.model.enums.BookFormat;
-import lombok.Data;
+import com.andmark.qoutegen.models.enums.BookFormat;
+import lombok.*;
 
-@Data
+@RequiredArgsConstructor
+@Getter
+@Setter
+@ToString
 public class BookDTO {
 
-    private Long id;
     private String title;
     private String author;
     private BookFormat format;

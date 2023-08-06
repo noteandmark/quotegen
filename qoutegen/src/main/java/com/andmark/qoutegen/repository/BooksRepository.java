@@ -1,7 +1,7 @@
 package com.andmark.qoutegen.repository;
 
-import com.andmark.qoutegen.model.Book;
-import com.andmark.qoutegen.model.enums.Status;
+import com.andmark.qoutegen.models.Book;
+import com.andmark.qoutegen.models.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

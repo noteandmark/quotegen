@@ -1,12 +1,10 @@
 package com.andmark.qoutegen.service;
 
 import com.andmark.qoutegen.dto.BookDTO;
-import com.andmark.qoutegen.model.Book;
-import com.andmark.qoutegen.model.enums.BookFormat;
-import com.andmark.qoutegen.model.enums.Status;
+import com.andmark.qoutegen.models.Book;
+import com.andmark.qoutegen.models.enums.BookFormat;
+import com.andmark.qoutegen.models.enums.Status;
 import com.andmark.qoutegen.repository.BooksRepository;
-import com.andmark.qoutegen.service.ScanService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -153,7 +150,7 @@ public class ScanServiceTest {
         verify(booksRepository).findByFilePath(any());
         verify(scanService, times(1)).checkExistingBook(existingFile);
         verify(scanService, times(1)).getBookFormat(existingFile.getName());
-        assertEquals(existingBook, resultBook);
+        assertEquals(existingBook.getFilePath(), resultBook.getFilePath());
         // Verify that the status of existingBook is not changed
         assertEquals(Status.ACTIVE, existingBook.getStatus());
     }

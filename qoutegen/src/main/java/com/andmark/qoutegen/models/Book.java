@@ -1,15 +1,18 @@
-package com.andmark.qoutegen.model;
+package com.andmark.qoutegen.models;
 
-import com.andmark.qoutegen.model.enums.BookFormat;
-import com.andmark.qoutegen.model.enums.Status;
+import com.andmark.qoutegen.models.enums.BookFormat;
+import com.andmark.qoutegen.models.enums.Status;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "book")
-@Data
+@RequiredArgsConstructor
+@Getter
+@Setter
+@ToString
 public class Book {
 
     @Id
@@ -35,6 +38,7 @@ public class Book {
 
     // "book" refers to the field name in the Quote (or Paragraph) entity that maps back to this Book entity
     @OneToMany(mappedBy = "bookSource", fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Quote> quotes;
 
 }

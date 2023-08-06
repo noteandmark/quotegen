@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name ="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">%-30(%d %p) %-30.30([%t] %C): %msg%n%throwable</layout>
+    </appender>
+    <appender name ="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/app-logback.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d %p [%t] %C: %msg%n%throwable</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/app-%d{yyyy-MM-dd}.%i-logback.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class ="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <MaxHistory>7</MaxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder>
+            <pattern>%d{ISO8601} [%-5p][%-16.16t][%32.32c] - %m%n</pattern>
+            <charset>utf8</charset>
+        </encoder>
+        <file>./logs/error1.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./logs/error/%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+    </appender>
+<root level="INFO">
+    <appender-ref ref="File"/>
+    <appender-ref ref="Console"/>
+    <appender-ref ref="ERROR_FILE"/>
+</root>
+
+    <logger name="com.andmark.qoutegen" level="DEBUG" additivity="false">
+        <appender-ref ref="File"/>
+        <appender-ref ref="Console"/>
+    </logger>
+
+</configuration>
