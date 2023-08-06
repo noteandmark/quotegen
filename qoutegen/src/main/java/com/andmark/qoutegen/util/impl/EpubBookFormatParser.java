@@ -7,7 +7,7 @@ import java.io.File;
 
 public class EpubBookFormatParser implements BookFormatParser {
     @Override
-    public Book parse(File file) {
+    public String parse(Book book) {
         return null;
     }
 }

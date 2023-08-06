@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "book")
@@ -41,4 +42,16 @@ public class Book {
     @ToString.Exclude
     private List<Quote> quotes;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return Objects.equals(id, book.id) && Objects.equals(title, book.title) && Objects.equals(author, book.author) && format == book.format && Objects.equals(filePath, book.filePath) && status == book.status && Objects.equals(quotes, book.quotes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, author, format, filePath, status, quotes);
+    }
 }

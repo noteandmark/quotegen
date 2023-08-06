@@ -5,5 +5,5 @@ import com.andmark.qoutegen.models.Book;
 import java.io.File;
 
 public interface BookFormatParser {
-    Book parse(File file);
+    String parse(Book book);
 }

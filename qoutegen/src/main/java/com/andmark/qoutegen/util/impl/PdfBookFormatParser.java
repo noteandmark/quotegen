@@ -7,7 +7,8 @@ import java.io.File;
 
 public class PdfBookFormatParser implements BookFormatParser {
     @Override
-    public Book parse(File file) {
-        return null;
+    public String parse(Book book) {
+        System.out.println("in PdfBookFormatParser");
+        return "text from pdf file";
     }
 }
