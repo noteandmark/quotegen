@@ -9,3 +9,6 @@ spring.datasource.password=
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.show_sql=true
 spring.jpa.properties.hibernate.check_nullability=true
+
+# Set the quote's cache size
+quote.cache.size=30

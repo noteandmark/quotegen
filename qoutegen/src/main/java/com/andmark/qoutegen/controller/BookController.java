@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/books")
+@RequestMapping("api/books")
 @Slf4j
 public class BookController {
     private final BooksService booksService;

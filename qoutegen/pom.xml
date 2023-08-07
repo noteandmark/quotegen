@@ -20,8 +20,8 @@
         <modelmapper.version>3.1.1</modelmapper.version>
         <pdfbox.version>2.0.27</pdfbox.version>
         <apache.poi.version>5.2.3</apache.poi.version>
-        <slf4j.version>1.7.33</slf4j.version>
-        <logback.version>1.2.10</logback.version>
+<!--        <slf4j.version>1.7.33</slf4j.version>-->
+<!--        <logback.version>1.2.10</logback.version>-->
     </properties>
 
     <repositories>
@@ -32,14 +32,14 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-logging</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>ch.qos.logback</groupId>-->
+<!--                    <artifactId>logback-classic</artifactId>-->
+<!--                </exclusion>-->
 <!--                <exclusion>-->
 <!--                    <groupId>org.apache.logging.log4j</groupId>-->
 <!--                    <artifactId>log4j-to-slf4j</artifactId>-->
@@ -48,8 +48,9 @@
 <!--                    <groupId>org.slf4j</groupId>-->
 <!--                    <artifactId>slf4j-simple</artifactId>-->
 <!--                </exclusion>-->
-            </exclusions>
-        </dependency>
+<!--            </exclusions>-->
+<!--        </dependency>-->
+
         <!--Spring-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -111,12 +112,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                    <artifactId>slf4j-simple</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -124,25 +119,6 @@
             <scope>runtime</scope>
         </dependency>
         <!--Utilities-->
-        <!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-logging</artifactId>-->
-<!--&lt;!&ndash;            <version>3.1.2</version>&ndash;&gt;-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.apache.logging.log4j</groupId>-->
-<!--                    <artifactId>log4j-to-slf4j</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                    <artifactId>jul-to-slf4j</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                    <artifactId>slf4j-simple</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
 
         <!--        <dependency>-->
 <!--            <groupId>ch.qos.logback</groupId>-->

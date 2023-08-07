@@ -1,7 +1,10 @@
 package com.andmark.qoutegen.dto;
 
-import com.andmark.qoutegen.models.enums.BookFormat;
-import lombok.*;
+import com.andmark.qoutegen.domain.enums.BookFormat;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @RequiredArgsConstructor
 @Getter

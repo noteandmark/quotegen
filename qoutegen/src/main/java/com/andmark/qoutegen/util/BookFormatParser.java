@@ -1,9 +1,10 @@
 package com.andmark.qoutegen.util;
 
-import com.andmark.qoutegen.models.Book;
+import com.andmark.qoutegen.domain.Book;
+import com.andmark.qoutegen.domain.enums.BookFormat;
 
-import java.io.File;
-
-public interface BookFormatParser {
+    public interface BookFormatParser {
     String parse(Book book);
+
+    BookFormat getFormat();
 }

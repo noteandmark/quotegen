@@ -1,13 +1,15 @@
 package com.andmark.qoutegen.service.impl;
 
-import com.andmark.qoutegen.exceptions.ServiceException;
-import com.andmark.qoutegen.models.Book;
-import com.andmark.qoutegen.models.Quote;
-import com.andmark.qoutegen.models.enums.Status;
+import com.andmark.qoutegen.domain.Book;
+import com.andmark.qoutegen.domain.Quote;
+import com.andmark.qoutegen.domain.enums.Status;
+import com.andmark.qoutegen.dto.QuoteDTO;
+import com.andmark.qoutegen.exception.ServiceException;
 import com.andmark.qoutegen.repository.BooksRepository;
 import com.andmark.qoutegen.repository.QuotesRepository;
 import com.andmark.qoutegen.service.QuoteService;
 import com.andmark.qoutegen.util.BookFormatParser;
+import com.andmark.qoutegen.util.BookFormatParserFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,21 +25,22 @@ import java.util.*;
 public class QuoteServiceImpl implements QuoteService {
     @Value("${quote.cache.size}")
     private int cacheSize;
+    private final Queue<Quote> quoteCache;
 
     private final QuotesRepository quotesRepository;
     private final BooksRepository booksRepository;
-    private final BookFormatParser bookFormatParser;
+    private final BookFormatParserFactory bookFormatParserFactory;
     private final ModelMapper mapper;
-    private final Queue<Quote> quoteCache;
 
     @Autowired
-    public QuoteServiceImpl(QuotesRepository quotesRepository, ModelMapper mapper, Queue<Quote> quoteCache, BooksRepository booksRepository, BookFormatParser bookFormatParser) {
+    public QuoteServiceImpl(QuotesRepository quotesRepository, BooksRepository booksRepository, BookFormatParserFactory bookFormatParserFactory, ModelMapper mapper) {
         this.quotesRepository = quotesRepository;
-        this.mapper = mapper;
         this.booksRepository = booksRepository;
-        this.bookFormatParser = bookFormatParser;
+        this.bookFormatParserFactory = bookFormatParserFactory;
+        this.mapper = mapper;
         this.quoteCache = new LinkedList<>();
     }
+
 
     public void setCacheSize(int cacheSize) {
         this.cacheSize = cacheSize;
@@ -82,6 +85,58 @@ public class QuoteServiceImpl implements QuoteService {
         log.info("delete quote with id {} perform", id);
     }
 
+    @Transactional
+    public void checkAndPopulateCache() {
+        log.debug("service checkAndPopulateCache");
+        int usedQuotesCount = quotesRepository.countByUsedAtIsNull();
+        log.debug("usedQuotesCount is {}",usedQuotesCount);
+
+        if (usedQuotesCount < 5) {
+            log.debug("usedQuotesCount < 5");
+            populateCache();
+        }
+
+    }
+
+    public void waitForSuitableQuotes() {
+        log.debug("service waitForSuitableQuotes");
+        int unsuitableQuotesCount = quotesRepository.countByUsedAtIsNull();
+        log.debug("unsuitableQuotesCount = {}", unsuitableQuotesCount);
+
+//        while (unsuitableQuotesCount > 5) {
+//            // Wait for a moment (you may need to handle exceptions here)
+//            try {
+//                log.debug("sleep 1sec");
+//                Thread.sleep(1000); // Wait for 1 second
+//                unsuitableQuotesCount = quotesRepository.countByUsedAtIsNull();
+//            } catch (InterruptedException e) {
+//                log.error("InterruptedException in waitForSuitableQuotes");
+//                Thread.currentThread().interrupt();
+//            }
+//        }
+        log.info("unsuitableQuotesCount = {}", unsuitableQuotesCount);
+    }
+
+    public String provideQuoteToClient() {
+        log.debug("service provideQuoteToClient");
+        Quote quote = quotesRepository.findFirstByUsedAtIsNull();
+        log.info("quote = {}", quote);
+
+        return quote.getContent();
+    }
+
+    public void confirmQuote(Long quoteId) {
+        Quote quote = quotesRepository.findById(quoteId)
+                .orElseThrow(() -> new ServiceException("Quote not found"));
+
+        quote.setUsedAt(new Date());
+        quotesRepository.save(quote);
+    }
+
+    public void deleteQuote(Long quoteId) {
+        quotesRepository.deleteById(quoteId);
+    }
+
     public void populateCache() {
         log.debug("Populating cache...");
 
@@ -93,12 +148,38 @@ public class QuoteServiceImpl implements QuoteService {
 
         //parse books and generate quotes
         generateQuotes(parsedBooks);
+        // Save quotes in the cache to the database
+        saveQuotesFromCache(quoteCache);
 
         log.debug("Cache populated successfully.");
     }
 
+    @Transactional
+    public void saveQuotesFromCache(Queue<Quote> quoteCache) {
+        List<Quote> quotesToSave = getQuotes(quoteCache);
+
+        if (!quotesToSave.isEmpty()) {
+            log.debug("Saving quotes to the database: {}", quotesToSave);
+            quotesRepository.saveAll(quotesToSave);
+            log.info("Quotes saved: {}", quotesToSave);
+        } else {
+            log.error("nothing to save, something wrong");
+        }
+    }
+
+    private List<Quote> getQuotes(Queue<Quote> quoteCache) {
+        List<Quote> quotesToSave = new ArrayList<>();
+        while (!quoteCache.isEmpty()) {
+            Quote quote = quoteCache.poll();
+            if (quote != null) {
+                log.debug("quote to save to list with id = {}", quote.getId());
+                quotesToSave.add(quote);
+            }
+        }
+        return quotesToSave;
+    }
+
     private void generateQuotes(Map<Book, Integer> parsedBooks) {
-        Random random = new Random();
 
         // Generate quotes for selected books
         for (Book book : parsedBooks.keySet()) {
@@ -109,33 +190,41 @@ public class QuoteServiceImpl implements QuoteService {
 
             String bookText = getBookText(book);
 
-            List<String> words = Arrays.asList(bookText.split("\\s+"));
-
-            do {
-                String quoteContent;
-
-                if (words.size() > 500) {
-                    int startIndex = random.nextInt(words.size() - 500);
-                    quoteContent = String.join(" ", words.subList(startIndex, startIndex + 500));
-                } else {
-                    quoteContent = bookText;
-                }
-
-                log.debug("quoteContent = {}", quoteContent);
-
-                Quote quote = new Quote();
-                quote.setBookSource(book);
-                quote.setContent(quoteContent);
-                quoteCache.offer(quote);
-
-                occurrences--;
-            } while (occurrences > 0);
+            parseAndCacheQuotes(book, bookText, occurrences);
         }
 
     }
 
-    private String getBookText(Book book) {
-        String bookText = bookFormatParser.parse(book);
+    private void parseAndCacheQuotes(Book book, String bookText, Integer occurrences) {
+        List<String> words = Arrays.asList(bookText.split("\\s+"));
+        do {
+            String quoteContent = generateQuoteContent(words);
+            log.debug("quoteContent = {}", quoteContent);
+
+            Quote quote = new Quote();
+            quote.setBookSource(book);
+            quote.setContent(quoteContent);
+            quoteCache.offer(quote);
+
+            occurrences--;
+        } while (occurrences > 0);
+    }
+
+    public String generateQuoteContent(List<String> words) {
+        Random random = new Random();
+
+        if (words.size() <= 500) {
+            return String.join(" ", words);
+        } else {
+            int startIndex = random.nextInt(words.size() - 500);
+            return String.join(" ", words.subList(startIndex, startIndex + 500));
+        }
+    }
+
+    public String getBookText(Book book) {
+        // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
+        BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
+        String bookText = parser.parse(book);
         if (bookText == null) {
             log.error("Text from book {} is null!", book);
             throw new ServiceException("Text from book is null!");
@@ -161,7 +250,7 @@ public class QuoteServiceImpl implements QuoteService {
         return parsedBooks;
     }
 
-    private List<Book> getAllActiveBooks() {
+    public List<Book> getAllActiveBooks() {
         List<Book> allBooks = booksRepository.findByStatus(Status.ACTIVE);
         log.debug("Active books: {}", allBooks);
         if (allBooks.isEmpty()) {
@@ -175,6 +264,7 @@ public class QuoteServiceImpl implements QuoteService {
         if (quoteCache.isEmpty()) {
             populateCache();
         }
+        log.info("content {}", quoteCache.element().getContent());
         return quoteCache.poll();
     }
 

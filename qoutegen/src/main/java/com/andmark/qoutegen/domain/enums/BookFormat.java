@@ -1,4 +1,4 @@
-package com.andmark.qoutegen.models.enums;
+package com.andmark.qoutegen.domain.enums;
 
 public enum BookFormat {
     FB2("fb2"),

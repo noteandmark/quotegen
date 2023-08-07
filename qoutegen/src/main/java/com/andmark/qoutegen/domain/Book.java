@@ -1,7 +1,7 @@
-package com.andmark.qoutegen.models;
+package com.andmark.qoutegen.domain;
 
-import com.andmark.qoutegen.models.enums.BookFormat;
-import com.andmark.qoutegen.models.enums.Status;
+import com.andmark.qoutegen.domain.enums.BookFormat;
+import com.andmark.qoutegen.domain.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +10,8 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "book")
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString

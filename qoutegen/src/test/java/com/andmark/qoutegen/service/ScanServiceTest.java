@@ -1,12 +1,13 @@
 package com.andmark.qoutegen.service;
 
+import com.andmark.qoutegen.domain.Book;
+import com.andmark.qoutegen.domain.enums.BookFormat;
+import com.andmark.qoutegen.domain.enums.Status;
 import com.andmark.qoutegen.dto.BookDTO;
-import com.andmark.qoutegen.models.Book;
-import com.andmark.qoutegen.models.enums.BookFormat;
-import com.andmark.qoutegen.models.enums.Status;
 import com.andmark.qoutegen.repository.BooksRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -16,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,8 +136,10 @@ public class ScanServiceTest {
     }
 
     @Test
-    public void whenExistingBookFound_thenShouldReturnBook() {
-        File existingFile = new File("existingFile.epub");
+    public void whenExistingBookFound_thenShouldReturnBook(@TempDir Path tempDir) {
+        // Create a temporary file with a known path
+        Path existingFilePath = tempDir.resolve("existingFile.epub");
+        File existingFile = existingFilePath.toFile();
 
         Book existingBook = new Book();
         existingBook.setId(null);
@@ -150,14 +154,17 @@ public class ScanServiceTest {
         verify(booksRepository).findByFilePath(any());
         verify(scanService, times(1)).checkExistingBook(existingFile);
         verify(scanService, times(1)).getBookFormat(existingFile.getName());
-        assertEquals(existingBook.getFilePath(), resultBook.getFilePath());
+        assertEquals(existingBook.getTitle(), resultBook.getTitle());
         // Verify that the status of existingBook is not changed
         assertEquals(Status.ACTIVE, existingBook.getStatus());
     }
 
     @Test
-    public void whenNewBookFound_thenShouldReturnBook() {
-        File newFile = new File("newFile.pdf");
+    public void whenNewBookFound_thenShouldReturnBook() throws IOException {
+        tempDirectory = createTempDirectory();
+        // Create temporary files within the temporary directory
+        File newFile = new File(tempDirectory, "newFile.pdf");
+        newFile.createNewFile();
 
         when(scanService.checkExistingBook(newFile)).thenReturn(null); // No existing book
         Book newResult = scanService.processBookFile(newFile);
