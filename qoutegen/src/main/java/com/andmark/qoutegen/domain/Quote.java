@@ -1,4 +1,4 @@
-package com.andmark.qoutegen.models;
+package com.andmark.qoutegen.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,8 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "quote")
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -23,8 +24,8 @@ public class Quote {
     private String content;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Column(name = "usedAt", nullable = false)
+//    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Column(name = "usedAt")
     private Date usedAt;
 
     @ManyToOne

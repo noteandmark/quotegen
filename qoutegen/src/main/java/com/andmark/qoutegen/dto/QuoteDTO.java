@@ -1,6 +1,6 @@
 package com.andmark.qoutegen.dto;
 
-import com.andmark.qoutegen.models.Book;
+import com.andmark.qoutegen.domain.Book;
 import lombok.*;
 
 import java.util.Date;

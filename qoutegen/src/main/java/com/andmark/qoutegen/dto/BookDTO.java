@@ -1,6 +1,6 @@
 package com.andmark.qoutegen.dto;
 
-import com.andmark.qoutegen.models.enums.BookFormat;
+import com.andmark.qoutegen.domain.enums.BookFormat;
 import lombok.*;
 
 @RequiredArgsConstructor

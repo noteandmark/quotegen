@@ -1,13 +1,21 @@
 package com.andmark.qoutegen.util.impl;
 
-import com.andmark.qoutegen.models.Book;
+import com.andmark.qoutegen.domain.Book;
+import com.andmark.qoutegen.domain.enums.BookFormat;
 import com.andmark.qoutegen.util.BookFormatParser;
+import org.springframework.stereotype.Component;
 
-import java.io.File;
-
+@Component
 public class EpubBookFormatParser implements BookFormatParser {
     @Override
     public String parse(Book book) {
-        return null;
+        String text;
+        text = "epub_book";
+        return text;
+    }
+
+    @Override
+    public BookFormat getFormat() {
+        return BookFormat.EPUB;
     }
 }

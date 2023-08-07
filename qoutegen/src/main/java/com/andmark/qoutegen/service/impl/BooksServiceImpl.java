@@ -1,7 +1,7 @@
 package com.andmark.qoutegen.service.impl;
 
-import com.andmark.qoutegen.models.Book;
-import com.andmark.qoutegen.models.enums.Status;
+import com.andmark.qoutegen.domain.Book;
+import com.andmark.qoutegen.domain.enums.Status;
 import com.andmark.qoutegen.repository.BooksRepository;
 import com.andmark.qoutegen.service.BooksService;
 import lombok.extern.slf4j.Slf4j;
