@@ -11,11 +11,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @Slf4j
-public class ApiController {
+public class ScanController {
     private final ScanService scanService;
 
     @Autowired
-    public ApiController(ScanService scanService) {
+    public ScanController(ScanService scanService) {
         this.scanService = scanService;
     }
 

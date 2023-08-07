@@ -1,6 +1,9 @@
-package com.andmark.qoutegen.exceptions;
+package com.andmark.qoutegen.exception;
 
 public class ServiceException extends RuntimeException {
+
+    public ServiceException() {
+    }
 
     public ServiceException(String message) {
         super(message);

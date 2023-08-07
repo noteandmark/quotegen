@@ -1,7 +1,7 @@
 package com.andmark.qoutegen.service.impl;
 
-import com.andmark.qoutegen.models.Book;
-import com.andmark.qoutegen.models.enums.Status;
+import com.andmark.qoutegen.domain.Book;
+import com.andmark.qoutegen.domain.enums.Status;
 import com.andmark.qoutegen.repository.BooksRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

@@ -1,8 +1,8 @@
 package com.andmark.qoutegen.service;
 
 import com.andmark.qoutegen.dto.BookDTO;
-import com.andmark.qoutegen.models.Book;
-import com.andmark.qoutegen.models.enums.BookFormat;
+import com.andmark.qoutegen.domain.Book;
+import com.andmark.qoutegen.domain.enums.BookFormat;
 import com.andmark.qoutegen.repository.BooksRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -14,8 +14,8 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.andmark.qoutegen.models.enums.Status.ACTIVE;
-import static com.andmark.qoutegen.models.enums.Status.DELETED;
+import static com.andmark.qoutegen.domain.enums.Status.ACTIVE;
+import static com.andmark.qoutegen.domain.enums.Status.DELETED;
 
 @Service
 @Transactional(readOnly = true)
@@ -108,7 +108,7 @@ public class ScanService {
             BookFormat bookFormat = getBookFormat(file.getName());
             if (bookFormat != BookFormat.NOT_FOUND) {
                 book = new Book();
-                book.setAuthor("file.getParentFile().getName()");
+                book.setAuthor(file.getParentFile().getName());
                 book.setFilePath(file.getPath());
                 book.setTitle(removeExtension(file));
                 book.setStatus(ACTIVE);

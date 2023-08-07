@@ -1,4 +1,4 @@
-package com.andmark.qoutegen.models.enums;
+package com.andmark.qoutegen.domain.enums;
 
 public enum Status {
     ACTIVE("active"), DELETED("deleted");
