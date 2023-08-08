@@ -1,16 +1,10 @@
 package com.andmark.qoutegen.service;
 
-import com.andmark.qoutegen.domain.Quote;
 import com.andmark.qoutegen.dto.QuoteDTO;
 
-public interface QuoteService extends AbstractService<Quote>{
+public interface QuoteService extends AbstractService<QuoteDTO>{
     void checkAndPopulateCache();
-
-    void waitForSuitableQuotes();
-
-    String provideQuoteToClient();
-
+    QuoteDTO provideQuoteToClient();
     void confirmQuote(Long quoteId);
 
-    void deleteQuote(Long quoteId);
 }

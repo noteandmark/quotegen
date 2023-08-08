@@ -10,14 +10,15 @@ import com.andmark.qoutegen.repository.QuotesRepository;
 import com.andmark.qoutegen.service.QuoteService;
 import com.andmark.qoutegen.util.BookFormatParser;
 import com.andmark.qoutegen.util.BookFormatParserFactory;
+import com.andmark.qoutegen.util.impl.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,10 +31,10 @@ public class QuoteServiceImpl implements QuoteService {
     private final QuotesRepository quotesRepository;
     private final BooksRepository booksRepository;
     private final BookFormatParserFactory bookFormatParserFactory;
-    private final ModelMapper mapper;
+    private final MapperConvert<Quote, QuoteDTO> mapper;
 
     @Autowired
-    public QuoteServiceImpl(QuotesRepository quotesRepository, BooksRepository booksRepository, BookFormatParserFactory bookFormatParserFactory, ModelMapper mapper) {
+    public QuoteServiceImpl(QuotesRepository quotesRepository, BooksRepository booksRepository, BookFormatParserFactory bookFormatParserFactory, MapperConvert<Quote, QuoteDTO> mapper) {
         this.quotesRepository = quotesRepository;
         this.booksRepository = booksRepository;
         this.bookFormatParserFactory = bookFormatParserFactory;
@@ -41,37 +42,42 @@ public class QuoteServiceImpl implements QuoteService {
         this.quoteCache = new LinkedList<>();
     }
 
-
     public void setCacheSize(int cacheSize) {
         this.cacheSize = cacheSize;
     }
 
     @Override
     @Transactional
-    public void save(Quote quote) {
-        log.debug("saving book");
-        quotesRepository.save(quote);
-        log.info("save book {}", quote);
+    public void save(QuoteDTO quoteDTO) {
+        log.debug("saving quote");
+        quotesRepository.save(convertToEntity(quoteDTO));
+        log.info("save quote {}", quoteDTO);
     }
 
     @Override
-    public Quote findOne(Long id) {
+    public QuoteDTO findOne(Long id) {
         log.debug("find quote by id {}", id);
         Optional<Quote> foundQuote = quotesRepository.findById(id);
         log.info("find quote {}", foundQuote);
-        return foundQuote.orElse(null);
+        return foundQuote.map(this::convertToDTO)
+                .orElse(null);
     }
 
     @Override
-    public List<Quote> findAll() {
+    public List<QuoteDTO> findAll() {
         log.debug("find all quotes");
-        return quotesRepository.findAll();
+        List<Quote> quoteList = quotesRepository.findAll();
+        log.info("founded quoteList = {}", quoteList);
+        return quoteList.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void update(Long id, Quote updatedQuote) {
-        log.debug("update book by id {}", id);
+    public void update(Long id, QuoteDTO updatedQuoteDTO) {
+        log.debug("update quote by id {}", id);
+        Quote updatedQuote = convertToEntity(updatedQuoteDTO);
         updatedQuote.setId(id);
         quotesRepository.save(updatedQuote);
         log.info("update quote {}", updatedQuote);
@@ -95,36 +101,25 @@ public class QuoteServiceImpl implements QuoteService {
             log.debug("usedQuotesCount < 5");
             populateCache();
         }
-
     }
 
-    public void waitForSuitableQuotes() {
-        log.debug("service waitForSuitableQuotes");
-        int unsuitableQuotesCount = quotesRepository.countByUsedAtIsNull();
-        log.debug("unsuitableQuotesCount = {}", unsuitableQuotesCount);
-
-        log.info("unsuitableQuotesCount = {}", unsuitableQuotesCount);
-    }
-
-    public String provideQuoteToClient() {
+    public QuoteDTO provideQuoteToClient() {
         log.debug("service provideQuoteToClient");
         Quote quote = quotesRepository.findFirstByUsedAtIsNull();
-        log.info("quote = {}", quote);
+        log.info("provideQuoteToClient = {}", quote);
 
-        return quote.getContent();
+        return convertToDTO(quote);
     }
 
+    @Transactional
     public void confirmQuote(Long id) {
-        log.debug("service provideQuoteToClient");
+        log.debug("service confirmQuote");
         Quote quote = quotesRepository.findById(id)
                 .orElseThrow(() -> new ServiceException("Quote not found for id: " + id));
-
         quote.setUsedAt(new Date());
+        log.info("setUsedAt date: " + quote.getUsedAt());
         quotesRepository.save(quote);
-    }
-
-    public void deleteQuote(Long id) {
-        quotesRepository.deleteById(id);
+        log.info("quote with id = {} saved in database", id);
     }
 
     public void populateCache() {
@@ -260,5 +255,13 @@ public class QuoteServiceImpl implements QuoteService {
 
     public void updateQuoteStatus(Quote quote, boolean isSuitable) {
         // TODO: Implement logic to update the status of the quote based on client feedback
+    }
+
+    public QuoteDTO convertToDTO(Quote quote) {
+        return mapper.convertToDTO(quote, QuoteDTO.class);
+    }
+
+    public Quote convertToEntity(QuoteDTO quoteDTO) {
+        return mapper.convertToEntity(quoteDTO, Quote.class);
     }
 }

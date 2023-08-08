@@ -1,5 +1,6 @@
 package com.andmark.qoutegen.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,7 @@ public class Quote {
     @ManyToOne
     // Join with the Book entity using "book_id" column, and it is mandatory (not nullable)
     @JoinColumn(name = "book_id", nullable = false, referencedColumnName = "id")
+    @JsonIgnore // to prevent infinite recursion
     private Book bookSource;
 
     @Override

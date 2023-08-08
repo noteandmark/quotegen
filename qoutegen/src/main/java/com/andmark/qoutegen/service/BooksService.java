@@ -1,7 +1,7 @@
 package com.andmark.qoutegen.service;
 
-import com.andmark.qoutegen.domain.Book;
+import com.andmark.qoutegen.dto.BookDTO;
 
-public interface BooksService extends AbstractService<Book>{
+public interface BooksService extends AbstractService<BookDTO>{
     void clearDeletedBooks();
 }
