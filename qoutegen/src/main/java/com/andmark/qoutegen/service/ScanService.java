@@ -3,6 +3,7 @@ package com.andmark.qoutegen.service;
 import com.andmark.qoutegen.domain.Book;
 import com.andmark.qoutegen.domain.enums.BookFormat;
 import com.andmark.qoutegen.dto.BookDTO;
+import com.andmark.qoutegen.exception.ServiceException;
 import com.andmark.qoutegen.repository.BooksRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +45,13 @@ public class ScanService {
         }
 
         //scan and find files in folder and subfolders
-        List<Book> scannedBooks = getBookList(rootDirectory);
+        List<Book> scannedBooks;
+        try {
+            scannedBooks = getBookList(rootDirectory);
+        } catch (IllegalArgumentException e) {
+            log.error("Error while scanning books in directory: {}", directoryPath, e);
+            throw new ServiceException("Error while scanning books.", e);
+        }
 
         //check if the database is up to date - if you have deleted a file from the disc
         // - put the status deleted in the database
@@ -90,8 +98,14 @@ public class ScanService {
 
         if (files != null) {
             for (File file : files) {
+                Book book = null;
                 if (file.isFile()) {
-                    Book book = processBookFile(file);
+                    try {
+                        book = processBookFile(file);
+                    } catch (Exception e) {
+                        log.error("Error while processing book file: {}", file, e);
+                    }
+
                     if (book != null) {
                         scannedBooks.add(book);
                     }

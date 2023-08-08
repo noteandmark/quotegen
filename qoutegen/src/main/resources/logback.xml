@@ -3,12 +3,15 @@
 
     <property name="LOGS" value="logs/app.log"/>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
-        <encoder>
-            <pattern>%cyan(%d{dd.MM.yyyy HH:mm:ss.SSS}) [%thread] %-5level %logger{20} - %cyan(%msg%n)</pattern>
-        </encoder>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%-30(%d %p) %-30.30([%t] %C): %cyan(%msg%n%throwable)</Pattern>
+        </layout>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -18,11 +21,11 @@
             <MaxHistory>30</MaxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{ISO8601} [%-5p][%-16.16t][%32.32c] - %m%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
             <charset>utf8</charset>
         </encoder>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <MaxFileSize>10MB</MaxFileSize>
+            <MaxFileSize>3MB</MaxFileSize>
         </triggeringPolicy>
     </appender>
 
@@ -41,99 +44,18 @@
         </rollingPolicy>
     </appender>
 
-    <root level="debug">
-<!--        <appender-ref ref="STDOUT"/>-->
+    <logger name="com.andmark.qoutegen" level="DEBUG" additivity="false">
         <appender-ref ref="FILE"/>
         <appender-ref ref="ERROR_FILE"/>
-    </root>
-    <root level = "INFO">
-        <appender-ref ref = "STDOUT"/>
-    </root>
-
-    <logger name="com.foxminded.andreimarkov.warehouse" level="trace" additivity="false">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
 </configuration>
-
-<!--<?xml version="1.0" encoding="UTF-8"?>-->
-<!--<configuration debug="true">-->
-
-<!--    <property name="LOGS" value="logs/app.log"/>-->
-
-<!--&lt;!&ndash;    <property name="HOME_LOG" value="logs/app.log"/>&ndash;&gt;-->
-<!--    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
-<!--        <encoder>-->
-<!--            <pattern>%d{dd.MM.yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{20} - %msg%n</pattern>-->
-<!--        </encoder>-->
-<!--    </appender>-->
-
-
-<!--&lt;!&ndash;    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;        <withJansi>true</withJansi>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;        <encoder>&ndash;&gt;-->
-<!--&lt;!&ndash;            <pattern>%-30(%d %p) %-30.30([%t] %C): %msg%n%throwable</pattern>&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            <pattern>[%thread] %highlight(%-5level) %cyan(%logger{15}) -%kvp -%msg %n</pattern>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;        </encoder>&ndash;&gt;-->
-<!--&lt;!&ndash;    </appender>&ndash;&gt;-->
-
-<!--&lt;!&ndash;    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;        <file>logs/app-logback.log</file>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;        <file>${LOGS}</file>&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            <Pattern>%d %p [%t] %C: %msg%n%throwable</Pattern>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;        </encoder>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            <fileNamePattern>logs/archived/app-%d{yyyy-MM-dd}.%i-logback.log</fileNamePattern>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;            <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>&ndash;&gt;-->
-<!--&lt;!&ndash;            &lt;!&ndash; each archived file, size max 10MB &ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;            <maxFileSize>10MB</maxFileSize>&ndash;&gt;-->
-<!--&lt;!&ndash;            &lt;!&ndash; total size of all archive files, if total size > 20GB,&ndash;&gt;-->
-<!--&lt;!&ndash;    it will delete old archived file &ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;            <totalSizeCap>200MB</totalSizeCap>&ndash;&gt;-->
-<!--&lt;!&ndash;            &lt;!&ndash; 30 days to keep &ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;            <maxHistory>30</maxHistory>&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                <maxFileSize>10MB</maxFileSize>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            </timeBasedFileNamingAndTriggeringPolicy>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;            <MaxHistory>7</MaxHistory>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;        </rollingPolicy>&ndash;&gt;-->
-<!--&lt;!&ndash;        <encoder>&ndash;&gt;-->
-<!--&lt;!&ndash;            <pattern>%d %p %c{1.} [%t] %m%n</pattern>&ndash;&gt;-->
-<!--&lt;!&ndash;        </encoder>&ndash;&gt;-->
-<!--&lt;!&ndash;    </appender>&ndash;&gt;-->
-
-<!--&lt;!&ndash;    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">&ndash;&gt;-->
-<!--&lt;!&ndash;        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">&ndash;&gt;-->
-<!--&lt;!&ndash;            <level>ERROR</level>&ndash;&gt;-->
-<!--&lt;!&ndash;        </filter>&ndash;&gt;-->
-<!--&lt;!&ndash;        <encoder>&ndash;&gt;-->
-<!--&lt;!&ndash;            <pattern>%d{ISO8601} [%-5p][%-16.16t][%32.32c] - %m%n</pattern>&ndash;&gt;-->
-<!--&lt;!&ndash;            <charset>utf8</charset>&ndash;&gt;-->
-<!--&lt;!&ndash;        </encoder>&ndash;&gt;-->
-<!--&lt;!&ndash;        <file>./logs/error1.log</file>&ndash;&gt;-->
-<!--&lt;!&ndash;        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">&ndash;&gt;-->
-<!--&lt;!&ndash;            <fileNamePattern>./logs/error/%d{yyyy-MM-dd}.log</fileNamePattern>&ndash;&gt;-->
-<!--&lt;!&ndash;            <maxHistory>7</maxHistory>&ndash;&gt;-->
-<!--&lt;!&ndash;        </rollingPolicy>&ndash;&gt;-->
-<!--&lt;!&ndash;    </appender>&ndash;&gt;-->
-
-<!--&lt;!&ndash;    <root level="DEBUG">&ndash;&gt;-->
-<!--&lt;!&ndash;        <appender-ref ref="STDOUT"/>&ndash;&gt;-->
-<!--&lt;!&ndash;    </root>&ndash;&gt;-->
-
-<!--    <root level="DEBUG">-->
-<!--        <appender-ref ref="STDOUT"/>-->
-<!--&lt;!&ndash;        <appender-ref ref="FILE"/>&ndash;&gt;-->
-<!--&lt;!&ndash;        <appender-ref ref="ERROR_FILE"/>&ndash;&gt;-->
-<!--    </root>-->
-
-<!--    <logger name="com.andmark.qoutegen" level="DEBUG" additivity="false">-->
-<!--        <appender-ref ref="STDOUT"/>-->
-<!--&lt;!&ndash;        <appender-ref ref="FILE"/>&ndash;&gt;-->
-<!--    </logger>-->
-
-<!--</configuration>-->
 
 

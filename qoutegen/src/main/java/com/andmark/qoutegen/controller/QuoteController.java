@@ -86,9 +86,12 @@ public class QuoteController {
     }
 
     @GetMapping("/generate")
-    public ResponseEntity<Void> generateQuotes(@RequestParam int count) {
-        log.debug("controller generate quotes in quantity = {}", count);
-
+    public ResponseEntity<Void> generateQuotes(@RequestParam(name = "count", required = false) Integer count) {
+        int cacheSize = (count != null && count > 0) ? count : 30;
+        log.debug("Controller generating quotes in quantity = {}", cacheSize);
+        //overload protection
+        if (cacheSize < 300)
+            quoteService.populateCache(cacheSize);
         return ResponseEntity.ok().build();
     }
 

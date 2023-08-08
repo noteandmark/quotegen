@@ -6,5 +6,5 @@ public interface QuoteService extends AbstractService<QuoteDTO>{
     void checkAndPopulateCache();
     QuoteDTO provideQuoteToClient();
     void confirmQuote(Long quoteId);
-
+    void populateCache(Integer cacheSize);
 }

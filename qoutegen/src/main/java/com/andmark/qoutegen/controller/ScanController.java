@@ -8,6 +8,7 @@ import com.andmark.qoutegen.util.impl.Fb2BookFormatParser;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,10 +33,10 @@ public class ScanController {
 
     @GetMapping("/scan-books")
     public List<BookDTO> scanBooks(@RequestParam String directoryPath) {
-        log.debug("start scan-books");
+        log.debug("log.debug start scan-books");
         List<BookDTO> scannedBooks = scanService.scanBooks(directoryPath);
         log.debug("scannedBooks = " + scannedBooks);
-        log.info("get scannedBooks from scanService.scanBooks(directoryPath)");
+        log.info("finished scannedBooks from scanService.scanBooks({})",directoryPath);
         return scannedBooks;
     }
 
@@ -45,6 +46,13 @@ public class ScanController {
         BookDTO bookDTO = new BookDTO();
         bookDTO = booksService.findOne(id);
         return parser.parse(mapper.map(bookDTO, Book.class));
+    }
+
+    @GetMapping("/test-connection")
+    public ResponseEntity<String> testConnection() {
+        log.debug("log.debug test-connection");
+        log.info("log.info test-connection");
+        return ResponseEntity.ok("Connection is ok");
     }
 
 }

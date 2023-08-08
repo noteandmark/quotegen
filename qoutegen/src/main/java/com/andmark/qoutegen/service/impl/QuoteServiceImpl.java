@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class QuoteServiceImpl implements QuoteService {
     @Value("${quote.cache.size:30}")
-        private int cacheSize;
+    private int cacheSize;
     private final Queue<Quote> quoteCache;
 
     private final QuotesRepository quotesRepository;
@@ -96,7 +96,7 @@ public class QuoteServiceImpl implements QuoteService {
 
         if (usedQuotesCount < 5) {
             log.debug("usedQuotesCount < 5");
-            populateCache();
+            populateCache(cacheSize);
         }
     }
 
@@ -118,14 +118,16 @@ public class QuoteServiceImpl implements QuoteService {
         log.info("quote with id = {} saved in database", id);
     }
 
-    public void populateCache() {
-        log.debug("Populating cache...");
-
+    @Override
+    @Transactional
+    public void populateCache(Integer cacheSize) {
+        int size = (cacheSize != null && cacheSize > 0) ? cacheSize : this.cacheSize;
+        log.debug("Populating cache with quotes (cacheSize = {})", size);
         //get list of books from DB
         List<Book> allBooks = getAllActiveBooks();
 
         //get map of books with the number of identical
-        Map<Book, Integer> parsedBooks = selectBooksRandomly(allBooks);
+        Map<Book, Integer> parsedBooks = selectBooksRandomly(allBooks, size);
 
         //parse books and generate quotes
         generateQuotes(parsedBooks);
@@ -145,13 +147,13 @@ public class QuoteServiceImpl implements QuoteService {
         return allBooks;
     }
 
-    private Map<Book, Integer> selectBooksRandomly(List<Book> allBooks) {
+    private Map<Book, Integer> selectBooksRandomly(List<Book> allBooks, int size) {
         Map<Book, Integer> parsedBooks = new HashMap<>();
         int counter = 0;
         Random random = new Random();
 
         // Randomly select books and track their occurrences
-        while (counter < cacheSize) {
+        while (counter < size) {
             Book randomBook = allBooks.get(random.nextInt(allBooks.size()));
             log.debug("Selected book: {}", randomBook);
 
@@ -242,7 +244,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     public Quote getNextQuote() {
         if (quoteCache.isEmpty()) {
-            populateCache();
+            populateCache(cacheSize);
         }
         Quote pollQuote = quoteCache.poll();
         log.info("get NextQuote quote: {}", pollQuote);

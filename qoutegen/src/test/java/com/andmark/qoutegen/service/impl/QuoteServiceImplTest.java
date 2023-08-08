@@ -67,7 +67,7 @@ public class QuoteServiceImplTest {
         when(bookFormatParserFactory.createParser(BookFormat.PDF)).thenReturn(bookFormatParser);
         when(bookFormatParser.parse(any())).thenReturn("PDF Book Content");
         when(booksRepository.findByStatus(Status.ACTIVE)).thenReturn(allBooks);
-        quoteService.populateCache();
+        quoteService.populateCache(cacheSize);
 
         verify(booksRepository, times(1)).findByStatus(Status.ACTIVE);
         //there can only be one book in the end
@@ -138,7 +138,7 @@ public class QuoteServiceImplTest {
     public void whenNoActiveBooks_thenShouldThrowException() {
         when(booksRepository.findByStatus(Status.ACTIVE)).thenReturn(new ArrayList<>());
 
-        assertThrows(ServiceException.class, () -> quoteService.populateCache());
+        assertThrows(ServiceException.class, () -> quoteService.populateCache(cacheSize));
     }
 
     @Test
@@ -146,10 +146,10 @@ public class QuoteServiceImplTest {
         quoteService.setCacheSize(0);
 
         try {
-            quoteService.populateCache();
+            quoteService.populateCache(cacheSize);
         } catch (ServiceException ex) {
             // Handle the exception, e.g., log it or perform assertions
-            assertThrows(ServiceException.class, () -> quoteService.populateCache());
+            assertThrows(ServiceException.class, () -> quoteService.populateCache(cacheSize));
         }
 
         verify(quoteCache, never()).offer(any());
@@ -178,7 +178,7 @@ public class QuoteServiceImplTest {
         // Set up parser interactions for docBookFormatParser
         when(docBookFormatParser.parse(any())).thenReturn("DOC Book Content");
 
-        quoteService.populateCache();
+        quoteService.populateCache(cacheSize);
 
         verify(pdfBookFormatParser).parse(eq(pdfBook));
         verify(docBookFormatParser).parse(eq(docBook));
