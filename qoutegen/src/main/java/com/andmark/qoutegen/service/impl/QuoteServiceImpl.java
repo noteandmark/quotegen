@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @Slf4j
 public class QuoteServiceImpl implements QuoteService {
-    @Value("${quote.cache.size}")
-    private int cacheSize;
+    @Value("${quote.cache.size:30}")
+        private int cacheSize;
     private final Queue<Quote> quoteCache;
 
     private final QuotesRepository quotesRepository;
@@ -59,8 +59,7 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("find quote by id {}", id);
         Optional<Quote> foundQuote = quotesRepository.findById(id);
         log.info("find quote {}", foundQuote);
-        return foundQuote.map(this::convertToDTO)
-                .orElse(null);
+        return foundQuote.map(this::convertToDTO).orElse(null);
     }
 
     @Override
@@ -68,9 +67,7 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("find all quotes");
         List<Quote> quoteList = quotesRepository.findAll();
         log.info("founded quoteList = {}", quoteList);
-        return quoteList.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return quoteList.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -95,7 +92,7 @@ public class QuoteServiceImpl implements QuoteService {
     public void checkAndPopulateCache() {
         log.debug("service checkAndPopulateCache");
         int usedQuotesCount = quotesRepository.countByUsedAtIsNull();
-        log.debug("usedQuotesCount is {}",usedQuotesCount);
+        log.debug("usedQuotesCount is {}", usedQuotesCount);
 
         if (usedQuotesCount < 5) {
             log.debug("usedQuotesCount < 5");
@@ -114,8 +111,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Transactional
     public void confirmQuote(Long id) {
         log.debug("service confirmQuote");
-        Quote quote = quotesRepository.findById(id)
-                .orElseThrow(() -> new ServiceException("Quote not found for id: " + id));
+        Quote quote = quotesRepository.findById(id).orElseThrow(() -> new ServiceException("Quote not found for id: " + id));
         quote.setUsedAt(new Date());
         log.info("setUsedAt date: " + quote.getUsedAt());
         quotesRepository.save(quote);
@@ -139,6 +135,49 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("Cache populated successfully.");
     }
 
+    public List<Book> getAllActiveBooks() {
+        List<Book> allBooks = booksRepository.findByStatus(Status.ACTIVE);
+        log.debug("Active books: {}", allBooks);
+        if (allBooks.isEmpty()) {
+            log.error("No active books available.");
+            throw new ServiceException("No active books available.");
+        }
+        return allBooks;
+    }
+
+    private Map<Book, Integer> selectBooksRandomly(List<Book> allBooks) {
+        Map<Book, Integer> parsedBooks = new HashMap<>();
+        int counter = 0;
+        Random random = new Random();
+
+        // Randomly select books and track their occurrences
+        while (counter < cacheSize) {
+            Book randomBook = allBooks.get(random.nextInt(allBooks.size()));
+            log.debug("Selected book: {}", randomBook);
+
+            // Check if the book is already in the map
+            Integer count = parsedBooks.getOrDefault(randomBook, 0);
+            parsedBooks.put(randomBook, count + 1); // Increment count by 1
+            counter++;
+        }
+        return parsedBooks;
+    }
+
+    private void generateQuotes(Map<Book, Integer> parsedBooks) {
+        // Generate quotes for selected books
+        for (Book book : parsedBooks.keySet()) {
+            log.debug("Generating quotes for book: {}", book);
+
+            Integer occurrences = parsedBooks.get(book);
+            log.debug("Occurrences: {}", occurrences);
+
+            String bookText = getBookText(book);
+
+            parseAndCacheQuotes(book, bookText, occurrences);
+        }
+
+    }
+
     @Transactional
     public void saveQuotesFromCache(Queue<Quote> quoteCache) {
         List<Quote> quotesToSave = getQuotes(quoteCache);
@@ -146,7 +185,7 @@ public class QuoteServiceImpl implements QuoteService {
         if (!quotesToSave.isEmpty()) {
             log.debug("Saving quotes to the database: {}", quotesToSave);
             quotesRepository.saveAll(quotesToSave);
-            log.info("Quotes saved: {}", quotesToSave);
+            log.info("Quotes saved, size: {}", quotesToSave.size());
         } else {
             log.error("nothing to save, something wrong");
         }
@@ -162,22 +201,6 @@ public class QuoteServiceImpl implements QuoteService {
             }
         }
         return quotesToSave;
-    }
-
-    private void generateQuotes(Map<Book, Integer> parsedBooks) {
-
-        // Generate quotes for selected books
-        for (Book book : parsedBooks.keySet()) {
-            log.debug("Generating quotes for book: {}", book);
-
-            Integer occurrences = parsedBooks.get(book);
-            log.debug("Occurrences: {}", occurrences);
-
-            String bookText = getBookText(book);
-
-            parseAndCacheQuotes(book, bookText, occurrences);
-        }
-
     }
 
     private void parseAndCacheQuotes(Book book, String bookText, Integer occurrences) {
@@ -217,44 +240,13 @@ public class QuoteServiceImpl implements QuoteService {
         return bookText;
     }
 
-    private Map<Book, Integer> selectBooksRandomly(List<Book> allBooks) {
-        Map<Book, Integer> parsedBooks = new HashMap<>();
-        int counter = 0;
-        Random random = new Random();
-
-        // Randomly select books and track their occurrences
-        while (counter < cacheSize) {
-            Book randomBook = allBooks.get(random.nextInt(allBooks.size()));
-            log.debug("Selected book: {}", randomBook);
-
-            // Check if the book is already in the map
-            Integer count = parsedBooks.getOrDefault(randomBook, 0);
-            parsedBooks.put(randomBook, count + 1); // Increment count by 1
-            counter++;
-        }
-        return parsedBooks;
-    }
-
-    public List<Book> getAllActiveBooks() {
-        List<Book> allBooks = booksRepository.findByStatus(Status.ACTIVE);
-        log.debug("Active books: {}", allBooks);
-        if (allBooks.isEmpty()) {
-            log.error("No active books available.");
-            throw new ServiceException("No active books available.");
-        }
-        return allBooks;
-    }
-
     public Quote getNextQuote() {
         if (quoteCache.isEmpty()) {
             populateCache();
         }
-        log.info("content {}", quoteCache.element().getContent());
-        return quoteCache.poll();
-    }
-
-    public void updateQuoteStatus(Quote quote, boolean isSuitable) {
-        // TODO: Implement logic to update the status of the quote based on client feedback
+        Quote pollQuote = quoteCache.poll();
+        log.info("get NextQuote quote: {}", pollQuote);
+        return pollQuote;
     }
 
     public QuoteDTO convertToDTO(Quote quote) {

@@ -14,8 +14,10 @@ import java.util.Date;
 @ToString
 public class QuoteDTO {
 
+    private Long id;
     private String content;
     private Date usedAt;
-    private Book bookSource;
 
+    private String bookAuthor;
+    private String bookTitle;
 }

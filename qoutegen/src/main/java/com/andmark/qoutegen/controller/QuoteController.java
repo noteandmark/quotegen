@@ -84,4 +84,12 @@ public class QuoteController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/generate")
+    public ResponseEntity<Void> generateQuotes(@RequestParam int count) {
+        log.debug("controller generate quotes in quantity = {}", count);
+
+        return ResponseEntity.ok().build();
+    }
+
 }

@@ -21,7 +21,7 @@ import java.nio.file.StandardOpenOption;
 public class DocBookFormatParser implements BookFormatParser {
     @Override
     public String parse(Book book) {
-        log.debug("parse book, title = {}", book.getTitle());
+        log.debug("parse doc book, title = {}", book.getTitle());
 //        POITextExtractor extractor = null;
         String text = null;
         Path path = Paths.get(book.getFilePath());
@@ -32,8 +32,8 @@ public class DocBookFormatParser implements BookFormatParser {
              POITextExtractor extractor = ExtractorFactory.createExtractor(is)) {
             log.debug("getting text from doc book {}", book.getTitle());
             text = extractor.getText();
-        } catch (Exception ex) {
-            log.warn("Error in file {}", path, ex);
+        } catch (Exception e) {
+            log.warn("Error parse in file {}", path, e);
         }
 
         return text;
