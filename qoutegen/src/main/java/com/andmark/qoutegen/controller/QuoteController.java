@@ -56,15 +56,15 @@ public class QuoteController {
         }
     }
 
-//    @PostMapping("/confirm")
-//    public ResponseEntity<Void> confirmQuote(@RequestParam Long quoteId) {
-//        quoteService.confirmQuote(quoteId);
-//        return ResponseEntity.ok().build();
-//    }
-//
-//    @PostMapping("/reject")
-//    public ResponseEntity<Void> rejectQuote(@RequestParam Long quoteId) {
-//        quoteService.deleteQuote(quoteId);
-//        return ResponseEntity.ok().build();
-//    }
+    @PostMapping("/confirm")
+    public ResponseEntity<Void> confirmQuote(@RequestParam Long id) {
+        quoteService.confirmQuote(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reject")
+    public ResponseEntity<Void> rejectQuote(@RequestParam Long id) {
+        quoteService.deleteQuote(id);
+        return ResponseEntity.ok().build();
+    }
 }

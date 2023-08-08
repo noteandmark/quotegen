@@ -9,4 +9,8 @@ public interface QuoteService extends AbstractService<Quote>{
     void waitForSuitableQuotes();
 
     String provideQuoteToClient();
+
+    void confirmQuote(Long quoteId);
+
+    void deleteQuote(Long quoteId);
 }

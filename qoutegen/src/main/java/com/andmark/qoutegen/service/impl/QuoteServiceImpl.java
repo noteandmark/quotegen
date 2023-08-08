@@ -103,17 +103,6 @@ public class QuoteServiceImpl implements QuoteService {
         int unsuitableQuotesCount = quotesRepository.countByUsedAtIsNull();
         log.debug("unsuitableQuotesCount = {}", unsuitableQuotesCount);
 
-//        while (unsuitableQuotesCount > 5) {
-//            // Wait for a moment (you may need to handle exceptions here)
-//            try {
-//                log.debug("sleep 1sec");
-//                Thread.sleep(1000); // Wait for 1 second
-//                unsuitableQuotesCount = quotesRepository.countByUsedAtIsNull();
-//            } catch (InterruptedException e) {
-//                log.error("InterruptedException in waitForSuitableQuotes");
-//                Thread.currentThread().interrupt();
-//            }
-//        }
         log.info("unsuitableQuotesCount = {}", unsuitableQuotesCount);
     }
 
@@ -125,16 +114,17 @@ public class QuoteServiceImpl implements QuoteService {
         return quote.getContent();
     }
 
-    public void confirmQuote(Long quoteId) {
-        Quote quote = quotesRepository.findById(quoteId)
-                .orElseThrow(() -> new ServiceException("Quote not found"));
+    public void confirmQuote(Long id) {
+        log.debug("service provideQuoteToClient");
+        Quote quote = quotesRepository.findById(id)
+                .orElseThrow(() -> new ServiceException("Quote not found for id: " + id));
 
         quote.setUsedAt(new Date());
         quotesRepository.save(quote);
     }
 
-    public void deleteQuote(Long quoteId) {
-        quotesRepository.deleteById(quoteId);
+    public void deleteQuote(Long id) {
+        quotesRepository.deleteById(id);
     }
 
     public void populateCache() {
