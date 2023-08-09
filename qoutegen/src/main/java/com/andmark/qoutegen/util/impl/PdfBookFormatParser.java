@@ -24,10 +24,10 @@ public class PdfBookFormatParser implements BookFormatParser {
         log.debug("path = {}", path);
         File file = path.toFile();
 
-        try (PDDocument document = PDDocument.load(file)){
+        try (PDDocument document = PDDocument.load(file)) {
             PDFTextStripper stripper = new PDFTextStripper();
             text = stripper.getText(document);
-            log.debug("get text from pdf book with id = {}",book.getId());
+            log.debug("get text from pdf book with id = {}", book.getId());
         } catch (IOException e) {
             log.warn("Error parse in file {}", path, e);
         }

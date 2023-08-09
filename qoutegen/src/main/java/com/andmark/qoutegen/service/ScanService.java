@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -130,7 +129,7 @@ public class ScanService {
                 book.setStatus(ACTIVE);
                 book.setFormat(bookFormat);
             } else {
-                //unknown format file
+                log.warn("unknown format file for application");
                 return null;
             }
             if (book.getStatus().equals(DELETED)) book.setStatus(ACTIVE);

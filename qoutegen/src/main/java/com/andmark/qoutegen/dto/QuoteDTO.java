@@ -1,6 +1,5 @@
 package com.andmark.qoutegen.dto;
 
-import com.andmark.qoutegen.domain.Book;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

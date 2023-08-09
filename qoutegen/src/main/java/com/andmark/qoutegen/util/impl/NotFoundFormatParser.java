@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class NotFoundFormatParser implements BookFormatParser {
     @Override
     public String parse(Book book) {
-        log.debug("unknown book format = {}",book.getFormat());
+        log.debug("unknown book format = {}", book.getFormat());
         return "unfortunately this book format is not implemented for reading by the program";
     }
 
