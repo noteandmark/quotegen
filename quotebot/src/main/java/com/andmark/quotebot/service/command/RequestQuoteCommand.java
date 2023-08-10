@@ -2,6 +2,7 @@ package com.andmark.quotebot.service.command;
 
 import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.dto.QuoteDTO;
+import com.andmark.quotebot.service.QuoteBot;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -41,33 +42,35 @@ public class RequestQuoteCommand extends BotCommand {
         message.setChatId(chat.getId().toString());
         if (quoteDTO != null) {
             log.debug("getting quoteDTO: " + quoteDTO);
+            System.out.println("chat.getid = " + chat.getId());
             message.setText("Here's your quote:\n" + quoteDTO.getContent());
 
             log.debug("creating inline keyboard");
             // Create an inline keyboard with accept and reject options
             InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-//            ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
             List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
             List<InlineKeyboardButton> row = new ArrayList<>();
+
+            InlineKeyboardButton editButton = new InlineKeyboardButton("Edit");
+            editButton.setCallbackData("edit_-" + quoteDTO.getId());
+            row.add(editButton);
 
             InlineKeyboardButton acceptButton = new InlineKeyboardButton("Accept");
             acceptButton.setCallbackData("decision_confirm-" + quoteDTO.getId());
             row.add(acceptButton);
-            log.debug("Accept button callback data: {}", acceptButton.getCallbackData());
 
             InlineKeyboardButton rejectButton = new InlineKeyboardButton("Reject");
             rejectButton.setCallbackData("decision_reject-" + quoteDTO.getId());
             row.add(rejectButton);
-            log.debug("Reject button callback data: {}", rejectButton.getCallbackData());
 
             keyboard.add(row);
             keyboardMarkup.setKeyboard(keyboard);
-            log.debug("Inline keyboard markup: {}", keyboardMarkup);
             message.setReplyMarkup(keyboardMarkup);
 
             try {
                 log.debug("try execute absSender");
                 absSender.execute(message);
+
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
