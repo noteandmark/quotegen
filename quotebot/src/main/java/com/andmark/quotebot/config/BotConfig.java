@@ -1,9 +1,12 @@
 package com.andmark.quotebot.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-@Component
+@Configuration
 public class BotConfig {
     public static String API_BASE_URL;
     public static String botUsername;
@@ -22,5 +25,10 @@ public class BotConfig {
     @Value("${telegram.bot.token}")
     public void setBotToken(String botToken) {
         BotConfig.botToken = botToken;
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

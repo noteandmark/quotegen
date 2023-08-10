@@ -1,31 +1,44 @@
 package com.andmark.quotebot.service;
 
 import com.andmark.quotebot.config.BotConfig;
+import com.andmark.quotebot.service.command.RatifyQuote;
 import com.andmark.quotebot.service.command.RequestQuoteCommand;
 import com.andmark.quotebot.service.command.StartCommand;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 @Slf4j
 public class QuoteBot extends TelegramLongPollingCommandBot {
+    private final RatifyQuote ratifyQuote;
+
+    public QuoteBot(RatifyQuote ratifyQuote) {
+        this.ratifyQuote = ratifyQuote;
+    }
 
     @Override
     public void processNonCommandUpdate(Update update) {
         try {
-            String chatId = update.getMessage().getChatId().toString();
+            SendMessage message;
+            if (update.hasMessage()) {
+                String chatId = update.getMessage().getChatId().toString();
 
-            SendMessage message = new SendMessage();
-            message.setChatId(chatId);
-            message.setText("Hi!");
+                message = new SendMessage();
+                message.setChatId(chatId);
+                message.setText("Hi!");
 
-            execute(message);
+                execute(message);
+            } else if (update.hasCallbackQuery()) {
+                CallbackQuery callbackQuery = update.getCallbackQuery();
+                log.debug("update.hasCallbackQuery() = {}", callbackQuery.getMessage().toString());
+                ratifyQuote.handleCallbackQuery(callbackQuery);
+
+            }
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
