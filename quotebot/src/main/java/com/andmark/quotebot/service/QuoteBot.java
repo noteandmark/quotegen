@@ -13,10 +13,15 @@ import org.springframework.http.ResponseEntity;
 
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import static java.lang.Math.toIntExact;
 
 @Component
 @Slf4j
@@ -35,7 +40,7 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     @Override
     public void processNonCommandUpdate(Update update) {
         SendMessage message;
-        if (update.hasMessage()) {
+        if (update.hasMessage() && update.getMessage().hasText()) {
             Thread messageThread = new Thread(() -> handleIncomingMessage(update.getMessage()));
             messageThread.start();
         } else if (update.hasCallbackQuery()) {
@@ -104,8 +109,18 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
             SendMessage answer = new SendMessage();
             answer.setChatId(chatId);
             answer.setText("Цитата с id = " + quoteId + " " + action + "\n");
+
+            // Edit the original message to remove the inline keyboard
+            long chat_id = callbackQuery.getMessage().getChatId();
+            int message_id = callbackQuery.getMessage().getMessageId();
+            EditMessageReplyMarkup editMessage = new EditMessageReplyMarkup();
+            editMessage.setChatId(chat_id);
+            editMessage.setMessageId(message_id);
+
             try {
+                execute(editMessage);
                 execute(answer);
+                log.debug("execute answer and empty keyboard");
             } catch (TelegramApiException e) {
                 log.error("Failed to send action message for quote {}", quoteId, e);
             }
@@ -113,7 +128,6 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
             log.error("Failed to action quote with id {}: {}", quoteId, response.getStatusCode());
         }
     }
-
 
     @Override
     public void onRegister() {
