@@ -49,12 +49,12 @@ public class RequestQuoteCommand extends BotCommand {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
             InlineKeyboardButton acceptButton = new InlineKeyboardButton("Accept");
-            acceptButton.setCallbackData("accept-" + quoteDTO.getId());
+            acceptButton.setCallbackData("decision_confirm-" + quoteDTO.getId());
             row.add(acceptButton);
             log.debug("Accept button callback data: {}", acceptButton.getCallbackData());
 
             InlineKeyboardButton rejectButton = new InlineKeyboardButton("Reject");
-            rejectButton.setCallbackData("reject-" + quoteDTO.getId());
+            rejectButton.setCallbackData("decision_reject-" + quoteDTO.getId());
             row.add(rejectButton);
             log.debug("Reject button callback data: {}", rejectButton.getCallbackData());
 
