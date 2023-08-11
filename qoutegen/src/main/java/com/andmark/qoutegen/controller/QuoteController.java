@@ -63,9 +63,9 @@ public class QuoteController {
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<Void> confirmQuote(@RequestParam Long id) {
+    public ResponseEntity<Void> confirmQuote(@RequestParam Long id, @RequestParam String content) {
         log.debug("controller confirmQuote id = {}", id);
-        quoteService.confirmQuote(id);
+        quoteService.confirmQuote(id, content);
         return ResponseEntity.ok().build();
     }
 

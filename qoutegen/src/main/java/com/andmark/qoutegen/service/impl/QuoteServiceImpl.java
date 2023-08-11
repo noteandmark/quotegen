@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -109,13 +110,15 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     @Transactional
-    public void confirmQuote(Long id) {
+    public void confirmQuote(Long id, String content) {
         log.debug("service confirmQuote");
-        Quote quote = quotesRepository.findById(id).orElseThrow(() -> new ServiceException("Quote not found for id: " + id));
+        Quote quote = quotesRepository.findById(id)
+                .orElseThrow(() -> new ServiceException("Quote not found with id: " + id));
         quote.setUsedAt(new Date());
+        quote.setContent(content);
         log.info("setUsedAt date: " + quote.getUsedAt());
         quotesRepository.save(quote);
-        log.info("quote with id = {} saved in database", id);
+        log.info("quote with id = {} saved in database", quote.getId());
     }
 
     @Override
