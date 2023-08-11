@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -36,51 +37,40 @@ public class RequestQuoteCommand extends BotCommand {
         ResponseEntity<QuoteDTO> response = restTemplate.getForEntity(quoteUrlGetNext, QuoteDTO.class);
 
         QuoteDTO quoteDTO = response.getBody();
-        log.info("get quote with id: {}",quoteDTO.getId());
+        log.info("get quote with id: {}", quoteDTO.getId());
 
         SendMessage message = new SendMessage();
         message.setChatId(chat.getId().toString());
-        if (quoteDTO != null) {
-            log.debug("getting quoteDTO: " + quoteDTO);
-            System.out.println("chat.getid = " + chat.getId());
-            message.setText("Here's your quote:\n" + quoteDTO.getContent());
+        log.debug("getting quoteDTO: {}, in chatId = {}", quoteDTO, chat.getId());
+        message.setText("Here's your quote:\n" + quoteDTO.getContent());
+        log.debug("creating inline keyboard");
 
-            log.debug("creating inline keyboard");
-            // Create an inline keyboard with accept and reject options
-            InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-            List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-            List<InlineKeyboardButton> row = new ArrayList<>();
+        // Create an inline keyboard with accept and reject options
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
 
-            InlineKeyboardButton editButton = new InlineKeyboardButton("Edit");
-            editButton.setCallbackData("edit_-" + quoteDTO.getId());
-            row.add(editButton);
+        InlineKeyboardButton editButton = new InlineKeyboardButton("Edit");
+        editButton.setCallbackData("edit-" + quoteDTO.getId());
+        row.add(editButton);
 
-            InlineKeyboardButton acceptButton = new InlineKeyboardButton("Accept");
-            acceptButton.setCallbackData("decision_confirm-" + quoteDTO.getId());
-            row.add(acceptButton);
+        InlineKeyboardButton acceptButton = new InlineKeyboardButton("Accept");
+        acceptButton.setCallbackData("confirm-" + quoteDTO.getId());
+        row.add(acceptButton);
 
-            InlineKeyboardButton rejectButton = new InlineKeyboardButton("Reject");
-            rejectButton.setCallbackData("decision_reject-" + quoteDTO.getId());
-            row.add(rejectButton);
+        InlineKeyboardButton rejectButton = new InlineKeyboardButton("Reject");
+        rejectButton.setCallbackData("reject-" + quoteDTO.getId());
+        row.add(rejectButton);
 
-            keyboard.add(row);
-            keyboardMarkup.setKeyboard(keyboard);
-            message.setReplyMarkup(keyboardMarkup);
+        keyboard.add(row);
+        keyboardMarkup.setKeyboard(keyboard);
+        message.setReplyMarkup(keyboardMarkup);
 
-            try {
-                log.debug("try execute absSender");
-                absSender.execute(message);
-
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
-        } else {
-            message.setText("Sorry, no quotes are available at the moment.");
-            try {
-                absSender.execute(message);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+        try {
+            log.debug("try execute absSender");
+            absSender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("error in RequestQuoteCommand e: {}", e.getMessage());
         }
     }
 }
