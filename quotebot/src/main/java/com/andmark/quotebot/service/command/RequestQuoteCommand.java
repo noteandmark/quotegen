@@ -42,7 +42,7 @@ public class RequestQuoteCommand extends BotCommand {
         SendMessage message = new SendMessage();
         message.setChatId(chat.getId().toString());
         log.debug("getting quoteDTO: {}, in chatId = {}", quoteDTO, chat.getId());
-        message.setText("Here's your quote:\n" + quoteDTO.getContent());
+        message.setText(quoteDTO.getContent());
         log.debug("creating inline keyboard");
 
         // Create an inline keyboard with accept and reject options

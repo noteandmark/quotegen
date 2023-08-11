@@ -2,11 +2,11 @@ package com.andmark.quotebot.service;
 
 import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.dto.QuoteDTO;
-import com.andmark.quotebot.exception.QuoteException;
 import com.andmark.quotebot.service.command.RequestQuoteCommand;
 import com.andmark.quotebot.service.command.StartCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpEntity;
@@ -31,8 +31,9 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     public static final String API_BASE_URL = BotConfig.API_BASE_URL;
     public static final String botToken = BotConfig.botToken;
 
-    private final Stack<String> quoteText;
+    private Stack<String> quoteText;
     private int lastMessageId;
+    private String lastCallbackMessage;
 
     private final RestTemplate restTemplate;
 
@@ -67,8 +68,8 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     private void handleCallbackQuery(CallbackQuery callbackQuery) {
         lastMessageId = callbackQuery.getMessage().getMessageId();
         log.debug("handleCallbackQuery with lastMessageId: {}", lastMessageId);
-//        quoteText.push(callbackQuery.getMessage().getText());
-//        log.debug("handleCallbackQuery push in quoteText: {}", quoteText);
+        lastCallbackMessage = callbackQuery.getMessage().getText();
+        log.debug("handleCallbackQuery push in lastCallbackMessage: {}", lastCallbackMessage);
         Long chatId = callbackQuery.getMessage().getChatId();
         log.debug("chatID = {}", chatId);
 
@@ -81,7 +82,7 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         switch (action) {
             case "edit" -> editQuote(chatId, quoteId);
             case "confirm" -> confirmQuote(chatId, quoteId);
-//            case "confirm", "reject" -> decisionQuote(chatId, quoteId);
+            case "reject" -> rejectQuote(chatId, quoteId);
             default -> log.warn("no action");
         }
     }
@@ -97,24 +98,21 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         sendMessage(chatId, keyboard, editedText);
     }
 
-
-    private void decisionQuote(Long chatId, Long quoteId) {
-        log.debug("decisionQuote with chatId: {} and quoteId: {}", chatId, quoteId);
-    }
-
     private void confirmQuote(Long chatId, Long quoteId) {
         log.debug("confirmQuote with chatId: {} and quoteId: {}", chatId, quoteId);
+        String content = (!quoteText.isEmpty()) ? quoteText.peek() : lastCallbackMessage;
+        log.debug("content in confirmQuote = {}", content);
 
-        String content = (!quoteText.isEmpty()) ? quoteText.peek() : "error";
-        if (content.equals("error")) throw new QuoteException("quote text can't be empty");
+        // Create a QuoteDTO object with id and content
+        QuoteDTO quoteDTO = new QuoteDTO();
+        quoteDTO.setId(quoteId);
+        quoteDTO.setContent(content);
 
-        String confirmUrl = API_BASE_URL + "/quotes/confirm?id=" + quoteId + "&content=" + content;
-        log.debug("decision quote with url = {}", confirmUrl);
-
-        RestTemplate restTemplate = new RestTemplate();
+        String confirmUrl = API_BASE_URL + "/quotes/confirm";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + botToken);
-        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+        HttpEntity<QuoteDTO> requestEntity = new HttpEntity<>(quoteDTO, headers);
+
         ResponseEntity<Void> response = restTemplate.exchange(
                 confirmUrl,
                 HttpMethod.POST,
@@ -123,63 +121,40 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         );
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            log.info("Quote confirmation request sent successfully.");
+            log.info("Quote confirm request sent successfully.");
             removeKeyboard(chatId);
-            sendMessage(chatId,null,"Цитата с id = " + quoteId + "успешно принята");
+            sendMessage(chatId, null, "Цитата с id = " + quoteId + " успешно принята");
         } else {
-            log.error("Failed to send quote confirmation request. Status code: {}", response.getStatusCode());
+            log.error("Failed to send quote confirm request. Status code: {}", response.getStatusCode());
         }
-
     }
 
-    private void rejectQuote() {
-
-    }
-
-    private void decisionQuote1(CallbackQuery callbackQuery) {
-        String callbackData = callbackQuery.getData();
-        String[] dataParts = callbackData.split("_");
-        String[] dataAction = dataParts[1].split("-");
-        if (dataAction.length != 2) {
-            log.warn("Invalid callback data format : {}", callbackData);
-            return;
-        }
-        String action = dataAction[0];
-        Long quoteId = Long.parseLong(dataAction[1]);
-        log.debug("action = {},quoteId = {}", action, quoteId);
-        String decisionUrl = API_BASE_URL + "/quotes/" + action + "?id=" + quoteId;
-        log.debug("decision quote with url = {}", decisionUrl);
-
+    private void rejectQuote(Long chatId, Long quoteId) {
+        log.debug("rejectQuote with chatId: {} and quoteId: {}", chatId, quoteId);
+        String rejectUrl = API_BASE_URL + "/quotes/reject?id=" + quoteId;
+        log.debug("rejectUrl quote with url = {}", rejectUrl);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer" + botToken);//TODOmakeencryption
-
+        headers.set("Authorization", "Bearer " + botToken);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-        HttpMethod httpMethod = action.equals("reject") ? HttpMethod.DELETE : HttpMethod.POST;
-        ResponseEntity<Void> response = restTemplate.exchange(decisionUrl, httpMethod, requestEntity, Void.class);
-
+        ResponseEntity<Void> response = null;
+        try {
+            response = restTemplate.exchange(
+                    rejectUrl,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    Void.class
+            );
+        } catch (HttpClientErrorException ex) {
+            log.warn("HttpClientErrorException in confirm quote");
+            sendMessage(chatId, null, "HttpClientErrorException");
+        }
         if (response.getStatusCode().is2xxSuccessful()) {
-            log.info("quote with id {} has been {}", quoteId, action);
-            Long chatId = callbackQuery.getMessage().getChatId();
-            SendMessage answer = new SendMessage();
-            answer.setChatId(chatId);
-            answer.setText("Цитата с id = " + quoteId + " " + action + "\n");
-
-            //Edit the original message to remove the inline keyboard
-            int messageId = callbackQuery.getMessage().getMessageId();
-            EditMessageReplyMarkup editMessage = new EditMessageReplyMarkup();
-            editMessage.setChatId(chatId);
-            editMessage.setMessageId(messageId);
-
-            try {
-                execute(editMessage);
-                execute(answer);
-                log.debug("execute answer and empty keyboard");
-            } catch (TelegramApiException e) {
-                log.error("Failed to send action message for quote {}", quoteId, e);
-            }
+            log.info("Quote reject request sent successfully.");
+            removeKeyboard(chatId);
+            sendMessage(chatId, null, "Цитата с id = " + quoteId + " успешно удалена");
         } else {
-            log.error("Failed to action quote with id {} : {}", quoteId, response.getStatusCode());
+            log.error("Failed to send quote reject request. Status code: {}", response.getStatusCode());
         }
     }
 
