@@ -5,6 +5,6 @@ import com.andmark.qoutegen.dto.QuoteDTO;
 public interface QuoteService extends AbstractService<QuoteDTO>{
     void checkAndPopulateCache();
     QuoteDTO provideQuoteToClient();
-    void confirmQuote(Long id, String content);
+    void confirmQuote(QuoteDTO quoteDTO);
     void populateCache(Integer cacheSize);
 }

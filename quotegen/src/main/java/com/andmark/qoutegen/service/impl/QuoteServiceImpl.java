@@ -110,12 +110,12 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     @Transactional
-    public void confirmQuote(Long id, String content) {
+    public void confirmQuote(QuoteDTO quoteDTO) {
         log.debug("service confirmQuote");
-        Quote quote = quotesRepository.findById(id)
-                .orElseThrow(() -> new ServiceException("Quote not found with id: " + id));
+        Quote quote = quotesRepository.findById(quoteDTO.getId())
+                .orElseThrow(() -> new ServiceException("Quote not found with id: " + quoteDTO.getId()));
         quote.setUsedAt(new Date());
-        quote.setContent(content);
+        quote.setContent(quoteDTO.getContent());
         log.info("setUsedAt date: " + quote.getUsedAt());
         quotesRepository.save(quote);
         log.info("quote with id = {} saved in database", quote.getId());

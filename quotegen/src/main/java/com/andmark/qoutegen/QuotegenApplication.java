@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-public class QoutegenApplication {
+public class QuotegenApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(QoutegenApplication.class, args);
+        SpringApplication.run(QuotegenApplication.class, args);
     }
 
     @Bean
