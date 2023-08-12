@@ -4,6 +4,7 @@ import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.service.command.RequestQuoteCommand;
 import com.andmark.quotebot.service.command.StartCommand;
+import com.andmark.quotebot.service.googleapi.GoogleCustomSearchService;
 import com.andmark.quotebot.service.keyboard.InlineButton;
 import com.andmark.quotebot.service.keyboard.InlineKeyboardService;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
@@ -39,9 +39,11 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
 
     private final RestTemplate restTemplate;
     private final InlineKeyboardService inlineKeyboardService;
+    private final GoogleCustomSearchService googleCustomSearchService;
 
-    public QuoteBot(RestTemplate restTemplate, InlineKeyboardService inlineKeyboardService) {
+    public QuoteBot(RestTemplate restTemplate, InlineKeyboardService inlineKeyboardService, GoogleCustomSearchService googleCustomSearchService) {
         this.inlineKeyboardService = inlineKeyboardService;
+        this.googleCustomSearchService = googleCustomSearchService;
         //a cache to store edited text
         quoteText = new Stack<>();
         this.restTemplate = restTemplate;
@@ -104,14 +106,17 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     private void confirmQuote(Long chatId, Long quoteId) {
         log.debug("confirmQuote with chatId: {} and quoteId: {}", chatId, quoteId);
         String content = (!quoteText.isEmpty()) ? quoteText.peek() : lastCallbackMessage;
-        log.debug("content in confirmQuote = {}", content);
 
+        // searching images for content with Google custom search api
+        List<String> imagesByKeywords = googleCustomSearchService.searchImagesByKeywords(content);
+        // sending selectable images to the user
+        imageSelection();
+
+        // send the quote to be saved in the database
         QuoteDTO quoteDTO = new QuoteDTO();
         quoteDTO.setId(quoteId);
         quoteDTO.setContent(content);
-
         String confirmUrl = API_BASE_URL + "/quotes/confirm";
-
         sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно принята", chatId, quoteId);
     }
 
@@ -122,7 +127,6 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
 
         sendRequestAndHandleResponse(rejectUrl, HttpMethod.DELETE, null, "успешно удалена", chatId, quoteId);
     }
-
 
     private void sendRequestAndHandleResponse(String url, HttpMethod httpMethod, Object requestBody, String successMessage, Long chatId, Long quoteId) {
         HttpHeaders headers = new HttpHeaders();

@@ -1,3 +1,4 @@
+server.port = 8081
 
 # Telegram Bot Configuration
 telegram.bot.username=YOUR_BOT_USERNAME_HERE
@@ -5,3 +6,7 @@ telegram.bot.token=YOUR_BOT_TOKEN_HERE
 
 # Server adress
 api.base.url=http://localhost:8080/api
+
+# Google API Search
+google.api.key = YOUR_API_KEY_HERE
+google.search.engine.id = YOUR_SEARCH_ENGINE_ID_HERE
