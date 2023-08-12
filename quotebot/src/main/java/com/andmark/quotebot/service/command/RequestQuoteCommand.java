@@ -2,16 +2,14 @@ package com.andmark.quotebot.service.command;
 
 import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.dto.QuoteDTO;
-import com.andmark.quotebot.service.QuoteBot;
+import com.andmark.quotebot.service.keyboard.InlineButton;
+import com.andmark.quotebot.service.keyboard.InlineKeyboardService;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +21,11 @@ import java.util.List;
 @Slf4j
 public class RequestQuoteCommand extends BotCommand {
 
-    public RequestQuoteCommand() {
+    private final InlineKeyboardService inlineKeyboardService;
+
+    public RequestQuoteCommand(InlineKeyboardService inlineKeyboardService) {
         super("requestquote", "Request a new quote");
+        this.inlineKeyboardService = inlineKeyboardService;
     }
 
     @Override
@@ -41,29 +42,15 @@ public class RequestQuoteCommand extends BotCommand {
 
         SendMessage message = new SendMessage();
         message.setChatId(chat.getId().toString());
-        log.debug("getting quoteDTO: {}, in chatId = {}", quoteDTO, chat.getId());
         message.setText(quoteDTO.getContent());
-        log.debug("creating inline keyboard");
 
         // Create an inline keyboard with accept and reject options
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        List<InlineKeyboardButton> row = new ArrayList<>();
+        List<InlineButton> buttons = new ArrayList<>();
+        buttons.add(new InlineButton("Edit", "edit-" + quoteDTO.getId()));
+        buttons.add(new InlineButton("Accept", "confirm-" + quoteDTO.getId()));
+        buttons.add(new InlineButton("Reject", "reject-" + quoteDTO.getId()));
 
-        InlineKeyboardButton editButton = new InlineKeyboardButton("Edit");
-        editButton.setCallbackData("edit-" + quoteDTO.getId());
-        row.add(editButton);
-
-        InlineKeyboardButton acceptButton = new InlineKeyboardButton("Accept");
-        acceptButton.setCallbackData("confirm-" + quoteDTO.getId());
-        row.add(acceptButton);
-
-        InlineKeyboardButton rejectButton = new InlineKeyboardButton("Reject");
-        rejectButton.setCallbackData("reject-" + quoteDTO.getId());
-        row.add(rejectButton);
-
-        keyboard.add(row);
-        keyboardMarkup.setKeyboard(keyboard);
+        InlineKeyboardMarkup keyboardMarkup = inlineKeyboardService.createInlineKeyboard(buttons);
         message.setReplyMarkup(keyboardMarkup);
 
         try {

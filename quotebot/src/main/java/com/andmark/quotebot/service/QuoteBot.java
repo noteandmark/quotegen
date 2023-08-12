@@ -4,6 +4,8 @@ import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.service.command.RequestQuoteCommand;
 import com.andmark.quotebot.service.command.StartCommand;
+import com.andmark.quotebot.service.keyboard.InlineButton;
+import com.andmark.quotebot.service.keyboard.InlineKeyboardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -36,8 +38,10 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     private String lastCallbackMessage;
 
     private final RestTemplate restTemplate;
+    private final InlineKeyboardService inlineKeyboardService;
 
-    public QuoteBot(RestTemplate restTemplate) {
+    public QuoteBot(RestTemplate restTemplate, InlineKeyboardService inlineKeyboardService) {
+        this.inlineKeyboardService = inlineKeyboardService;
         //a cache to store edited text
         quoteText = new Stack<>();
         this.restTemplate = restTemplate;
@@ -73,8 +77,7 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         Long chatId = callbackQuery.getMessage().getChatId();
         log.debug("chatID = {}", chatId);
 
-        String callbackData = callbackQuery.getData();
-        String[] dataParts = callbackData.split("-");
+        String[] dataParts = callbackQuery.getData().split("-");
         String action = dataParts[0];
         Long quoteId = Long.valueOf(dataParts[1]);
         log.debug("action = {}  quoteId = {}", action, quoteId);
@@ -103,30 +106,13 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         String content = (!quoteText.isEmpty()) ? quoteText.peek() : lastCallbackMessage;
         log.debug("content in confirmQuote = {}", content);
 
-        // Create a QuoteDTO object with id and content
         QuoteDTO quoteDTO = new QuoteDTO();
         quoteDTO.setId(quoteId);
         quoteDTO.setContent(content);
 
         String confirmUrl = API_BASE_URL + "/quotes/confirm";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + botToken);
-        HttpEntity<QuoteDTO> requestEntity = new HttpEntity<>(quoteDTO, headers);
 
-        ResponseEntity<Void> response = restTemplate.exchange(
-                confirmUrl,
-                HttpMethod.POST,
-                requestEntity,
-                Void.class
-        );
-
-        if (response.getStatusCode().is2xxSuccessful()) {
-            log.info("Quote confirm request sent successfully.");
-            removeKeyboard(chatId);
-            sendMessage(chatId, null, "Цитата с id = " + quoteId + " успешно принята");
-        } else {
-            log.error("Failed to send quote confirm request. Status code: {}", response.getStatusCode());
-        }
+        sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно принята", chatId, quoteId);
     }
 
     private void rejectQuote(Long chatId, Long quoteId) {
@@ -134,27 +120,32 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         String rejectUrl = API_BASE_URL + "/quotes/reject?id=" + quoteId;
         log.debug("rejectUrl quote with url = {}", rejectUrl);
 
+        sendRequestAndHandleResponse(rejectUrl, HttpMethod.DELETE, null, "успешно удалена", chatId, quoteId);
+    }
+
+
+    private void sendRequestAndHandleResponse(String url, HttpMethod httpMethod, Object requestBody, String successMessage, Long chatId, Long quoteId) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + botToken);
-        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-        ResponseEntity<Void> response = null;
+
+        HttpEntity<?> requestEntity = (requestBody != null) ? new HttpEntity<>(requestBody, headers) : new HttpEntity<>(headers);
         try {
-            response = restTemplate.exchange(
-                    rejectUrl,
-                    HttpMethod.DELETE,
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    url,
+                    httpMethod,
                     requestEntity,
                     Void.class
             );
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info(successMessage);
+                removeKeyboard(chatId);
+                sendMessage(chatId, null, "Цитата с id = " + quoteId + " " + successMessage);
+            } else {
+                log.error("Failed to send request. Status code: {}", response.getStatusCode());
+            }
         } catch (HttpClientErrorException ex) {
-            log.warn("HttpClientErrorException in confirm quote");
+            log.warn("HttpClientErrorException while sending request: {}", ex.getMessage());
             sendMessage(chatId, null, "HttpClientErrorException");
-        }
-        if (response.getStatusCode().is2xxSuccessful()) {
-            log.info("Quote reject request sent successfully.");
-            removeKeyboard(chatId);
-            sendMessage(chatId, null, "Цитата с id = " + quoteId + " успешно удалена");
-        } else {
-            log.error("Failed to send quote reject request. Status code: {}", response.getStatusCode());
         }
     }
 
@@ -184,32 +175,19 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     }
 
     private InlineKeyboardMarkup getEditKeyboardMarkup(Long quoteId) {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        List<InlineKeyboardButton> row = new ArrayList<>();
+        List<InlineButton> buttons = new ArrayList<>();
+        buttons.add(new InlineButton("Edit", "edit-" + quoteId));
+        buttons.add(new InlineButton("Accept", "confirm-" + quoteId));
+        buttons.add(new InlineButton("Reject", "reject-" + quoteId));
 
-        InlineKeyboardButton editButton = new InlineKeyboardButton("Edit");
-        editButton.setCallbackData("edit_-" + quoteId);
-        row.add(editButton);
-
-        InlineKeyboardButton acceptButton = new InlineKeyboardButton("Accept");
-        acceptButton.setCallbackData("confirm-" + quoteId);
-        row.add(acceptButton);
-
-        InlineKeyboardButton rejectButton = new InlineKeyboardButton("Reject");
-        rejectButton.setCallbackData("reject-" + quoteId);
-        row.add(rejectButton);
-
-        keyboard.add(row);
-        keyboardMarkup.setKeyboard(keyboard);
-
+        InlineKeyboardMarkup keyboardMarkup = inlineKeyboardService.createInlineKeyboard(buttons);
         return keyboardMarkup;
     }
 
     @Override
     public void onRegister() {
         register(new StartCommand());
-        register(new RequestQuoteCommand());
+        register(new RequestQuoteCommand(inlineKeyboardService));
     }
 
     @Override
