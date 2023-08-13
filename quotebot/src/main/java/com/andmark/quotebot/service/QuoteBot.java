@@ -29,6 +29,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
@@ -39,18 +41,20 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     private static final int IMAGE_COUNT_TO_CHOICE = 10;
 
     private Stack<String> quoteText;
-    private BotState currentState;
+//    private BotState currentState;
 
     private final BotAttributes botAttributes;
     private final RestTemplate restTemplate;
     private final InlineKeyboardService inlineKeyboardService;
     private final GoogleCustomSearchService googleCustomSearchService;
+    private final QuoteApiService quoteApiService;
 
-    public QuoteBot(BotAttributes botAttributes, RestTemplate restTemplate, InlineKeyboardService inlineKeyboardService, GoogleCustomSearchService googleCustomSearchService) {
+    public QuoteBot(BotAttributes botAttributes, RestTemplate restTemplate, InlineKeyboardService inlineKeyboardService, GoogleCustomSearchService googleCustomSearchService, QuoteApiService quoteApiService) {
         this.botAttributes = botAttributes;
         this.inlineKeyboardService = inlineKeyboardService;
         this.googleCustomSearchService = googleCustomSearchService;
         this.restTemplate = restTemplate;
+        this.quoteApiService = quoteApiService;
         //a cache to store edited text
         quoteText = new Stack<>();
     }
@@ -69,43 +73,58 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     // Handle incoming messages
     private void handleIncomingMessage(Message message) {
         log.debug("handleIncomingMessage in chatId: {}, messageId: {}", message.getChatId(), message.getMessageId());
-        String text = message.getText().trim();
-        log.debug("text = {}", text);
+        String userInput = message.getText().trim();
+        Long chatId = message.getChatId();
+
+        log.debug("text = {}", userInput);
         if (message.getText().startsWith("q:")) {
-//            String text = message.getText().substring(2);
-            quoteText.push(text.substring(2));
-            log.debug("quoteText offer text = {}", text);
+            quoteText.push(userInput.substring(2));
+            log.debug("quoteText offer text = {}", userInput);
         }
         // other cases
         else {
             // selects a picture for the accepted quote
-            if (currentState == BotState.AWAITING_IMAGE_CHOICE) {
-                handleImageChoiceResponse(message.getChatId(), text);
+//            if (currentState == BotState.AWAITING_IMAGE_CHOICE) {
+            if (botAttributes.getCurrentState().equals(BotState.AWAITING_IMAGE_CHOICE)) {
+                log.debug("current state is AWAITING_IMAGE_CHOICE");
+                // TODO: возможно, все эти методы выбора можно объединить с выбором параметра
+                handleImageChoiceResponse(chatId, userInput);
+            }
+            if (botAttributes.getCurrentState().equals(BotState.AWAITING_PUBLISHING)) {
+                log.debug("current state is AWAITING_PUBLISHING");
+                handlePublishingChoiceResponse(chatId, userInput);
+            }
+            if (botAttributes.getCurrentState().equals(BotState.POSTPONE)) {
+                log.debug("current state is POSTPONE");
+                handlePostponeChoiceResponse(chatId, userInput);
             }
         }
     }
 
-    private void handleImageChoiceResponse(Long chatId, String text) {
+
+    private void handleImageChoiceResponse(Long chatId, String userInput) {
+        log.debug("handleImageChoiceResponse");
         Integer chosenImageNumber = -1;
         String chosenImageUrl = null;
         try {
-            chosenImageNumber = Integer.parseInt(text);
+            chosenImageNumber = Integer.parseInt(userInput);
             log.debug("chosenImageNumber = {}", chosenImageNumber);
         } catch (NumberFormatException e) {
-            log.warn("NumberFormatException in NumberFormatException with text = {}", text);
+            log.warn("NumberFormatException in NumberFormatException with choice = {}", userInput);
             sendMessage(chatId, null, "Выбери изображение от 0 до 10 (0 - пост без изображений)");
         }
         int countTimer = 0;
-        while (currentState.equals(BotState.AWAITING_IMAGE_CHOICE)) {
-            log.debug("currentState = " + currentState);
+        while (botAttributes.getCurrentState().equals(BotState.AWAITING_IMAGE_CHOICE)) {
+            log.debug("currentState = " + botAttributes.getCurrentState());
             switch (chosenImageNumber) {
                 case 0:
-                    currentState = BotState.FREE_STATE;
+                    botAttributes.setCurrentState(BotState.FREE_STATE);
                     log.debug("case 0");
                     break;
                 case 1,2,3,4,5,6,7,8,9,10:
                     chosenImageUrl = botAttributes.getImageUrls().get(chosenImageNumber - 1);
-                    currentState = BotState.FREE_STATE;
+                    botAttributes.setConfirmedUrl(chosenImageUrl);
+                    botAttributes.setCurrentState(BotState.FREE_STATE);
                     log.debug("case 1-10, chosenImageUrl = {}", chosenImageUrl);
                     break;
                 default:
@@ -119,31 +138,92 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
                         }
                         break;
                     } else {
-                        currentState = BotState.FREE_STATE;
+                        botAttributes.setCurrentState(BotState.FREE_STATE);
                         throw new RuntimeException();
                     }
             }
             countTimer++;
         }
-        postingQuote(botAttributes.getLastCallbackMessage(), chosenImageUrl);
+        postingQuote(chatId);
 
         botAttributes.setImageUrls(new ArrayList<>());
-        log.debug("currentState = {}, botAttributes.setImageUrls cleared", currentState);
+//        log.debug("currentState = {}, botAttributes.setImageUrls cleared", currentState);
+        log.debug("currentState = {}, botAttributes.setImageUrls cleared", botAttributes.getCurrentState());
     }
 
-    private void postingQuote(String lastCallbackMessage, String chosenImageUrl) {
-        log.debug("in postingQuote with lastCallbackMessage: {}, chosenImageUrl: {}", botAttributes.getLastCallbackMessage(), chosenImageUrl);
+    private void postingQuote(Long chatId) {
+        log.debug("in postingQuote with lastCallbackMessage: {}, chosenImageUrl: {}",
+                botAttributes.getLastCallbackMessage(), botAttributes.getConfirmedUrl());
+        // choose whether to publish the quote immediately or postpone it
+        botAttributes.setCurrentState(BotState.AWAITING_PUBLISHING);
+        sendMessage(chatId, null, "Публиковать [сразу] или [отложить]?");
 
-//        botAttributes.setConfirmedContent("");
+//        List<QuoteDTO> pendingQuotes = quoteApiService.getPendingQuotes();
+//        log.debug("get pendingQuotes, count = {}", pendingQuotes.size());
+
+        //        botAttributes.setConfirmedContent("");
     }
+
+    private void handlePublishingChoiceResponse(Long chatId, String userInput) {
+        log.debug("handlePublishingChoiceResponse");
+        switch (userInput) {
+            case "сразу":
+                // TODO: реализировать публикацию сразу в группу
+                // here is code
+                // !!!!!!!!!!!!
+                botAttributes.setCurrentState(BotState.FREE_STATE);
+                break;
+            case "отложить":
+                sendMessage(chatId, null, "Напиши дату публикации в виде: [yyyy-MM-dd HH:mm:ss] или напиши [случайно]");
+                botAttributes.setCurrentState(BotState.POSTPONE);
+                postponePublishing(chatId);
+                break;
+            default:
+                sendMessage(chatId, null, "Напиши выбор в виде: [сразу] или [отложить]");
+                break;
+        }
+    }
+
+    private void handlePostponeChoiceResponse(Long chatId, String userInput) {
+        if (userInput.equalsIgnoreCase("случайно")) {
+
+            botAttributes.setCurrentState(BotState.FREE_STATE);
+        } else {
+            // Parse the input as a date
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                Date pendingTime = dateFormat.parse(userInput);
+
+//                quoteApiService.sendDeferredQuote(quoteDTO, deferredDate);
+
+                // send the quote to be saved in the database
+                QuoteDTO quoteDTO = new QuoteDTO();
+                quoteDTO.setId(botAttributes.getQuoteId());
+                quoteDTO.setContent(botAttributes.getConfirmedContent());
+                quoteDTO.setPendingTime(pendingTime);
+
+                String confirmUrl = API_BASE_URL + "/quotes/pending";
+                sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно отложена на " + pendingTime, chatId, botAttributes.getQuoteId());
+
+                botAttributes.setCurrentState(BotState.FREE_STATE);
+            } catch (ParseException e) {
+                // Handle invalid date format error
+                sendMessage(chatId, null, "Неверный формат. Напиши в формате: [yyyy-MM-dd HH:mm:ss] или: [случайно].");
+            }
+        }
+    }
+
+    private void postponePublishing(Long chatId) {
+
+    }
+
+
 
     // Handle callback queries
     private void handleCallbackQuery(CallbackQuery callbackQuery) {
         log.debug("callbackQuery.getMessage().getText() = {}", callbackQuery.getMessage().getText());
-//        lastMessageId = callbackQuery.getMessage().getMessageId();
         botAttributes.setLastMessageId(callbackQuery.getMessage().getMessageId());
         log.debug("handleCallbackQuery with lastMessageId: {}", botAttributes.getLastMessageId());
-//        lastCallbackMessage = callbackQuery.getMessage().getText();
         botAttributes.setLastCallbackMessage(callbackQuery.getMessage().getText());
         log.debug("handleCallbackQuery push in lastCallbackMessage: {}", botAttributes.getLastCallbackMessage());
         Long chatId = callbackQuery.getMessage().getChatId();
@@ -183,6 +263,7 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         String contentRequest = content.substring(0, Math.min(content.length(), 1024));
         botAttributes.setImageUrls(googleCustomSearchService.searchImagesByKeywords(contentRequest));
         log.debug("size of botAttributes.setImageUrls = {}", botAttributes.getImageUrls().size());
+        botAttributes.setQuoteId(quoteId);
         // sending selectable images to the user
         sendImagesToChoice(chatId);
 
@@ -191,7 +272,9 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         quoteDTO.setId(quoteId);
         quoteDTO.setContent(content);
         String confirmUrl = API_BASE_URL + "/quotes/confirm";
+        // !!! wait for next string !!!
         sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно принята", chatId, quoteId);
+        /// !!! don't delete
     }
 
     private void sendImagesToChoice(Long chatId) {
@@ -204,15 +287,11 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
                 sendImageAttachment(chatId, imageBytes, i + 1);
             }
         }
-        // Add a keyboard with options to select an image or skip
-        // ... (add code to send the keyboard with options)
-
         // ask for image choice
         sendMessage(chatId, null, "Please choose an image by typing the corresponding number (1-10):");
-        currentState = BotState.AWAITING_IMAGE_CHOICE;
+        botAttributes.setCurrentState(BotState.AWAITING_IMAGE_CHOICE);
     }
 
-    //a method to download the image from the provided URL.
     private byte[] downloadImage(String imageUrl) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<byte[]> response = restTemplate.exchange(imageUrl, HttpMethod.GET, null, byte[].class);
@@ -241,6 +320,7 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
         sendRequestAndHandleResponse(rejectUrl, HttpMethod.DELETE, null, "успешно удалена", chatId, quoteId);
     }
 
+    // TODO : вынести этот метод в QuoteApiService
     private void sendRequestAndHandleResponse(String url, HttpMethod httpMethod, Object requestBody, String successMessage, Long chatId, Long quoteId) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + botToken);
@@ -283,7 +363,6 @@ public class QuoteBot extends TelegramLongPollingCommandBot {
     private void removeKeyboard(Long chatId) {
         EditMessageReplyMarkup editMessage = new EditMessageReplyMarkup();
         editMessage.setChatId(chatId);
-//        editMessage.setMessageId(lastMessageId);
         editMessage.setMessageId(botAttributes.getLastMessageId());
         try {
             execute(editMessage);

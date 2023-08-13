@@ -3,6 +3,7 @@ server.port = 8081
 # Telegram Bot Configuration
 telegram.bot.username=YOUR_BOT_USERNAME_HERE
 telegram.bot.token=YOUR_BOT_TOKEN_HERE
+spring.task.scheduling.pool.size=1
 
 # Server adress
 api.base.url=http://localhost:8080/api
