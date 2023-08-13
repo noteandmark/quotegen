@@ -2,7 +2,8 @@ package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.Quote;
-import com.andmark.quotegen.domain.enums.Status;
+import com.andmark.quotegen.domain.enums.BookStatus;
+import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.repository.BooksRepository;
@@ -67,7 +68,7 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("find all quotes");
         List<Quote> quoteList = quotesRepository.findAll();
         log.info("founded quoteList = {}", quoteList);
-        return quoteList.stream().map(this::convertToDTO).collect(Collectors.toList());
+        return convertToDtoList(quoteList);
     }
 
     @Override
@@ -104,8 +105,19 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("service provideQuoteToClient");
         Quote quote = quotesRepository.findFirstByUsedAtIsNull();
         log.info("provideQuoteToClient = {}", quote);
-
         return convertToDTO(quote);
+    }
+
+    @Transactional
+    public void pendingQuote(QuoteDTO quoteDTO) {
+        log.debug("service pendingQuote");
+        Quote quote = quotesRepository.findById(quoteDTO.getId())
+                .orElseThrow(() -> new ServiceException("Quote not found with id: " + quoteDTO.getId()));
+        quote.setPendingTime(quoteDTO.getPendingTime());
+        quote.setContent(quoteDTO.getContent());
+        log.info("setUsedAt date: " + quote.getUsedAt());
+        quotesRepository.save(quote);
+        log.info("quote with id = {} saved in database", quote.getId());
     }
 
     @Transactional
@@ -127,20 +139,19 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("Populating cache with quotes (cacheSize = {})", size);
         //get list of books from DB
         List<Book> allBooks = getAllActiveBooks();
-
         //get map of books with the number of identical
         Map<Book, Integer> parsedBooks = selectBooksRandomly(allBooks, size);
 
         //parse books and generate quotes
         generateQuotes(parsedBooks);
-        // Save quotes in the cache to the database
+        // Save quotes in the cache to the database and clear cache
         saveQuotesFromCache(quoteCache);
-
-        log.debug("Cache populated successfully.");
+        quoteCache.clear();
+        log.info("Cache populated successfully.");
     }
 
     public List<Book> getAllActiveBooks() {
-        List<Book> allBooks = booksRepository.findByStatus(Status.ACTIVE);
+        List<Book> allBooks = booksRepository.findByBookStatus(BookStatus.ACTIVE);
         log.debug("Active books: {}", allBooks);
         if (allBooks.isEmpty()) {
             log.error("No active books available.");
@@ -216,6 +227,7 @@ public class QuoteServiceImpl implements QuoteService {
             Quote quote = new Quote();
             quote.setBookSource(book);
             quote.setContent(quoteContent);
+            quote.setStatus(QuoteStatus.FREE);
             quoteCache.offer(quote);
 
             occurrences--;
@@ -244,20 +256,31 @@ public class QuoteServiceImpl implements QuoteService {
         return bookText;
     }
 
-    public Quote getNextQuote() {
-        if (quoteCache.isEmpty()) {
-            populateCache(cacheSize);
-        }
-        Quote pollQuote = quoteCache.poll();
-        log.info("get NextQuote quote: {}", pollQuote);
-        return pollQuote;
+//    public Quote getNextQuote() {
+//        if (quoteCache.isEmpty()) {
+//            populateCache(cacheSize);
+//        }
+//        Quote pollQuote = quoteCache.poll();
+//        log.info("get NextQuote quote: {}", pollQuote);
+//        return pollQuote;
+//    }
+
+    public List<QuoteDTO> getPendingQuotes() {
+        List<Quote> pendingQuoteEntities = quotesRepository.findByStatus(QuoteStatus.PENDING);
+        return convertToDtoList(pendingQuoteEntities);
     }
 
-    public QuoteDTO convertToDTO(Quote quote) {
+    private QuoteDTO convertToDTO(Quote quote) {
         return mapper.convertToDTO(quote, QuoteDTO.class);
     }
 
-    public Quote convertToEntity(QuoteDTO quoteDTO) {
+    private Quote convertToEntity(QuoteDTO quoteDTO) {
         return mapper.convertToEntity(quoteDTO, Quote.class);
+    }
+
+    private List<QuoteDTO> convertToDtoList(List<Quote> quotes) {
+        return quotes.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 }

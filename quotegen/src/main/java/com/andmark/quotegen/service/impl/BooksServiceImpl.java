@@ -1,7 +1,7 @@
 package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
-import com.andmark.quotegen.domain.enums.Status;
+import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.service.BooksService;
@@ -77,7 +77,7 @@ public class BooksServiceImpl implements BooksService {
     @Transactional
     public void clearDeletedBooks() {
         log.debug("in clearDeletedBooks");
-        List<Book> deletedBooks = booksRepository.findByStatus(Status.DELETED);
+        List<Book> deletedBooks = booksRepository.findByBookStatus(BookStatus.DELETED);
         log.debug("books that will be deleted: " + deletedBooks);
         booksRepository.deleteAll(deletedBooks);
         log.info("service clearDeletedBooks perform");

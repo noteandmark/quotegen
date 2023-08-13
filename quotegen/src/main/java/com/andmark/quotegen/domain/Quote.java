@@ -1,5 +1,6 @@
 package com.andmark.quotegen.domain;
 
+import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,8 +24,19 @@ public class Quote {
     @Column(name = "content", nullable = false)
     private String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, columnDefinition = "DEFAULT 'FREE'")
+    private QuoteStatus status;
+
     @Temporal(TemporalType.TIMESTAMP)
-//    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Column(name = "pending_time")
+    private Date pendingTime;
+
+    @Column(name = "imageUrl")
+    private String imageUrl;
+
+    @Temporal(TemporalType.TIMESTAMP)
+//  (it includes @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss"))
     @Column(name = "usedAt")
     private Date usedAt;
 

@@ -15,18 +15,20 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./logs/info1.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>log.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <MaxHistory>30</MaxHistory>
+        <file>${LOGS}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- each archived file, size max 5MB -->
+            <maxFileSize>5MB</maxFileSize>
+            <!-- total size of all archive files, if total size > 100MB, it will delete old archived file -->
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 30 days to keep -->
+            <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
             <charset>utf8</charset>
         </encoder>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <MaxFileSize>3MB</MaxFileSize>
-        </triggeringPolicy>
     </appender>
 
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">

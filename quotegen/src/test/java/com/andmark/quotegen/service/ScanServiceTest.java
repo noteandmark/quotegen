@@ -2,7 +2,7 @@ package com.andmark.quotegen.service;
 
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.enums.BookFormat;
-import com.andmark.quotegen.domain.enums.Status;
+import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.repository.BooksRepository;
 import org.junit.jupiter.api.Test;
@@ -78,7 +78,7 @@ public class ScanServiceTest {
         book1.setTitle("Book 1");
         book1.setFilePath(file1.getAbsolutePath());
         book1.setFormat(BookFormat.EPUB);
-        book1.setStatus(Status.ACTIVE);
+        book1.setBookStatus(BookStatus.ACTIVE);
         expectedScannedBooks.add(book1);
 
         Book book2 = new Book();
@@ -86,7 +86,7 @@ public class ScanServiceTest {
         book2.setTitle("Book 2");
         book2.setFilePath(file2.getAbsolutePath());
         book2.setFormat(BookFormat.PDF);
-        book2.setStatus(Status.ACTIVE);
+        book2.setBookStatus(BookStatus.ACTIVE);
         expectedScannedBooks.add(book2);
 
         // Mock behavior of getBookList
@@ -109,16 +109,16 @@ public class ScanServiceTest {
         Book bookInDatabase1 = new Book();
         bookInDatabase1.setId(1L);
         bookInDatabase1.setTitle("Existing Book 1");
-        bookInDatabase1.setStatus(Status.ACTIVE);
+        bookInDatabase1.setBookStatus(BookStatus.ACTIVE);
         booksInDatabase.add(bookInDatabase1);
 
         Book bookInDatabase2 = new Book();
         bookInDatabase2.setId(2L);
         bookInDatabase2.setTitle("Existing Book 2");
-        bookInDatabase2.setStatus(Status.ACTIVE);
+        bookInDatabase2.setBookStatus(BookStatus.ACTIVE);
         booksInDatabase.add(bookInDatabase2);
 
-        when(booksRepository.findByStatus(Status.ACTIVE)).thenReturn(booksInDatabase);
+        when(booksRepository.findByBookStatus(BookStatus.ACTIVE)).thenReturn(booksInDatabase);
 
         // Simulate a scenario where bookInDatabase1 has been deleted from disk
         // and bookInDatabase2 still exists in the scanned books
@@ -127,7 +127,7 @@ public class ScanServiceTest {
         // Act
         scanService.cleanUpDatabase(scannedBooks);
 
-        assertEquals(Status.DELETED, bookInDatabase1.getStatus());
+        assertEquals(BookStatus.DELETED, bookInDatabase1.getBookStatus());
 
         // Verify that the save method is called exactly once for bookInDatabase1
         verify(booksRepository, times(1)).save(bookInDatabase1);
@@ -146,7 +146,7 @@ public class ScanServiceTest {
         existingBook.setTitle("existingFile");
         existingBook.setAuthor("file.getParentFile().getName()");
         existingBook.setFilePath("existingFile.epub");
-        existingBook.setStatus(Status.ACTIVE);
+        existingBook.setBookStatus(BookStatus.ACTIVE);
         existingBook.setFormat(BookFormat.EPUB);
 
         Book resultBook = scanService.processBookFile(existingFile);
@@ -156,7 +156,7 @@ public class ScanServiceTest {
         verify(scanService, times(1)).getBookFormat(existingFile.getName());
         assertEquals(existingBook.getTitle(), resultBook.getTitle());
         // Verify that the status of existingBook is not changed
-        assertEquals(Status.ACTIVE, existingBook.getStatus());
+        assertEquals(BookStatus.ACTIVE, existingBook.getBookStatus());
     }
 
     @Test
@@ -176,7 +176,7 @@ public class ScanServiceTest {
         // Verify that a new book is created for newFile
         assertEquals("newFile", newResult.getTitle());
         assertEquals(BookFormat.PDF, newResult.getFormat());
-        assertEquals(Status.ACTIVE, newResult.getStatus());
+        assertEquals(BookStatus.ACTIVE, newResult.getBookStatus());
     }
 
     @Test

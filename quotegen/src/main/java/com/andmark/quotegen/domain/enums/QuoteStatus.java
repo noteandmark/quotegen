@@ -1,11 +1,13 @@
 package com.andmark.quotegen.domain.enums;
 
-public enum Status {
-    ACTIVE("active"), DELETED("deleted");
+public enum QuoteStatus {
+    FREE("free"),
+    PENDING("pending"),
+    PUBLISHED("published");
 
     private final String value;
 
-    Status(final String value) {
+    QuoteStatus(final String value) {
         this.value = value;
     }
 
@@ -17,5 +19,4 @@ public enum Status {
     public String toString() {
         return value;
     }
-
 }

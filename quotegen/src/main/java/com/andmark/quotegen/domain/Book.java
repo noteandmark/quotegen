@@ -1,7 +1,7 @@
 package com.andmark.quotegen.domain;
 
 import com.andmark.quotegen.domain.enums.BookFormat;
-import com.andmark.quotegen.domain.enums.Status;
+import com.andmark.quotegen.domain.enums.BookStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,7 +36,7 @@ public class Book {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, columnDefinition = "DEFAULT 'ACTIVE'")
-    private Status status;
+    private BookStatus bookStatus;
 
     // "book" refers to the field name in the Quote (or Paragraph) entity that maps back to this Book entity
     @OneToMany(mappedBy = "bookSource", fetch = FetchType.LAZY)
@@ -48,11 +48,11 @@ public class Book {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return Objects.equals(id, book.id) && Objects.equals(title, book.title) && Objects.equals(author, book.author) && format == book.format && Objects.equals(filePath, book.filePath) && status == book.status && Objects.equals(quotes, book.quotes);
+        return Objects.equals(id, book.id) && Objects.equals(title, book.title) && Objects.equals(author, book.author) && format == book.format && Objects.equals(filePath, book.filePath) && bookStatus == book.bookStatus && Objects.equals(quotes, book.quotes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, author, format, filePath, status, quotes);
+        return Objects.hash(id, title, author, format, filePath, bookStatus, quotes);
     }
 }

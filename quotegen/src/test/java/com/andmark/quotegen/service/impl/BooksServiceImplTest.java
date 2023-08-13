@@ -1,7 +1,7 @@
 package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
-import com.andmark.quotegen.domain.enums.Status;
+import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.repository.BooksRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,16 +30,16 @@ public class BooksServiceImplTest {
         Book deletedBook1 = new Book();
         deletedBook1.setId(1L);
         deletedBook1.setTitle("Deleted Book 1");
-        deletedBook1.setStatus(Status.DELETED);
+        deletedBook1.setBookStatus(BookStatus.DELETED);
         deletedBooks.add(deletedBook1);
 
         Book deletedBook2 = new Book();
         deletedBook2.setId(2L);
         deletedBook2.setTitle("Deleted Book 2");
-        deletedBook2.setStatus(Status.DELETED);
+        deletedBook2.setBookStatus(BookStatus.DELETED);
         deletedBooks.add(deletedBook2);
 
-        when(booksRepository.findByStatus(Status.DELETED)).thenReturn(deletedBooks);
+        when(booksRepository.findByBookStatus(BookStatus.DELETED)).thenReturn(deletedBooks);
 
         // Invoke the clearDeletedBooks method
         booksService.clearDeletedBooks();

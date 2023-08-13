@@ -20,15 +20,6 @@ public class QuoteController {
         this.quoteService = quoteService;
     }
 
-    @GetMapping("/get-next")
-    public ResponseEntity<QuoteDTO> getNextQuote() {
-        log.debug("controller getNextQuote");
-        quoteService.checkAndPopulateCache();
-        QuoteDTO quoteDTO = quoteService.provideQuoteToClient();
-        log.info("response with quote = {}", quoteDTO);
-        return ResponseEntity.ok(quoteDTO);
-    }
-
     @GetMapping("/all")
     public ResponseEntity<List<QuoteDTO>> getAllQuotes() {
         log.debug("controller getAllQuotes");
@@ -62,8 +53,30 @@ public class QuoteController {
         }
     }
 
+    @GetMapping("/get-next")
+    public ResponseEntity<QuoteDTO> getNextQuote() {
+        log.debug("controller getNextQuote");
+        quoteService.checkAndPopulateCache();
+        QuoteDTO quoteDTO = quoteService.provideQuoteToClient();
+        log.info("response with quote = {}", quoteDTO);
+        return ResponseEntity.ok(quoteDTO);
+    }
+
+    @GetMapping("/get-pending")
+    public ResponseEntity<List<QuoteDTO>> getPendingQuotes() {
+        log.debug("controller getPendingQuotes");
+        List<QuoteDTO> quotes = quoteService.getPendingQuotes();
+        return ResponseEntity.ok(quotes);
+    }
+
+    @PostMapping("/pending")
+    public ResponseEntity<Void> pendingQuote(@RequestBody QuoteDTO quoteDTO) {
+        log.debug("controller pendingQuote id = {}", quoteDTO.getId());
+        quoteService.pendingQuote(quoteDTO);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/confirm")
-//    public ResponseEntity<Void> confirmQuote(@RequestParam Long id, @RequestParam String content) {
     public ResponseEntity<Void> confirmQuote(@RequestBody QuoteDTO quoteDTO) {
         log.debug("controller confirmQuote id = {}", quoteDTO.getId());
         quoteService.confirmQuote(quoteDTO);

@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.andmark.quotegen.domain.enums.Status.ACTIVE;
-import static com.andmark.quotegen.domain.enums.Status.DELETED;
+import static com.andmark.quotegen.domain.enums.BookStatus.ACTIVE;
+import static com.andmark.quotegen.domain.enums.BookStatus.DELETED;
 
 @Service
 @Transactional(readOnly = true)
@@ -69,13 +69,13 @@ public class ScanService {
     @Transactional
     public void cleanUpDatabase(List<Book> scannedBooks) {
         log.debug("check if needed to set status deleted ");
-        List<Book> booksInDatabase = booksRepository.findByStatus(ACTIVE);
+        List<Book> booksInDatabase = booksRepository.findByBookStatus(ACTIVE);
         booksInDatabase.removeAll(scannedBooks);
         if (!booksInDatabase.isEmpty()) {
             log.info("cleaning books with status deleted: {}", booksInDatabase);
             for (Book bookToDelete : booksInDatabase) {
                 // mark the book as deleted
-                bookToDelete.setStatus(DELETED);
+                bookToDelete.setBookStatus(DELETED);
                 log.debug("setStatus DELETED to {}", bookToDelete.getFilePath());
                 booksRepository.save(bookToDelete);
                 log.info("booksRepository.save(bookToDelete) perform");
@@ -126,13 +126,13 @@ public class ScanService {
                 book.setAuthor(file.getParentFile().getName());
                 book.setFilePath(file.getPath());
                 book.setTitle(removeExtension(file));
-                book.setStatus(ACTIVE);
+                book.setBookStatus(ACTIVE);
                 book.setFormat(bookFormat);
             } else {
                 log.warn("unknown format file for application");
                 return null;
             }
-            if (book.getStatus().equals(DELETED)) book.setStatus(ACTIVE);
+            if (book.getBookStatus().equals(DELETED)) book.setBookStatus(ACTIVE);
         }
         return book;
     }

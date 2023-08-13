@@ -3,7 +3,8 @@ package com.andmark.quotegen.service.impl;
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.BookFormat;
-import com.andmark.quotegen.domain.enums.Status;
+import com.andmark.quotegen.domain.enums.BookStatus;
+import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.repository.QuotesRepository;
@@ -60,16 +61,16 @@ public class QuoteServiceImplTest {
             book.setTitle("Book " + i);
             book.setAuthor("Author " + i);
             book.setFormat(BookFormat.PDF);
-            book.setStatus(Status.ACTIVE);
+            book.setBookStatus(BookStatus.ACTIVE);
             allBooks.add(book);
         }
 
         when(bookFormatParserFactory.createParser(BookFormat.PDF)).thenReturn(bookFormatParser);
         when(bookFormatParser.parse(any())).thenReturn("PDF Book Content");
-        when(booksRepository.findByStatus(Status.ACTIVE)).thenReturn(allBooks);
+        when(booksRepository.findByBookStatus(BookStatus.ACTIVE)).thenReturn(allBooks);
         quoteService.populateCache(cacheSize);
 
-        verify(booksRepository, times(1)).findByStatus(Status.ACTIVE);
+        verify(booksRepository, times(1)).findByBookStatus(BookStatus.ACTIVE);
         //there can only be one book in the end
         verify(bookFormatParserFactory, atLeastOnce()).createParser(BookFormat.PDF);
         verify(bookFormatParser, atLeastOnce()).parse(any());
@@ -136,7 +137,7 @@ public class QuoteServiceImplTest {
 
     @Test
     public void whenNoActiveBooks_thenShouldThrowException() {
-        when(booksRepository.findByStatus(Status.ACTIVE)).thenReturn(new ArrayList<>());
+        when(booksRepository.findByBookStatus(BookStatus.ACTIVE)).thenReturn(new ArrayList<>());
 
         assertThrows(ServiceException.class, () -> quoteService.populateCache(cacheSize));
     }
@@ -158,8 +159,8 @@ public class QuoteServiceImplTest {
     @Test
     public void whenDifferentBookFormats_thenShouldUseCorrectParsers() {
         List<Book> allBooks = new ArrayList<>();
-        Book pdfBook = new Book(1L, "PDF Book", "Author", BookFormat.PDF, "Some folder", Status.ACTIVE, null);
-        Book docBook = new Book(2L, "DOC Book", "Author", BookFormat.DOC, "Some folder", Status.ACTIVE, null);
+        Book pdfBook = new Book(1L, "PDF Book", "Author", BookFormat.PDF, "Some folder", BookStatus.ACTIVE, null);
+        Book docBook = new Book(2L, "DOC Book", "Author", BookFormat.DOC, "Some folder", BookStatus.ACTIVE, null);
         allBooks.add(pdfBook);
         allBooks.add(docBook);
 
@@ -171,7 +172,7 @@ public class QuoteServiceImplTest {
         // Set up parser interactions for docBookFormatParser
         when(docBookFormatParser.parse(any())).thenReturn("DOC Book Content");
 
-        when(booksRepository.findByStatus(Status.ACTIVE)).thenReturn(allBooks);
+        when(booksRepository.findByBookStatus(BookStatus.ACTIVE)).thenReturn(allBooks);
 
         // Set up parser interactions for pdfBookFormatParser
         when(pdfBookFormatParser.parse(any())).thenReturn("PDF Book Content");
@@ -187,8 +188,8 @@ public class QuoteServiceImplTest {
     @Test
     public void testSaveQuotesFromCache() {
         // Create some sample quotes to be saved
-        Quote quote1 = new Quote(1L, "Quote 1", new Date(), new Book());
-        Quote quote2 = new Quote(2L, "Quote 2", new Date(), new Book());
+        Quote quote1 = new Quote(1L, "Quote 1", QuoteStatus.FREE, new Date(), null, new Date(), new Book());
+        Quote quote2 = new Quote(2L, "Quote 2", QuoteStatus.FREE, new Date(), null, new Date(), new Book());
 
         // Create a queue with sample quotes
         Queue<Quote> quoteCache = new LinkedList<>();
