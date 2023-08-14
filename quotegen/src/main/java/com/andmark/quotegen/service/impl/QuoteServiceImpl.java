@@ -115,7 +115,9 @@ public class QuoteServiceImpl implements QuoteService {
                 .orElseThrow(() -> new ServiceException("Quote not found with id: " + quoteDTO.getId()));
         quote.setPendingTime(quoteDTO.getPendingTime());
         quote.setContent(quoteDTO.getContent());
-        log.info("setUsedAt date: " + quote.getUsedAt());
+        quote.setImageUrl(quoteDTO.getImageUrl());
+        quote.setStatus(quoteDTO.getStatus());
+        log.info("setPendingTime date: " + quote.getPendingTime());
         quotesRepository.save(quote);
         log.info("quote with id = {} saved in database", quote.getId());
     }
@@ -127,6 +129,8 @@ public class QuoteServiceImpl implements QuoteService {
                 .orElseThrow(() -> new ServiceException("Quote not found with id: " + quoteDTO.getId()));
         quote.setUsedAt(new Date());
         quote.setContent(quoteDTO.getContent());
+        quote.setImageUrl(quoteDTO.getImageUrl());
+        quote.setStatus(quoteDTO.getStatus());
         log.info("setUsedAt date: " + quote.getUsedAt());
         quotesRepository.save(quote);
         log.info("quote with id = {} saved in database", quote.getId());

@@ -1,8 +1,10 @@
 package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
+import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.dto.BookDTO;
+import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.service.BooksService;
 import com.andmark.quotegen.util.impl.MapperConvert;
@@ -51,9 +53,7 @@ public class BooksServiceImpl implements BooksService {
         log.debug("find all books");
         List<Book> bookList = booksRepository.findAll();
         log.info("founded bookList = {}", bookList);
-        return bookList.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return convertToDtoList(bookList);
     }
 
     @Override
@@ -89,5 +89,11 @@ public class BooksServiceImpl implements BooksService {
 
     public Book convertToEntity(BookDTO bookDTO) {
         return mapper.convertToEntity(bookDTO, Book.class);
+    }
+
+    private List<BookDTO> convertToDtoList(List<Book> books) {
+        return books.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 }
