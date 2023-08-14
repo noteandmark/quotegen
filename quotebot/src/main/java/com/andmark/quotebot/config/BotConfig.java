@@ -3,7 +3,6 @@ package com.andmark.quotebot.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -12,6 +11,7 @@ public class BotConfig {
     public static String botUsername;
     public static String botToken;
     public static String groupChatId;
+    public static String adminChatId;
 
     @Value("${api.base.url}")
     public void setApiBaseUrl(String API_BASE_URL) {
@@ -31,6 +31,11 @@ public class BotConfig {
     @Value("${telegram.bot.groupid}")
     public void setGroupChatId(String groupChatId) {
         BotConfig.groupChatId = groupChatId;
+    }
+
+    @Value("${telegram.bot.adminchatid}")
+    public void setAdminChatId(String adminChatId) {
+        BotConfig.adminChatId = adminChatId;
     }
 
     @Bean

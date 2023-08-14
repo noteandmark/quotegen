@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class InlineKeyboardService {
+public class QuoteKeyboardService {
 
     public InlineKeyboardMarkup createInlineKeyboard(List<InlineButton> buttons) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
@@ -23,6 +23,16 @@ public class InlineKeyboardService {
         keyboard.add(row);
 
         keyboardMarkup.setKeyboard(keyboard);
+        return keyboardMarkup;
+    }
+
+    public InlineKeyboardMarkup getEditKeyboardMarkup(String quoteId) {
+        List<InlineButton> buttons = new ArrayList<>();
+        buttons.add(new InlineButton("Edit", "edit-" + quoteId));
+        buttons.add(new InlineButton("Accept", "confirm-" + quoteId));
+        buttons.add(new InlineButton("Reject", "reject-" + quoteId));
+
+        InlineKeyboardMarkup keyboardMarkup = createInlineKeyboard(buttons);
         return keyboardMarkup;
     }
 }

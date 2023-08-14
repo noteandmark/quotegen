@@ -19,9 +19,9 @@ import java.util.Stack;
 public class BotAttributes {
 
     private Long chatId;
+    private Long quoteId;
     private int lastMessageId;
     //TODO: возможно, стоит хранить всю цитату?
-    private Long quoteId;
     private List<String> imageUrls;
     private String lastCallbackMessage;
     private String confirmedContent;
