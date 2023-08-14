@@ -11,6 +11,7 @@ public class BotConfig {
     public static String API_BASE_URL;
     public static String botUsername;
     public static String botToken;
+    public static String groupChatId;
 
     @Value("${api.base.url}")
     public void setApiBaseUrl(String API_BASE_URL) {
@@ -25,6 +26,11 @@ public class BotConfig {
     @Value("${telegram.bot.token}")
     public void setBotToken(String botToken) {
         BotConfig.botToken = botToken;
+    }
+
+    @Value("${telegram.bot.groupid}")
+    public void setGroupChatId(String groupChatId) {
+        BotConfig.groupChatId = groupChatId;
     }
 
     @Bean

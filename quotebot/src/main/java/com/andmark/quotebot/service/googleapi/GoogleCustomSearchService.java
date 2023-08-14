@@ -1,11 +1,14 @@
 package com.andmark.quotebot.service.googleapi;
 
+import com.andmark.quotebot.exception.QuoteException;
 import com.andmark.quotebot.service.BotAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,14 +34,16 @@ public class GoogleCustomSearchService {
 
     public List<String> searchImagesByKeywords(String keywords) {
         GoogleCustomSearchResponse response = searchImages(keywords);
-        if (response != null) {
-            log.debug("get response from search images with keywoards");
-            if (response.getItems() == null) throw new RuntimeException();
-            return extractImageUrls(response);
-        } else {
-            log.warn("return empty Collections");
+        if (response == null) {
+            log.warn("Response is null. Returning empty list.");
             return Collections.emptyList();
         }
+        if (response.getItems() == null) {
+            log.warn("No items found in the response. Returning empty list.");
+            return Collections.emptyList();
+        }
+        log.debug("Received response from image search with keywords.");
+        return extractImageUrls(response);
     }
 
     public GoogleCustomSearchResponse searchImages(String keywords) {
