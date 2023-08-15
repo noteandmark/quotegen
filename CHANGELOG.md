@@ -1,0 +1,61 @@
+# Changelog
+## [Unreleased] - yyyy-mm-dd
+### Added
+- [QUOTEGEN](http://)
+  MAJOR HTTP access.
+- [QUOTEBOT](http://)
+  MINOR Add publishing pending quotes.
+### Changed
+### Fixed
+
+## [0.8.0] - 2023-08-15
+The bot already knows how to pick a random quote, edit it, and post it to the group immediately.
+### Added
+- starting work with authorization
+- realising publishing into telegram group
+- work with publishing quote to chat
+## [0.7.0] - 2023-08-12
+### Added
+- implemented selection of a quote and its image
+- implemented image retrieval by keywords with google api
+- successful sending of the edited quote and saving it to the database
+### Changed
+- put keyboard creation into a separate class
+- refactoring, implement methods edit,confirm,reject
+- changes in method parameters
+## [0.6.1] - 2023-08-10
+### Added
+- working variant of changing the text of a quote sent by bot
+- success removing keyboard after decision in message
+- realise buttons accept and reject
+### Changed
+- refactoring
+## [0.6.0] - 2023-08-09
+### Added
+- successfully receiving a response from rest api with a quote
+- initial commit telegram bot
+### Changed
+- stylistic edits
+## [0.5.0] - 2023-08-08
+### Added
+- first version of the project implementation
+- realising parsing books and get quotes from api
+- the success of getting a random quote from a doc file
+### Changed
+- updated mapping, add custom MapperConvert
+## [0.4.0] - 2023-08-07
+### Added
+- add business logic for service layer
+- add logging
+- add tests for ScanService
+## [0.3.0] - 2023-08-05
+### Added
+- realise scanBooks method multi-tasked
+- first simple realisation parsing all of needed formats
+## [0.2.0] - 2023-08-03
+### Added
+- successful parsing of fb2 format
+## [0.1.0] - 2023-08-03
+### Added
+- add model, dto, create sql tables
+- initial project commit
