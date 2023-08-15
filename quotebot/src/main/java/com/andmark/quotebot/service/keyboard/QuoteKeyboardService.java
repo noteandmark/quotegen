@@ -26,7 +26,7 @@ public class QuoteKeyboardService {
         return keyboardMarkup;
     }
 
-    public InlineKeyboardMarkup getEditKeyboardMarkup(String quoteId) {
+    public InlineKeyboardMarkup getEditKeyboardMarkup(Long quoteId) {
         List<InlineButton> buttons = new ArrayList<>();
         buttons.add(new InlineButton("Edit", "edit-" + quoteId));
         buttons.add(new InlineButton("Accept", "confirm-" + quoteId));

@@ -1,7 +1,9 @@
-package com.andmark.quotebot.service;
+package com.andmark.quotebot.service.impl;
 
 import com.andmark.quotebot.domain.enums.QuoteStatus;
 import com.andmark.quotebot.dto.QuoteDTO;
+import com.andmark.quotebot.dto.UserDTO;
+import com.andmark.quotebot.service.*;
 import com.andmark.quotebot.service.enums.BotState;
 import com.andmark.quotebot.service.googleapi.GoogleCustomSearchService;
 import com.andmark.quotebot.service.keyboard.QuoteKeyboardService;
@@ -13,49 +15,56 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Stack;
 
 import static com.andmark.quotebot.config.BotConfig.*;
 
 @Service
 @Slf4j
-public class QuoteServiceImpl implements QuoteService{
+public class QuoteServiceImpl implements QuoteService {
     private static final int IMAGE_COUNT_TO_CHOICE = 10;
 
     private final Bot telegramBot;
     private final BotAttributes botAttributes;
-    private final ApiServiceImpl apiServiceImpl;
+    private final ApiService apiService;
+    private final UserService userService;
     private final GoogleCustomSearchService googleCustomSearchService;
     private final QuoteKeyboardService quoteKeyboardService;
+    private final UserRegistrationService userRegistrationService;
 
     private Stack<String> quoteText;
 
-    public QuoteServiceImpl(@Lazy Bot telegramBot, BotAttributes botAttributes, ApiServiceImpl apiServiceImpl, GoogleCustomSearchService googleCustomSearchService, QuoteKeyboardService quoteKeyboardService) {
+    public QuoteServiceImpl(@Lazy Bot telegramBot, BotAttributes botAttributes, ApiService apiService, UserService userService, GoogleCustomSearchService googleCustomSearchService, QuoteKeyboardService quoteKeyboardService, UserRegistrationService userRegistrationService) {
         this.telegramBot = telegramBot;
         this.botAttributes = botAttributes;
-        this.apiServiceImpl = apiServiceImpl;
+        this.apiService = apiService;
+        this.userService = userService;
         this.googleCustomSearchService = googleCustomSearchService;
         this.quoteKeyboardService = quoteKeyboardService;
+        this.userRegistrationService = userRegistrationService;
         //a cache to store edited text
         quoteText = new Stack<>();
     }
 
-    public void handleIncomingMessage(Message message) {
+    @Override
+    public void handleIncomingMessage(Update update) {
+        Message message = update.getMessage();
         log.debug("handleIncomingMessage in chatId: {}, messageId: {}", message.getChatId(), message.getMessageId());
         String userInput = message.getText().trim();
-        String chatId = String.valueOf(message.getChatId());
+        Long chatId = message.getChatId();
 
         log.debug("text = {}", userInput);
         if (userInput.equals("сброс")) {
             clearBotAttributes();
-            telegramBot.sendMessage(String.valueOf(chatId), null, "Состояние сброшено");
+            telegramBot.sendMessage(chatId, null, "Состояние сброшено");
         }
         if (userInput.startsWith("q:")) {
             quoteText.push(userInput.substring(2));
@@ -74,21 +83,30 @@ public class QuoteServiceImpl implements QuoteService{
                 log.debug("current state is POSTPONE");
                 handlePostponeChoiceResponse(chatId, userInput);
             }
+            // Handle user's response to username input (registration new user)
+            if (botAttributes.getCurrentState().equals(BotState.AWAITING_USERNAME_INPUT)) {
+                handleUsernameInputResponse(update);
+            }
+            if (botAttributes.getCurrentState().equals(BotState.AWAITING_PASSWORD_INPUT)) {
+                handlePasswordInputResponse(update);
+            }
         }
     }
 
-    public void handleCallbackQuery(CallbackQuery callbackQuery) {
+    @Override
+    public void handleCallbackQuery(Update update) {
+        CallbackQuery callbackQuery = update.getCallbackQuery();
         log.debug("chatId = {}, callbackQuery text() = {}", callbackQuery.getMessage().getChatId(), callbackQuery.getMessage().getText());
         botAttributes.setLastMessageId(callbackQuery.getMessage().getMessageId());
         log.debug("handleCallbackQuery with lastMessageId: {}", botAttributes.getLastMessageId());
         botAttributes.setLastCallbackMessage(callbackQuery.getMessage().getText());
         log.debug("handleCallbackQuery push in lastCallbackMessage: {}", botAttributes.getLastCallbackMessage());
-        String chatId = String.valueOf(callbackQuery.getMessage().getChatId());
+        Long chatId = callbackQuery.getMessage().getChatId();
         log.debug("chatID = {}", chatId);
 
         String[] dataParts = callbackQuery.getData().split("-");
         String action = dataParts[0];
-        String quoteId =dataParts[1];
+        Long quoteId = Long.valueOf(dataParts[1]);
         log.debug("action = {}  quoteId = {}", action, quoteId);
 
         if (botAttributes.getCurrentState().equals(BotState.FREE_STATE)) {
@@ -102,7 +120,8 @@ public class QuoteServiceImpl implements QuoteService{
     }
 
     public QuoteDTO publishQuoteToGroup(QuoteDTO quoteDTO) {
-        if (!botAttributes.getConfirmedContent().isEmpty()) {
+//        if (!botAttributes.getConfirmedContent().isEmpty()) {
+        if (!quoteDTO.getContent().isEmpty()) {
             telegramBot.sendMessage(groupChatId, null, botAttributes.getConfirmedContent());
         }
         if (!botAttributes.getConfirmedUrl().isEmpty()) {
@@ -112,11 +131,11 @@ public class QuoteServiceImpl implements QuoteService{
         return quoteDTO;
     }
 
-    public InlineKeyboardMarkup getEditKeyboardMarkup(String quoteId) {
+    public InlineKeyboardMarkup getEditKeyboardMarkup(Long quoteId) {
         return quoteKeyboardService.getEditKeyboardMarkup(quoteId);
     }
 
-    private void handleImageChoiceResponse(String chatId, String userInput) {
+    private void handleImageChoiceResponse(Long chatId, String userInput) {
         log.debug("handleImageChoiceResponse");
         String chosenImageUrl = null;
 
@@ -133,7 +152,7 @@ public class QuoteServiceImpl implements QuoteService{
         postingQuote(chatId);
     }
 
-    private void postingQuote(String chatId) {
+    private void postingQuote(Long chatId) {
         log.debug("in postingQuote with lastCallbackMessage: {}, chosenImageUrl: {}",
                 botAttributes.getLastCallbackMessage(), botAttributes.getConfirmedUrl());
         // choose whether to publish the quote immediately or postpone it
@@ -142,7 +161,7 @@ public class QuoteServiceImpl implements QuoteService{
         botAttributes.setCurrentState(BotState.AWAITING_PUBLISHING);
     }
 
-    private void handlePublishingChoiceResponse(String chatId, String userInput) {
+    private void handlePublishingChoiceResponse(Long chatId, String userInput) {
         log.debug("in handlePublishingChoiceResponse currentState = {}, userInput = {}", botAttributes.getCurrentState(), userInput);
 
         switch (userInput) {
@@ -155,7 +174,7 @@ public class QuoteServiceImpl implements QuoteService{
                 quoteDTO.setStatus(QuoteStatus.PUBLISHED);
                 log.debug("send the quote to be saved in the database");
                 String confirmUrl = API_BASE_URL + "/quotes/confirm";
-                apiServiceImpl.sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "пост опубликован сразу", null);
+                apiService.sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "пост опубликован сразу", null);
                 break;
             case "отложить":
                 log.debug("case 'отложить'");
@@ -171,7 +190,7 @@ public class QuoteServiceImpl implements QuoteService{
         }
     }
 
-    private void handlePostponeChoiceResponse(String chatId, String userInput) {
+    private void handlePostponeChoiceResponse(Long chatId, String userInput) {
         if (userInput.equalsIgnoreCase("случайно")) {
 
             botAttributes.setCurrentState(BotState.FREE_STATE);
@@ -191,7 +210,7 @@ public class QuoteServiceImpl implements QuoteService{
         }
     }
 
-    private void postponePublishing(String chatId, Date pendingTime) {
+    private void postponePublishing(Long chatId, Date pendingTime) {
         QuoteDTO quoteDTO = new QuoteDTO();
         quoteDTO.setId(botAttributes.getQuoteId());
         quoteDTO.setContent(botAttributes.getConfirmedContent());
@@ -200,12 +219,12 @@ public class QuoteServiceImpl implements QuoteService{
         quoteDTO.setImageUrl(botAttributes.getConfirmedUrl());
 
         String confirmUrl = API_BASE_URL + "/quotes/pending";
-        apiServiceImpl.sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно отложена на " + pendingTime, null);
+        apiService.sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно отложена на " + pendingTime, null);
 
         clearBotAttributes();
     }
 
-    private void editQuote(String chatId, String quoteId) {
+    private void editQuote(Long chatId, Long quoteId) {
         log.debug("editQuote with chatId: {} and quoteId: {}", chatId, quoteId);
         // Edit the original message to remove the inline keyboard
         telegramBot.removeKeyboard(chatId);
@@ -216,7 +235,7 @@ public class QuoteServiceImpl implements QuoteService{
         telegramBot.sendMessage(chatId, keyboard, editedText);
     }
 
-    private void confirmQuote(String chatId, String quoteId) {
+    private void confirmQuote(Long chatId, Long quoteId) {
         log.debug("confirmQuote with chatId: {} and quoteId: {} and quoteText.isEmpty: {}", chatId, quoteId, quoteText.isEmpty());
         String content = (!quoteText.isEmpty()) ? quoteText.pop() : botAttributes.getLastCallbackMessage();
         botAttributes.setConfirmedContent(content);
@@ -231,15 +250,15 @@ public class QuoteServiceImpl implements QuoteService{
         sendImagesToChoice(chatId);
     }
 
-    private void rejectQuote(String chatId, String quoteId) {
+    private void rejectQuote(Long chatId, Long quoteId) {
         log.debug("rejectQuote with chatId: {} and quoteId: {}", chatId, quoteId);
         String rejectUrl = API_BASE_URL + "/quotes/reject?id=" + quoteId;
         log.debug("rejectUrl quote with url = {}", rejectUrl);
 
-        apiServiceImpl.sendRequestAndHandleResponse(rejectUrl, HttpMethod.DELETE, null, "успешно удалена", null);
+        apiService.sendRequestAndHandleResponse(rejectUrl, HttpMethod.DELETE, null, "успешно удалена", null);
     }
 
-    private void sendImagesToChoice(String chatId) {
+    private void sendImagesToChoice(Long chatId) {
         for (int i = 0; i < IMAGE_COUNT_TO_CHOICE; i++) {
             log.debug("in sendImagesToChoice botAttributes.getImageUrls().size() = {}", botAttributes.getImageUrls().size());
             if (botAttributes.getImageUrls().size() > i) {
@@ -267,6 +286,40 @@ public class QuoteServiceImpl implements QuoteService{
             return choice >= 0 && choice <= countImages;
         } catch (NumberFormatException e) {
             return false;
+        }
+    }
+
+    private void handleUsernameInputResponse(Update update) {
+        log.debug("QuoteService in handleUsernameInputResponse");
+        String username = update.getMessage().getText().trim();
+        Long chatId = update.getMessage().getChatId();
+        // Get the user ID of the current user
+        User user = update.getMessage().getFrom();
+        Long usertgId = user.getId();
+        // Forward the response to the UserRegistrationService if username isn't taken
+        if (!userService.isUsernameTaken(username)) {
+            log.debug("username is available, proceed with registration");
+            userRegistrationService.handleUsernameInput(usertgId, chatId, username);
+        } else {
+            log.warn("username is already taken");
+            telegramBot.sendMessage(chatId, null, "Имя пользователя уже занято. Пожалуйста, выберите другое имя.");
+        }
+    }
+
+    private void handlePasswordInputResponse(Update update) {
+        log.debug("QuoteService in handlePasswordInputResponse");
+        String password = update.getMessage().getText().trim();
+        Long chatId = update.getMessage().getChatId();
+        User user = update.getMessage().getFrom();
+        Long usertgId = user.getId();
+        // Forward the response to the UserRegistrationService
+        UserDTO userDTO = userRegistrationService.handlePasswordInput(usertgId, chatId, password);
+        if (userDTO != null) {
+            apiService.registerUser(userDTO);
+            // Remove the user from the registration in progress list
+            userRegistrationService.completeRegistration(usertgId, chatId);
+        } else {
+            log.warn("userRegistrationService.handlePasswordInput return null in userDTO ");
         }
     }
 

@@ -26,5 +26,6 @@ public class BotAttributes {
     private String lastCallbackMessage;
     private String confirmedContent;
     private String confirmedUrl;
+    private String username;
     private BotState currentState;
 }

@@ -1,17 +1,22 @@
 package com.andmark.quotebot.config;
 
+import com.andmark.quotebot.domain.enums.UserRole;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 public class BotConfig {
     public static String API_BASE_URL;
     public static String botUsername;
     public static String botToken;
-    public static String groupChatId;
-    public static String adminChatId;
+    public static Long groupChatId;
+    public static Long adminChatId;
 
     @Value("${api.base.url}")
     public void setApiBaseUrl(String API_BASE_URL) {
@@ -29,12 +34,12 @@ public class BotConfig {
     }
 
     @Value("${telegram.bot.groupid}")
-    public void setGroupChatId(String groupChatId) {
+    public void setGroupChatId(Long groupChatId) {
         BotConfig.groupChatId = groupChatId;
     }
 
     @Value("${telegram.bot.adminchatid}")
-    public void setAdminChatId(String adminChatId) {
+    public void setAdminChatId(Long adminChatId) {
         BotConfig.adminChatId = adminChatId;
     }
 
@@ -42,4 +47,15 @@ public class BotConfig {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public Map<Long, UserRole> userRoleCache() {
+        return new ConcurrentHashMap<>();
+    }
+
 }
