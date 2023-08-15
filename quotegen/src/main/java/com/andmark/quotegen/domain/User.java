@@ -1,6 +1,5 @@
 package com.andmark.quotegen.domain;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.andmark.quotegen.domain.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,6 +17,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "usertg_id", nullable = false, unique = true)
+    private Long usertgId;
+
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
@@ -29,8 +31,7 @@ public class User {
     private UserRole role;
 
     public void setPassword(String password) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        this.password = passwordEncoder.encode(password);
+        this.password = password;
     }
 }
 

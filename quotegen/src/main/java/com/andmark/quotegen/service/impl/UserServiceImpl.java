@@ -1,6 +1,5 @@
 package com.andmark.quotegen.service.impl;
 
-import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.User;
 import com.andmark.quotegen.domain.enums.UserRole;
 import com.andmark.quotegen.dto.UserDTO;
@@ -32,9 +31,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void save(UserDTO userDTO) {
-        log.debug("saving book");
+        log.debug("saving user");
         usersRepository.save(convertToEntity(userDTO));
-        log.info("save book {}", userDTO);
+        log.info("save user {}", userDTO);
     }
 
     @Override
@@ -72,12 +71,25 @@ public class UserServiceImpl implements UserService {
         log.info("delete user with id {} perform", id);
     }
 
-    public void registerUser(String username, String password, UserRole role) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setRole(role);
-        usersRepository.save(user);
+    @Override
+    public boolean isRegistered(Long usertgId) {
+        log.debug("check if usertgId = {} exists", usertgId);
+        return usersRepository.existsByUsertgId(usertgId);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        log.debug("check if exists username = {}", username);
+        return usersRepository.existsByUsername(username);
+    }
+
+    @Override
+    public UserRole getUserRole(Long usertgId) {
+        User user = usersRepository.findByUsertgId(usertgId);
+        if (user != null) {
+            return user.getRole();
+        }
+        return null; // User not found
     }
 
     private UserDTO convertToDTO(User user) {
@@ -85,7 +97,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private User convertToEntity(UserDTO userDTO) {
-        return mapper.convertToEntity(userDTO, Quote.class);
+        return mapper.convertToEntity(userDTO, User.class);
     }
 
     private List<UserDTO> convertToDtoList(List<User> users) {
@@ -93,4 +105,5 @@ public class UserServiceImpl implements UserService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+
 }

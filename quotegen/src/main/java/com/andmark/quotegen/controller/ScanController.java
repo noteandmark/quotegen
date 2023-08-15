@@ -2,7 +2,7 @@ package com.andmark.quotegen.controller;
 
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.dto.BookDTO;
-import com.andmark.quotegen.service.BooksService;
+import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.ScanService;
 import com.andmark.quotegen.util.impl.Fb2BookFormatParser;
 import lombok.extern.slf4j.Slf4j;
@@ -21,13 +21,13 @@ import java.util.List;
 @Slf4j
 public class ScanController {
     private final ScanService scanService;
-    private final BooksService booksService;
+    private final BookService bookService;
     private final ModelMapper mapper;
 
     @Autowired
-    public ScanController(ScanService scanService, BooksService booksService, ModelMapper mapper) {
+    public ScanController(ScanService scanService, BookService bookService, ModelMapper mapper) {
         this.scanService = scanService;
-        this.booksService = booksService;
+        this.bookService = bookService;
         this.mapper = mapper;
     }
 
@@ -44,7 +44,7 @@ public class ScanController {
     public String parseBook(@RequestParam Long id) {
         Fb2BookFormatParser parser = new Fb2BookFormatParser();
         BookDTO bookDTO = new BookDTO();
-        bookDTO = booksService.findOne(id);
+        bookDTO = bookService.findOne(id);
         return parser.parse(mapper.map(bookDTO, Book.class));
     }
 

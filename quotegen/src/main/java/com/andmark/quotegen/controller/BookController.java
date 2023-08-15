@@ -1,6 +1,6 @@
 package com.andmark.quotegen.controller;
 
-import com.andmark.quotegen.service.BooksService;
+import com.andmark.quotegen.service.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/books")
 @Slf4j
 public class BookController {
-    private final BooksService booksService;
+    private final BookService bookService;
 
     @Autowired
-    public BookController(BooksService booksService) {
-        this.booksService = booksService;
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
     }
 
     @DeleteMapping("/clear-deleted")
     public ResponseEntity<String> clearDeletedBooks() {
         log.debug("in clearDeletedBooks");
-        booksService.clearDeletedBooks();
+        bookService.clearDeletedBooks();
         log.info("clearDeletedBooks perform");
         return ResponseEntity.ok("Books with status DELETED cleared");
     }

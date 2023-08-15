@@ -15,10 +15,10 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class BooksServiceImplTest {
+public class BookServiceImplTest {
 
     @InjectMocks
-    private BooksServiceImpl booksService;
+    private BookServiceImpl booksService;
 
     @Mock
     private BooksRepository booksRepository;

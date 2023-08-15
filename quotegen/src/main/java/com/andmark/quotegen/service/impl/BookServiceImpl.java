@@ -1,12 +1,10 @@
 package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
-import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.dto.BookDTO;
-import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.repository.BooksRepository;
-import com.andmark.quotegen.service.BooksService;
+import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.util.impl.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +18,13 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @Slf4j
-public class BooksServiceImpl implements BooksService {
+public class BookServiceImpl implements BookService {
 
     private final BooksRepository booksRepository;
     private final MapperConvert<Book, BookDTO> mapper;
 
     @Autowired
-    public BooksServiceImpl(BooksRepository booksRepository, MapperConvert<Book, BookDTO> mapper) {
+    public BookServiceImpl(BooksRepository booksRepository, MapperConvert<Book, BookDTO> mapper) {
         this.booksRepository = booksRepository;
         this.mapper = mapper;
     }
