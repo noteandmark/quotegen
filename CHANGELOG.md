@@ -8,9 +8,13 @@
 ### Changed
 ### Fixed
 
-## [0.] - 2023-
+## [0.9.0] - 2023-08-16
 ### Added
-- 
+- implemented gif retrieval on request to the site api, which answers the question with a dynamic image "yes" or "no"
+- added possibility to get statistics on quotes and books
+### Fixed
+
+- immediate and delayed posting 
 ## [0.8.0] - 2023-08-15
 The bot already knows how to pick a random quote, edit it, and post it to the group immediately.
 ### Added

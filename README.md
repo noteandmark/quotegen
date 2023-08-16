@@ -19,6 +19,9 @@ of text (customisable) and provides it to the user. The user can
 edit the quote, accept or delete it. It is also specified: 
 publish immediately or postpone.*
 
+*For each quote, we use the Google API to look for an image. You can 
+choose from 10 (optional) suggested images.*
+
 ---
 *Technologies used:*
 - Java20, Spring Boot
@@ -32,3 +35,4 @@ publish immediately or postpone.*
 - generating a quote from a randomly selected book
 - ability to edit a quote, accept, reject
 - publication to the telegram group can be done immediately or delayed
+- search for images for text using Google Custom Search engine API
