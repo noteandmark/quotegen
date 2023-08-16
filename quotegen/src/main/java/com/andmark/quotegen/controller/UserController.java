@@ -53,4 +53,12 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error registering user");
         }
     }
+
+    @DeleteMapping("/delete/{usertgId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable long usertgId) {
+        log.debug("user controller in deleteUser");
+        userService.delete(usertgId);
+        log.debug("user controller: user deleted");
+        return ResponseEntity.ok().build();
+    }
 }

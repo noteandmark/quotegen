@@ -164,6 +164,46 @@ public class QuoteServiceImpl implements QuoteService {
         return allBooks;
     }
 
+    public List<QuoteDTO> getPendingQuotes() {
+        List<Quote> pendingQuoteEntities = quotesRepository.findByStatus(QuoteStatus.PENDING);
+        return convertToDtoList(pendingQuoteEntities);
+    }
+
+    public String generateQuoteContent(List<String> words) {
+        Random random = new Random();
+
+        if (words.size() <= 500) {
+            return String.join(" ", words);
+        } else {
+            int startIndex = random.nextInt(words.size() - 500);
+            return String.join(" ", words.subList(startIndex, startIndex + 500));
+        }
+    }
+
+    public String getBookText(Book book) {
+        // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
+        BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
+        String bookText = parser.parse(book);
+        if (bookText == null) {
+            log.error("Text from book {} is null!", book);
+            throw new ServiceException("Text from book is null!");
+        }
+        return bookText;
+    }
+
+    @Transactional
+    public void saveQuotesFromCache(Queue<Quote> quoteCache) {
+        List<Quote> quotesToSave = getQuotes(quoteCache);
+
+        if (!quotesToSave.isEmpty()) {
+            log.debug("Saving quotes to the database: {}", quotesToSave);
+            quotesRepository.saveAll(quotesToSave);
+            log.info("Quotes saved, size: {}", quotesToSave.size());
+        } else {
+            log.error("nothing to save, something wrong");
+        }
+    }
+
     private Map<Book, Integer> selectBooksRandomly(List<Book> allBooks, int size) {
         Map<Book, Integer> parsedBooks = new HashMap<>();
         int counter = 0;
@@ -197,19 +237,6 @@ public class QuoteServiceImpl implements QuoteService {
 
     }
 
-    @Transactional
-    public void saveQuotesFromCache(Queue<Quote> quoteCache) {
-        List<Quote> quotesToSave = getQuotes(quoteCache);
-
-        if (!quotesToSave.isEmpty()) {
-            log.debug("Saving quotes to the database: {}", quotesToSave);
-            quotesRepository.saveAll(quotesToSave);
-            log.info("Quotes saved, size: {}", quotesToSave.size());
-        } else {
-            log.error("nothing to save, something wrong");
-        }
-    }
-
     private List<Quote> getQuotes(Queue<Quote> quoteCache) {
         List<Quote> quotesToSave = new ArrayList<>();
         while (!quoteCache.isEmpty()) {
@@ -238,28 +265,6 @@ public class QuoteServiceImpl implements QuoteService {
         } while (occurrences > 0);
     }
 
-    public String generateQuoteContent(List<String> words) {
-        Random random = new Random();
-
-        if (words.size() <= 500) {
-            return String.join(" ", words);
-        } else {
-            int startIndex = random.nextInt(words.size() - 500);
-            return String.join(" ", words.subList(startIndex, startIndex + 500));
-        }
-    }
-
-    public String getBookText(Book book) {
-        // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
-        BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
-        String bookText = parser.parse(book);
-        if (bookText == null) {
-            log.error("Text from book {} is null!", book);
-            throw new ServiceException("Text from book is null!");
-        }
-        return bookText;
-    }
-
 //    public Quote getNextQuote() {
 //        if (quoteCache.isEmpty()) {
 //            populateCache(cacheSize);
@@ -269,10 +274,6 @@ public class QuoteServiceImpl implements QuoteService {
 //        return pollQuote;
 //    }
 
-    public List<QuoteDTO> getPendingQuotes() {
-        List<Quote> pendingQuoteEntities = quotesRepository.findByStatus(QuoteStatus.PENDING);
-        return convertToDtoList(pendingQuoteEntities);
-    }
 
     private QuoteDTO convertToDTO(Quote quote) {
         return mapper.convertToDTO(quote, QuoteDTO.class);

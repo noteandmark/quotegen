@@ -2,6 +2,7 @@ package com.andmark.quotegen.controller;
 
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.dto.BookDTO;
+import com.andmark.quotegen.dto.StatsDTO;
 import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.ScanService;
 import com.andmark.quotegen.util.impl.Fb2BookFormatParser;
@@ -38,6 +39,14 @@ public class ScanController {
         log.debug("scannedBooks = " + scannedBooks);
         log.info("finished scannedBooks from scanService.scanBooks({})", directoryPath);
         return scannedBooks;
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<StatsDTO> getStatistics() {
+        log.debug("scan controller: getStatistics");
+        StatsDTO stats = scanService.getStatistics();
+        log.debug("scan controller: get stats, getting ready to send");
+        return ResponseEntity.ok(stats);
     }
 
     @GetMapping("/test-parse")

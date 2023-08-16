@@ -2,9 +2,12 @@ package com.andmark.quotegen.service;
 
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.enums.BookFormat;
+import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.dto.BookDTO;
+import com.andmark.quotegen.dto.StatsDTO;
 import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.repository.BooksRepository;
+import com.andmark.quotegen.repository.QuotesRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,11 +33,13 @@ import static com.andmark.quotegen.domain.enums.BookStatus.DELETED;
 public class ScanService {
 
     private final BooksRepository booksRepository;
+    private final QuotesRepository quotesRepository;
     private final ModelMapper mapper;
 
     @Autowired
-    public ScanService(BooksRepository booksRepository, ModelMapper mapper) {
+    public ScanService(BooksRepository booksRepository, QuotesRepository quotesRepository, ModelMapper mapper) {
         this.booksRepository = booksRepository;
+        this.quotesRepository = quotesRepository;
         this.mapper = mapper;
     }
 
@@ -115,7 +124,7 @@ public class ScanService {
         }
     }
 
-    Book processBookFile(File file) {
+    public Book processBookFile(File file) {
         log.debug("Processing book file: {}", file);
         Book book = checkExistingBook(file);
 
@@ -137,7 +146,7 @@ public class ScanService {
         return book;
     }
 
-    Book checkExistingBook(File file) {
+    public Book checkExistingBook(File file) {
         log.debug("Checking existing book for file: {}", file);
         String filePath = file.getPath();
         Optional<Book> existingBook = booksRepository.findByFilePath(filePath);
@@ -145,13 +154,13 @@ public class ScanService {
         return existingBook.orElse(null);
     }
 
-    BookFormat getBookFormat(String fileName) {
+    public BookFormat getBookFormat(String fileName) {
         int lastDotIndex = fileName.lastIndexOf(".");
         String fileFormat = fileName.substring(lastDotIndex + 1).toUpperCase();
         return BookFormat.fromString(fileFormat);
     }
 
-    String removeExtension(File file) {
+    public String removeExtension(File file) {
         String fileName = file.getName();
         int lastDotIndex = fileName.lastIndexOf('.');
         if (lastDotIndex > 0) {
@@ -160,5 +169,24 @@ public class ScanService {
         return fileName;
     }
 
+    public StatsDTO getStatistics() {
+        log.debug("scan service: getStatistics");
+        LocalDate currentDate = LocalDate.now();
+        LocalDate startOfYear = currentDate.with(TemporalAdjusters.firstDayOfYear());
+        log.debug("startOfYear = {}", startOfYear);
+
+        Long bookCount = booksRepository.count();
+        log.debug("bookCount= " + bookCount);
+
+        Date startDate = Date.from(startOfYear.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Long publishedQuotesThisYear = quotesRepository.countByStatusAndUsedAtAfter(QuoteStatus.PUBLISHED, startDate);
+        log.debug("publishedQuotesThisYear = " + publishedQuotesThisYear);
+        Long pendingQuotesCount = quotesRepository.countByStatus(QuoteStatus.PENDING);
+        log.debug("pendingQuotesCount = " + pendingQuotesCount);
+
+        log.info("getting stats: {} , {} , {}", bookCount, publishedQuotesThisYear, pendingQuotesCount);
+
+        return new StatsDTO(bookCount, publishedQuotesThisYear, pendingQuotesCount);
+    }
 }
 
