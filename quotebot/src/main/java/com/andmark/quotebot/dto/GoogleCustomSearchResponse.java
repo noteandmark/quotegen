@@ -1,4 +1,4 @@
-package com.andmark.quotebot.service.googleapi;
+package com.andmark.quotebot.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,21 +1,27 @@
 package com.andmark.quotebot.service.command;
 
+import com.andmark.quotebot.service.BotAttributes;
 import com.andmark.quotebot.service.UserService;
-import com.andmark.quotebot.service.impl.UserRegistrationService;
+import com.andmark.quotebot.service.enums.BotState;
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
+@Slf4j
 public class SignUpCommand extends QuoteCommand{
     private final UserService userService;
+    private final BotAttributes botAttributes;
 
-    public SignUpCommand(UserService userService) {
+    public SignUpCommand(UserService userService, BotAttributes botAttributes) {
         super("signup", "Register a new user");
         this.userService = userService;
+        this.botAttributes = botAttributes;
     }
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+        log.debug("user with id = {} execute /signup", user.getId());
         // Check if the user is already registered
         Long usertgId = user.getId();
         if (userService.isRegistered(usertgId)) {
@@ -25,9 +31,7 @@ public class SignUpCommand extends QuoteCommand{
             return;
         }
         // Initiate the registration process
-        userService.initiateRegistration(usertgId, chat.getId());
-
-        // Send a message to start the registration flow
-        sendMessage(absSender, chat, "Введите имя (логин) пользователя");
+        botAttributes.setCurrentState(BotState.FREE_STATE);
+        userService.initiateRegistration(chat.getId(), usertgId);
     }
 }

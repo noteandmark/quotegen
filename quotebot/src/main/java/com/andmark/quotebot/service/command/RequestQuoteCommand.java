@@ -19,7 +19,7 @@ public class RequestQuoteCommand extends QuoteCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
-        log.debug("execute RequestQuoteCommand");
+        log.debug("user with id = {} execute /requestquote", user.getId());
         // Check if the user has the ADMIN role
         UserRole userRole = apiService.getUserRole(user.getId());
         log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
@@ -27,6 +27,8 @@ public class RequestQuoteCommand extends QuoteCommand {
         // Make a request to the REST API to get the next quote
             log.debug("user with role ADMIN run request quote command");
             apiService.getNextQuote();
+        } else {
+            sendMessage(absSender,chat,"Эта возможность только для админов");
         }
     }
 }

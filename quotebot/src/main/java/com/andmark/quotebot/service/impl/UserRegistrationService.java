@@ -28,27 +28,14 @@ public class UserRegistrationService {
     }
 
     public void initiateRegistration(Long usertgId, Long chatId) {
-        if (usersInProgress.contains(usertgId)) {
+        if (usersInProgress.contains(usertgId) && (botAttributes.getCurrentState() == BotState.AWAITING_USERNAME_INPUT)) {
             log.warn("User registration is already in progress for user: {}", usertgId);
             return;
         }
         // Mark user as in progress
         usersInProgress.add(usertgId);
-        try {
-            // Send a message to the user to enter their username
-            botAttributes.setCurrentState(BotState.AWAITING_USERNAME_INPUT);
-            telegramBot.sendMessage(chatId, null, "Введите имя (логин) пользователя");
-            // Mark user as not in progress after a delay (5 minutes)
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    botAttributes.setCurrentState(BotState.FREE_STATE);
-                    usersInProgress.remove(usertgId);
-                }
-            }, 5 * 60 * 1000);
-        } catch (Exception e) {
-            log.error("Error initiating user registration for user: {}", usertgId, e);
-        }
+        botAttributes.setCurrentState(BotState.AWAITING_USERNAME_INPUT);
+        telegramBot.sendMessage(chatId, null, "Введите имя (логин) пользователя");
     }
 
     public void handleUsernameInput(Long usertgId, Long chatId, String username) {
@@ -85,4 +72,5 @@ public class UserRegistrationService {
         botAttributes.setUsername(null);
         telegramBot.sendMessage(chatId, null, "Вы зарегистрированы. Теперь можете пользоваться командами бота");
     }
+
 }

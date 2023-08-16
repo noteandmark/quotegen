@@ -11,4 +11,10 @@ public interface QuoteService {
     void handleCallbackQuery(Update update);
 
     QuoteDTO publishQuoteToGroup(QuoteDTO pendingQuote);
+
+    void handleUsernameInputResponse(Update update);
+
+    void handlePasswordInputResponse(Update update);
+
+    void sendQuoteSavedTODatabase(QuoteDTO pendingQuote, String s);
 }

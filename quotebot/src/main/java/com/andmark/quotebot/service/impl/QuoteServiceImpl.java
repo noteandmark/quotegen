@@ -1,5 +1,6 @@
 package com.andmark.quotebot.service.impl;
 
+import com.andmark.quotebot.domain.RequestConfiguration;
 import com.andmark.quotebot.domain.enums.QuoteStatus;
 import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.dto.UserDTO;
@@ -83,13 +84,6 @@ public class QuoteServiceImpl implements QuoteService {
                 log.debug("current state is POSTPONE");
                 handlePostponeChoiceResponse(chatId, userInput);
             }
-            // Handle user's response to username input (registration new user)
-            if (botAttributes.getCurrentState().equals(BotState.AWAITING_USERNAME_INPUT)) {
-                handleUsernameInputResponse(update);
-            }
-            if (botAttributes.getCurrentState().equals(BotState.AWAITING_PASSWORD_INPUT)) {
-                handlePasswordInputResponse(update);
-            }
         }
     }
 
@@ -108,7 +102,7 @@ public class QuoteServiceImpl implements QuoteService {
         String action = dataParts[0];
         Long quoteId = Long.valueOf(dataParts[1]);
         log.debug("action = {}  quoteId = {}", action, quoteId);
-
+        log.debug("botAttributes.getCurrentState() = {}", botAttributes.getCurrentState());
         if (botAttributes.getCurrentState().equals(BotState.FREE_STATE)) {
             switch (action) {
                 case "edit" -> editQuote(chatId, quoteId);
@@ -120,19 +114,29 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     public QuoteDTO publishQuoteToGroup(QuoteDTO quoteDTO) {
-//        if (!botAttributes.getConfirmedContent().isEmpty()) {
+        log.debug("quote id = {} service publish to group", quoteDTO.getId());
         if (!quoteDTO.getContent().isEmpty()) {
-            telegramBot.sendMessage(groupChatId, null, botAttributes.getConfirmedContent());
+            telegramBot.sendMessage(groupChatId, null, quoteDTO.getContent());
+            quoteDTO.setStatus(QuoteStatus.PUBLISHED);
         }
-        if (!botAttributes.getConfirmedUrl().isEmpty()) {
-            telegramBot.sendImageToChat(groupChatId, botAttributes.getConfirmedUrl());
-            quoteDTO.setImageUrl(botAttributes.getConfirmedUrl());
+        if (!quoteDTO.getImageUrl().isEmpty()) {
+            telegramBot.sendImageToChat(groupChatId, quoteDTO.getImageUrl());
         }
         return quoteDTO;
     }
 
-    public InlineKeyboardMarkup getEditKeyboardMarkup(Long quoteId) {
-        return quoteKeyboardService.getEditKeyboardMarkup(quoteId);
+    public void sendQuoteSavedTODatabase(QuoteDTO quoteDTO, String message) {
+        log.debug("send the quote to be saved in the database");
+        String confirmUrl = API_BASE_URL + "/quotes/confirm";
+        RequestConfiguration requestConfig = new RequestConfiguration.Builder()
+                .url(confirmUrl)
+                .httpMethod(HttpMethod.POST)
+                .requestBody(quoteDTO)
+                .chatId(adminChatId)
+                .successMessage(message)
+                .keyboard(null)
+                .build();
+        apiService.sendRequestAndHandleResponse(requestConfig);
     }
 
     private void handleImageChoiceResponse(Long chatId, String userInput) {
@@ -163,18 +167,16 @@ public class QuoteServiceImpl implements QuoteService {
 
     private void handlePublishingChoiceResponse(Long chatId, String userInput) {
         log.debug("in handlePublishingChoiceResponse currentState = {}, userInput = {}", botAttributes.getCurrentState(), userInput);
-
         switch (userInput) {
             case "сразу":
                 // publishing a post in a telegram group
-                QuoteDTO quoteDTO = publishQuoteToGroup(new QuoteDTO());
-                // send the quote to be saved in the database
+                QuoteDTO quoteDTO = new QuoteDTO();
                 quoteDTO.setId(botAttributes.getQuoteId());
                 quoteDTO.setContent(botAttributes.getConfirmedContent());
-                quoteDTO.setStatus(QuoteStatus.PUBLISHED);
-                log.debug("send the quote to be saved in the database");
-                String confirmUrl = API_BASE_URL + "/quotes/confirm";
-                apiService.sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "пост опубликован сразу", null);
+                quoteDTO.setImageUrl(botAttributes.getConfirmedUrl());
+                quoteDTO = publishQuoteToGroup(quoteDTO);
+                // send the quote to be saved in the database
+                sendQuoteSavedTODatabase(quoteDTO, "пост опубликован сразу");
                 break;
             case "отложить":
                 log.debug("case 'отложить'");
@@ -219,8 +221,16 @@ public class QuoteServiceImpl implements QuoteService {
         quoteDTO.setImageUrl(botAttributes.getConfirmedUrl());
 
         String confirmUrl = API_BASE_URL + "/quotes/pending";
-        apiService.sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно отложена на " + pendingTime, null);
-
+//        apiService.sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно отложена на " + pendingTime, null);
+        RequestConfiguration requestConfig = new RequestConfiguration.Builder()
+                .url(confirmUrl)
+                .httpMethod(HttpMethod.POST)
+                .requestBody(quoteDTO)
+                .chatId(adminChatId)
+                .successMessage("успешно отложена на " + pendingTime)
+                .keyboard(null)
+                .build();
+        apiService.sendRequestAndHandleResponse(requestConfig);
         clearBotAttributes();
     }
 
@@ -255,7 +265,16 @@ public class QuoteServiceImpl implements QuoteService {
         String rejectUrl = API_BASE_URL + "/quotes/reject?id=" + quoteId;
         log.debug("rejectUrl quote with url = {}", rejectUrl);
 
-        apiService.sendRequestAndHandleResponse(rejectUrl, HttpMethod.DELETE, null, "успешно удалена", null);
+//        apiService.sendRequestAndHandleResponse(rejectUrl, HttpMethod.DELETE, null, "успешно удалена", null);
+        RequestConfiguration requestConfig = new RequestConfiguration.Builder()
+                .url(rejectUrl)
+                .httpMethod(HttpMethod.DELETE)
+                .requestBody(null)
+                .chatId(adminChatId)
+                .successMessage("успешно удалена")
+                .keyboard(null)
+                .build();
+        apiService.sendRequestAndHandleResponse(requestConfig);
     }
 
     private void sendImagesToChoice(Long chatId) {
@@ -289,7 +308,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    private void handleUsernameInputResponse(Update update) {
+    public void handleUsernameInputResponse(Update update) {
         log.debug("QuoteService in handleUsernameInputResponse");
         String username = update.getMessage().getText().trim();
         Long chatId = update.getMessage().getChatId();
@@ -306,7 +325,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    private void handlePasswordInputResponse(Update update) {
+    public void handlePasswordInputResponse(Update update) {
         log.debug("QuoteService in handlePasswordInputResponse");
         String password = update.getMessage().getText().trim();
         Long chatId = update.getMessage().getChatId();
@@ -315,7 +334,7 @@ public class QuoteServiceImpl implements QuoteService {
         // Forward the response to the UserRegistrationService
         UserDTO userDTO = userRegistrationService.handlePasswordInput(usertgId, chatId, password);
         if (userDTO != null) {
-            apiService.registerUser(userDTO);
+            apiService.registerUser(chatId, userDTO);
             // Remove the user from the registration in progress list
             userRegistrationService.completeRegistration(usertgId, chatId);
         } else {

@@ -18,7 +18,6 @@ import java.util.Stack;
 @ToString
 public class BotAttributes {
 
-    private Long chatId;
     private Long quoteId;
     private int lastMessageId;
     //TODO: возможно, стоит хранить всю цитату?

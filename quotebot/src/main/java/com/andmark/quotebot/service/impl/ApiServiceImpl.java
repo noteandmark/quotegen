@@ -1,19 +1,19 @@
 package com.andmark.quotebot.service.impl;
 
 import com.andmark.quotebot.config.BotConfig;
+import com.andmark.quotebot.domain.RequestConfiguration;
 import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.dto.QuoteDTO;
+import com.andmark.quotebot.dto.StatsDTO;
 import com.andmark.quotebot.dto.UserDTO;
+import com.andmark.quotebot.dto.YesNoApiResponse;
 import com.andmark.quotebot.service.ApiService;
 import com.andmark.quotebot.service.Bot;
 import com.andmark.quotebot.service.BotAttributes;
 import com.andmark.quotebot.service.keyboard.QuoteKeyboardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -53,7 +53,6 @@ public class ApiServiceImpl implements ApiService {
         QuoteDTO quoteDTO = response.getBody();
         log.info("get quote with id: {}", quoteDTO.getId());
         telegramBot.sendMessage(adminChatId, quoteKeyboardService.getEditKeyboardMarkup(quoteDTO.getId()), formatQuoteText(quoteDTO));
-
         return quoteDTO;
     }
 
@@ -87,38 +86,37 @@ public class ApiServiceImpl implements ApiService {
         return response.getBody();
     }
 
-
     @Override
-    public void registerUser(UserDTO userDTO) {
+    public void registerUser(Long chatId, UserDTO userDTO) {
         log.debug("api service request: registerUser with username = {}", userDTO.getUsername());
         // Hash the password before sending it to the API
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
         userDTO.setPassword(hashedPassword);
-
         String registerUserUrl = BotConfig.API_BASE_URL + "/users/register";
-        try {
-            ResponseEntity<Void> response = restTemplate.exchange(
-                    registerUserUrl,
-                    HttpMethod.POST,
-                    new HttpEntity<>(userDTO),
-                    Void.class
-            );
-            if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("User registration successful");
-            } else {
-                log.error("Failed to register user. Status code: {}", response.getStatusCode());
-            }
-        } catch (HttpClientErrorException ex) {
-            log.warn("HttpClientErrorException while sending user registration request: {}", ex.getMessage());
-        }
+
+        RequestConfiguration requestConfig = new RequestConfiguration.Builder()
+                .url(registerUserUrl)
+                .httpMethod(HttpMethod.POST)
+                .requestBody(userDTO)
+                .chatId(chatId)
+                .successMessage("Вы получили доступ к боту")
+                .keyboard(null)
+                .build();
+        sendRequestAndHandleResponse(requestConfig);
     }
 
     @Override
-    public void sendRequestAndHandleResponse(String url, HttpMethod httpMethod, Object requestBody, String successMessage, InlineKeyboardMarkup keyboard) {
+    public void sendRequestAndHandleResponse(RequestConfiguration requestConfig) {
         log.debug("api service sendRequestAndHandleResponse");
+        String url = requestConfig.getUrl();
+        HttpMethod httpMethod = requestConfig.getHttpMethod();
+        Object requestBody = requestConfig.getRequestBody();
+        Long chatId = requestConfig.getChatId();
+        String successMessage = requestConfig.getSuccessMessage();
+        InlineKeyboardMarkup keyboard = requestConfig.getKeyboard();
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + botToken);
-
         HttpEntity<?> requestEntity = (requestBody != null) ? new HttpEntity<>(requestBody, headers) : new HttpEntity<>(headers);
         try {
             ResponseEntity<Void> response = restTemplate.exchange(
@@ -130,15 +128,61 @@ public class ApiServiceImpl implements ApiService {
             if (response.getStatusCode().is2xxSuccessful()) {
                 log.info(successMessage);
                 if (keyboard != null) {
-                    telegramBot.removeKeyboard(adminChatId);
+                    telegramBot.removeKeyboard(chatId);
                 }
-                telegramBot.sendMessage(adminChatId, keyboard, successMessage);
+                telegramBot.sendMessage(chatId, keyboard, successMessage);
             } else {
                 log.error("Failed to send request. Status code: {}", response.getStatusCode());
             }
         } catch (HttpClientErrorException ex) {
             log.warn("HttpClientErrorException while sending request: {}", ex.getMessage());
-            telegramBot.sendMessage(adminChatId, null, "HttpClientErrorException");
+            telegramBot.sendMessage(chatId, null, "HttpClientErrorException");
+        }
+    }
+
+    @Override
+    public void deleteUser(Long chatId, Long usertgId) {
+        log.debug("delete user with usertgId = {}", usertgId);
+        String registerUserUrl = BotConfig.API_BASE_URL + "/users/delete/" + usertgId;
+
+        RequestConfiguration requestConfig = new RequestConfiguration.Builder()
+                .url(registerUserUrl)
+                .httpMethod(HttpMethod.DELETE)
+                .requestBody(null)
+                .chatId(chatId)
+                .successMessage("Пользователь id = " + "usertgId" + " удален из базы данных бота")
+                .keyboard(null)
+                .build();
+        sendRequestAndHandleResponse(requestConfig);
+    }
+
+    @Override
+    public String getResponseYesOrNo(String apiUrl) {
+        ResponseEntity<YesNoApiResponse> response = restTemplate.exchange(
+                apiUrl, HttpMethod.GET, null, YesNoApiResponse.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            YesNoApiResponse yesNoApiResponse = response.getBody();
+            if (yesNoApiResponse != null) {
+                return yesNoApiResponse.getImage();
+            }
+        } else {
+            log.error("Error fetching response from API: {}", response.getStatusCode());
+        }
+        return null;
+    }
+
+    @Override
+    public StatsDTO getStats() {
+        log.debug("api service: get stats");
+        String apiUrl = BotConfig.API_BASE_URL + "/stats";
+        try {
+            ResponseEntity<StatsDTO> response = restTemplate.getForEntity(apiUrl, StatsDTO.class);
+            log.debug("getting response in api service getStats");
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("Error while fetching statistics from API: {}", e.getMessage());
+            return null;
         }
     }
 

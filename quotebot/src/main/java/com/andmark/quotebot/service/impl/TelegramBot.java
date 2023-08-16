@@ -51,17 +51,14 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
 
             if (userRole == null) {
                 log.debug("userRole is null");
-                // Check if the user is registered
-                boolean isRegistered = userService.isRegistered(usertgId);
-                if (!isRegistered) {
-                    log.debug("user is not registered");
-                    // Initiate the registration process
-                    userService.initiateRegistration(usertgId, message.getChatId());
-                    return; // Exit processing for unregistered user
+                BotState state = botAttributes.getCurrentState();
+                Boolean checkReg = false;
+                switch (state) {
+                    case AWAITING_USERNAME_INPUT -> quoteService.handleUsernameInputResponse(update);
+                    case AWAITING_PASSWORD_INPUT -> quoteService.handlePasswordInputResponse(update);
+                    default -> checkReg = registrateUser(usertgId, message);
                 }
-                // If user is registered, fetch and cache their role
-                userRole = apiService.getUserRole(usertgId);
-                userRoleCache.put(usertgId, userRole);
+                if (!checkReg) return; // Exit processing for unregistered user
             }
 
             quoteService.handleIncomingMessage(update);
@@ -70,16 +67,36 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         }
     }
 
-    @Scheduled(fixedDelay = 3_600_000) // run every hour
+    private boolean registrateUser(Long usertgId, Message message) {
+        UserRole userRole;
+        // Check if the user is registered
+        boolean isRegistered = userService.isRegistered(usertgId);
+        if (!isRegistered) {
+            log.debug("user is not registered");
+            // Initiate the registration process
+            userService.initiateRegistration(message.getChatId(), usertgId);
+            return false;
+        }
+        // If user is registered, fetch and cache their role
+        userRole = apiService.getUserRole(usertgId);
+        userRoleCache.put(usertgId, userRole);
+        return true;
+    }
+
+    // publishes pending quotes, run every hour (3600000)
+    @Scheduled(fixedDelay = 3_600_000)
     public void checkAndPublishPendingQuotes() {
-        log.debug("Checking for pending quotes...");
+        log.debug("Time: {} .Checking for pending quotes...", new Date());
         List<QuoteDTO> pendingQuotes = apiService.getPendingQuotes();
         if (!pendingQuotes.isEmpty()) {
             log.debug("pendingQuotes size is = {}", pendingQuotes.size());
             for (QuoteDTO pendingQuote : pendingQuotes) {
                 if (pendingQuote.getPendingTime() != null && pendingQuote.getPendingTime().before(new Date())) {
-                    log.debug("publish quote with id = {} to group",pendingQuote.getId());
-                    quoteService.publishQuoteToGroup(pendingQuote);
+                    log.debug("publish quote with id = {} to group", pendingQuote.getId());
+                    pendingQuote = quoteService.publishQuoteToGroup(pendingQuote);
+                    // save in database
+                    quoteService.sendQuoteSavedTODatabase(pendingQuote, "отложенная цитата id = "
+                            + pendingQuote.getId() + " опубликована");
                 }
             }
         }
@@ -144,11 +161,13 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         botAttributes.setCurrentState(BotState.FREE_STATE);
         register(new StartCommand());
         register(new HelpCommand());
-        register(new SignUpCommand(userService));
-        register(new YesNoMagicCommand());
-        register(new QuotesWeekCommand());
-        register(new StatsCommand());
+        register(new SignUpCommand(userService, botAttributes));
+        register(new SignOutCommand(userService));
+        register(new YesNoMagicCommand(apiService));
+        register(new StatsCommand(apiService));
         register(new VersionCommand());
+        register(new QuotesWeekCommand());
+        register(new GetQuoteCommand(apiService));
         register(new RequestQuoteCommand(apiService));
     }
 
@@ -160,6 +179,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
     public String getBotToken() {
         return BotConfig.botToken;
     }
+
 
     public UserRole getUserRole(Long usertgId) {
         return userRoleCache.get(usertgId);

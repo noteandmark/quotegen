@@ -1,12 +1,8 @@
 package com.andmark.quotebot.service.impl;
 
-import com.andmark.quotebot.config.BotConfig;
-import com.andmark.quotebot.domain.enums.UserRole;
-import com.andmark.quotebot.dto.UserDTO;
 import com.andmark.quotebot.service.ApiService;
 import com.andmark.quotebot.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +19,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void initiateRegistration(Long usertgId, Long chatId) {
         userRegistrationService.initiateRegistration(usertgId, chatId);
+    }
+
+    @Override
+    public void deleteUser(Long chatId, Long usertgId) {
+        apiService.deleteUser(chatId, usertgId);
     }
 
     @Override

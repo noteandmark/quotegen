@@ -1,9 +1,11 @@
 package com.andmark.quotebot.service.command;
 
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
+@Slf4j
 public class HelpCommand extends QuoteCommand{
 
     public HelpCommand() {
@@ -12,6 +14,7 @@ public class HelpCommand extends QuoteCommand{
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+        log.debug("user with id = {} execute /help", user.getId());
         StringBuilder message = new StringBuilder();
         message.append("Добро пожаловать! Книголюб приветствует!\n\n");
         message.append("У меня есть такое меню команд:\n");

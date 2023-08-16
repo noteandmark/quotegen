@@ -1,14 +1,12 @@
 package com.andmark.quotebot.service.googleapi;
 
-import com.andmark.quotebot.exception.QuoteException;
+import com.andmark.quotebot.dto.GoogleCustomSearchResponse;
 import com.andmark.quotebot.service.BotAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.Collections;
