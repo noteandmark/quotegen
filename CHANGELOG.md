@@ -8,6 +8,9 @@
 ### Changed
 ### Fixed
 
+## [0.] - 2023-
+### Added
+- 
 ## [0.8.0] - 2023-08-15
 The bot already knows how to pick a random quote, edit it, and post it to the group immediately.
 ### Added
