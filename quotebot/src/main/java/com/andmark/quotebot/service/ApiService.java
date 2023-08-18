@@ -28,4 +28,8 @@ public interface ApiService {
     String getResponseYesOrNo(String apiUrl);
 
     StatsDTO getStats();
+
+    QuoteDTO getRandomPublishedQuote();
+
+    List<QuoteDTO> getWeekPublishedQuotes();
 }

@@ -23,6 +23,7 @@ public class RequestQuoteCommand extends QuoteCommand {
         // Check if the user has the ADMIN role
         UserRole userRole = apiService.getUserRole(user.getId());
         log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
+
         if (userRole == UserRole.ADMIN) {
         // Make a request to the REST API to get the next quote
             log.debug("user with role ADMIN run request quote command");

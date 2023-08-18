@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.andmark.quotebot.config.BotConfig.adminChatId;
@@ -184,6 +185,43 @@ public class ApiServiceImpl implements ApiService {
             log.error("Error while fetching statistics from API: {}", e.getMessage());
             return null;
         }
+    }
+
+    @Override
+    public QuoteDTO getRandomPublishedQuote() {
+        log.debug("api service: getRandomPublishedQuote");
+        String apiUrl = BotConfig.API_BASE_URL + "/quotes/random/published";
+        ResponseEntity<QuoteDTO> response = restTemplate.exchange(
+                apiUrl,
+                HttpMethod.GET,
+                null,
+                QuoteDTO.class
+        );
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return response.getBody();
+        } else {
+            // Handle error or return null if no published quotes were found
+            log.warn("No published quotes found.");
+            return null;
+        }
+    }
+
+    @Override
+    public List<QuoteDTO> getWeekPublishedQuotes() {
+        log.debug("api service: getWeekPublishedQuotes");
+        String apiUrl = BotConfig.API_BASE_URL + "/quotes/week";
+        ResponseEntity<QuoteDTO[]> responseEntity = restTemplate.getForEntity(apiUrl, QuoteDTO[].class);
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            log.debug("getWeekPublishedQuotes HttpStatus.OK");
+            QuoteDTO[] quotesArray = responseEntity.getBody();
+            if (quotesArray != null) {
+                log.debug("return quotesArray");
+                return Arrays.asList(quotesArray);
+            }
+        } else {
+            log.warn("getWeekPublishedQuotes responseEntity.getStatusCode() is not OK");
+        }
+        return Collections.emptyList();
     }
 
     private String formatQuoteText(QuoteDTO quoteDTO) {

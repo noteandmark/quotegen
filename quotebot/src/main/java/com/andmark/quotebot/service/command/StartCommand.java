@@ -15,6 +15,6 @@ public class StartCommand extends QuoteCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
         log.debug("user with id = {} execute /start", user.getId());
-        sendMessage(absSender, chat, "Welcome to the bot! Use /help to see available commands.");
+        sendMessage(absSender, chat, "Добро пожаловать! Меня зовут бот - Книголюб. Используй /help для просмотра всех моих возможностей :)");
     }
 }

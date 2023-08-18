@@ -21,6 +21,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -91,7 +92,10 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         if (!pendingQuotes.isEmpty()) {
             log.debug("pendingQuotes size is = {}", pendingQuotes.size());
             for (QuoteDTO pendingQuote : pendingQuotes) {
-                if (pendingQuote.getPendingTime() != null && pendingQuote.getPendingTime().before(new Date())) {
+                LocalDateTime pendingTime = pendingQuote.getPendingTime();
+                LocalDateTime currentDateTime = LocalDateTime.now();
+
+                if (pendingQuote.getPendingTime() != null && pendingTime.isBefore(currentDateTime)) {
                     log.debug("publish quote with id = {} to group", pendingQuote.getId());
                     pendingQuote = quoteService.publishQuoteToGroup(pendingQuote);
                     // save in database
@@ -166,7 +170,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         register(new YesNoMagicCommand(apiService));
         register(new StatsCommand(apiService));
         register(new VersionCommand());
-        register(new QuotesWeekCommand());
+        register(new QuotesWeekCommand(apiService));
         register(new GetQuoteCommand(apiService));
         register(new RequestQuoteCommand(apiService));
     }

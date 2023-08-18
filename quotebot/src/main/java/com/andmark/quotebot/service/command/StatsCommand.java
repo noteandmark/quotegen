@@ -28,7 +28,7 @@ public class StatsCommand extends QuoteCommand {
                     "Статистика:\n" +
                             "Количество книг в каталоге: %d\n" +
                             "Количество опубликованных Книголюбом цитат за год: %d\n" +
-                            "Количество выбранных и ожидаемых цитат: %d",
+                            "Количество ожидаемых к публикации цитат: %d",
                     stats.getBookCount(), stats.getPublishedQuotesThisYear(), stats.getPendingQuotesCount()
             );
             sendMessage(absSender, chat, statsMessage);

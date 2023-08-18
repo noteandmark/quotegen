@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @RequiredArgsConstructor
@@ -16,9 +17,9 @@ public class QuoteDTO {
     private Long id;
     private String content;
     private QuoteStatus status;
-    private Date pendingTime;
+    private LocalDateTime pendingTime;
     private String imageUrl;
-    private Date usedAt;
+    private LocalDateTime usedAt;
 
     private String bookAuthor;
     private String bookTitle;

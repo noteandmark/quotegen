@@ -22,6 +22,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Stack;
@@ -115,11 +118,11 @@ public class QuoteServiceImpl implements QuoteService {
 
     public QuoteDTO publishQuoteToGroup(QuoteDTO quoteDTO) {
         log.debug("quote id = {} service publish to group", quoteDTO.getId());
-        if (!quoteDTO.getContent().isEmpty()) {
+        if (quoteDTO.getContent() != null && !quoteDTO.getContent().isEmpty()) {
             telegramBot.sendMessage(groupChatId, null, quoteDTO.getContent());
             quoteDTO.setStatus(QuoteStatus.PUBLISHED);
         }
-        if (!quoteDTO.getImageUrl().isEmpty()) {
+        if (quoteDTO.getImageUrl() != null && !quoteDTO.getImageUrl().isEmpty()) {
             telegramBot.sendImageToChat(groupChatId, quoteDTO.getImageUrl());
         }
         return quoteDTO;
@@ -173,7 +176,9 @@ public class QuoteServiceImpl implements QuoteService {
                 QuoteDTO quoteDTO = new QuoteDTO();
                 quoteDTO.setId(botAttributes.getQuoteId());
                 quoteDTO.setContent(botAttributes.getConfirmedContent());
-                quoteDTO.setImageUrl(botAttributes.getConfirmedUrl());
+                if (botAttributes.getConfirmedUrl() != null) {
+                    quoteDTO.setImageUrl(botAttributes.getConfirmedUrl());
+                }
                 quoteDTO = publishQuoteToGroup(quoteDTO);
                 // send the quote to be saved in the database
                 sendQuoteSavedTODatabase(quoteDTO, "пост опубликован сразу");
@@ -194,16 +199,19 @@ public class QuoteServiceImpl implements QuoteService {
 
     private void handlePostponeChoiceResponse(Long chatId, String userInput) {
         if (userInput.equalsIgnoreCase("случайно")) {
-
+            log.debug("quote service: handlePostponeChoiceResponse user input = 'случайно'");
             botAttributes.setCurrentState(BotState.FREE_STATE);
         } else {
             // Parse the input as a date
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
-                Date pendingTime = dateFormat.parse(userInput);
-                // send the quote to be saved in the database
+                LocalDateTime pendingTime = LocalDateTime.parse(userInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 postponePublishing(chatId, pendingTime);
-            } catch (ParseException e) {
+//                LocalDateTime pendingTime = dateFormat.parse(userInput);
+//                Date pendingTime = dateFormat.parse(userInput);
+                // send the quote to be saved in the database
+//                postponePublishing(chatId, pendingTime);
+            } catch (DateTimeParseException e) {
                 // Handle invalid date format error
                 if (!userInput.equals("отложить")) {
                     telegramBot.sendMessage(chatId, null, "Неверный формат. Напиши в формате: [yyyy-MM-dd HH:mm:ss] или: [случайно].");
@@ -212,7 +220,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    private void postponePublishing(Long chatId, Date pendingTime) {
+    private void postponePublishing(Long chatId, LocalDateTime pendingTime) {
         QuoteDTO quoteDTO = new QuoteDTO();
         quoteDTO.setId(botAttributes.getQuoteId());
         quoteDTO.setContent(botAttributes.getConfirmedContent());
