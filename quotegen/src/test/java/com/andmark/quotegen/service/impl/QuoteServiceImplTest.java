@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -188,8 +189,8 @@ public class QuoteServiceImplTest {
     @Test
     public void testSaveQuotesFromCache() {
         // Create some sample quotes to be saved
-        Quote quote1 = new Quote(1L, "Quote 1", QuoteStatus.FREE, new Date(), null, new Date(), new Book());
-        Quote quote2 = new Quote(2L, "Quote 2", QuoteStatus.FREE, new Date(), null, new Date(), new Book());
+        Quote quote1 = new Quote(1L, "Quote 1", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), new Book());
+        Quote quote2 = new Quote(2L, "Quote 2", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), new Book());
 
         // Create a queue with sample quotes
         Queue<Quote> quoteCache = new LinkedList<>();

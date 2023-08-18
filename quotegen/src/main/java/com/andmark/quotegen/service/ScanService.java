@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -178,14 +178,14 @@ public class ScanService {
         Long bookCount = booksRepository.count();
         log.debug("bookCount= " + bookCount);
 
-        Date startDate = Date.from(startOfYear.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Long publishedQuotesThisYear = quotesRepository.countByStatusAndUsedAtAfter(QuoteStatus.PUBLISHED, startDate);
+        LocalDateTime startOfYearDateTime = startOfYear.atStartOfDay();
+        Long publishedQuotesThisYear = quotesRepository.countByStatusAndUsedAtAfter(QuoteStatus.PUBLISHED, startOfYearDateTime);
         log.debug("publishedQuotesThisYear = " + publishedQuotesThisYear);
+
         Long pendingQuotesCount = quotesRepository.countByStatus(QuoteStatus.PENDING);
         log.debug("pendingQuotesCount = " + pendingQuotesCount);
 
         log.info("getting stats: {} , {} , {}", bookCount, publishedQuotesThisYear, pendingQuotesCount);
-
         return new StatsDTO(bookCount, publishedQuotesThisYear, pendingQuotesCount);
     }
 }

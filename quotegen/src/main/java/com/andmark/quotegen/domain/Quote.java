@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -30,7 +30,7 @@ public class Quote {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "pending_time")
-    private Date pendingTime;
+    private LocalDateTime pendingTime;
 
     @Column(name = "imageUrl")
     private String imageUrl;
@@ -38,7 +38,7 @@ public class Quote {
     @Temporal(TemporalType.TIMESTAMP)
 //  (it includes @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss"))
     @Column(name = "usedAt")
-    private Date usedAt;
+    private LocalDateTime usedAt;
 
     @ManyToOne
     // Join with the Book entity using "book_id" column, and it is mandatory (not nullable)

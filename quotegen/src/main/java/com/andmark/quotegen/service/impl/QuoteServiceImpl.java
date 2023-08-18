@@ -18,6 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -122,12 +125,42 @@ public class QuoteServiceImpl implements QuoteService {
         log.info("quote with id = {} saved in database", quote.getId());
     }
 
+    @Override
+    public QuoteDTO getRandomPublishedQuote() {
+        log.debug("quote service getRandomPublishedQuote");
+        List<Quote> publishedQuotes = quotesRepository.findByStatus(QuoteStatus.PUBLISHED);
+
+        if (!publishedQuotes.isEmpty()) {
+            Quote randomQuote = getRandomElement(publishedQuotes);
+            log.debug("return randomQuote with id = {}", randomQuote.getId());
+            return convertToDTO(randomQuote);
+        } else {
+            log.debug("there were no quotes from stasus PUBLISHED in database");
+            return null;
+        }
+    }
+
+    public List<QuoteDTO> getPublishedQuotesForWeek() {
+        log.debug("quote service getPublishedQuotesForWeek");
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfWeek = now.with(DayOfWeek.MONDAY).with(LocalTime.MIN);
+        LocalDateTime endOfWeek = now.with(DayOfWeek.SUNDAY).with(LocalTime.MAX);
+
+        List<Quote> quotes = quotesRepository.findByStatusAndUsedAtBetween(
+                QuoteStatus.PUBLISHED, startOfWeek, endOfWeek);
+        log.debug("quote service: get quotes for week in size: {}", quotes.size());
+
+        return convertToDtoList(quotes);
+    }
+
     @Transactional
     public void confirmQuote(QuoteDTO quoteDTO) {
         log.debug("service confirmQuote");
         Quote quote = quotesRepository.findById(quoteDTO.getId())
                 .orElseThrow(() -> new ServiceException("Quote not found with id: " + quoteDTO.getId()));
-        quote.setUsedAt(new Date());
+        LocalDateTime currentDateTime = LocalDateTime.now(); // Get current date and time
+        quote.setUsedAt(currentDateTime);
         quote.setContent(quoteDTO.getContent());
         quote.setImageUrl(quoteDTO.getImageUrl());
         quote.setStatus(quoteDTO.getStatus());
@@ -274,6 +307,10 @@ public class QuoteServiceImpl implements QuoteService {
 //        return pollQuote;
 //    }
 
+    private <T> T getRandomElement(List<T> list) {
+        int randomIndex = new Random().nextInt(list.size());
+        return list.get(randomIndex);
+    }
 
     private QuoteDTO convertToDTO(Quote quote) {
         return mapper.convertToDTO(quote, QuoteDTO.class);

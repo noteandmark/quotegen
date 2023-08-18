@@ -11,4 +11,8 @@ public interface QuoteService extends AbstractService<QuoteDTO>{
     void populateCache(Integer cacheSize);
     List<QuoteDTO> getPendingQuotes();
     void pendingQuote(QuoteDTO quoteDTO);
+
+    QuoteDTO getRandomPublishedQuote();
+
+    List<QuoteDTO> getPublishedQuotesForWeek();
 }

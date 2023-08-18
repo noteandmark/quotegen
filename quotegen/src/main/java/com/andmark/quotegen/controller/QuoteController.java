@@ -109,4 +109,23 @@ public class QuoteController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/random/published")
+    public ResponseEntity<QuoteDTO> getRandomPublishedQuote() {
+        QuoteDTO randomPublishedQuote = quoteService.getRandomPublishedQuote();
+
+        if (randomPublishedQuote != null) {
+            log.debug("sending randomPublishedQuote with id = {}", randomPublishedQuote.getId());
+            return ResponseEntity.ok(randomPublishedQuote);
+        } else {
+            log.debug("sending noContent because we didn't find any citations in the database");
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+    @GetMapping("/week")
+    public ResponseEntity<List<QuoteDTO>> getPublishedQuotesForWeek() {
+        List<QuoteDTO> quotes = quoteService.getPublishedQuotesForWeek();
+        return ResponseEntity.ok(quotes);
+    }
+
 }

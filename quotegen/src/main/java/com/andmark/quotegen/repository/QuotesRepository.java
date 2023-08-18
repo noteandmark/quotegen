@@ -4,7 +4,7 @@ import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.QuoteStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface QuotesRepository extends JpaRepository<Quote, Long> {
@@ -17,5 +17,7 @@ public interface QuotesRepository extends JpaRepository<Quote, Long> {
 
     Long countByStatus(QuoteStatus quoteStatus);
 
-    Long countByStatusAndUsedAtAfter(QuoteStatus quoteStatus, Date startOfYear);
+    Long countByStatusAndUsedAtAfter(QuoteStatus quoteStatus, LocalDateTime startOfYear);
+
+    List<Quote> findByStatusAndUsedAtBetween(QuoteStatus quoteStatus, LocalDateTime startOfWeek, LocalDateTime endOfWeek);
 }
