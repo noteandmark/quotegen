@@ -17,6 +17,8 @@ public class BotConfig {
     public static String botToken;
     public static Long groupChatId;
     public static Long adminChatId;
+    public static String readmeFile;
+    public static String changelogFile;
 
     @Value("${api.base.url}")
     public void setApiBaseUrl(String API_BASE_URL) {
@@ -41,6 +43,16 @@ public class BotConfig {
     @Value("${telegram.bot.adminchatid}")
     public void setAdminChatId(Long adminChatId) {
         BotConfig.adminChatId = adminChatId;
+    }
+
+    @Value("${readme.file}")
+    public void setReadmeFile(String readmeFile) {
+        BotConfig.readmeFile = readmeFile;
+    }
+
+    @Value("${changelog.file}")
+    public void setChangelogFile(String changelogFile) {
+        BotConfig.changelogFile = changelogFile;
     }
 
     @Bean

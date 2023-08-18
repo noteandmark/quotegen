@@ -3,17 +3,24 @@
 ### Added
 - [QUOTEGEN](http://)
   MAJOR HTTP access.
-- [QUOTEBOT](http://)
-  MINOR Add publishing pending quotes.
+- [QUOTEBOT](http://t.me/rimay_bot)
+  MINOR add random publishing pending quotes.
 ### Changed
 ### Fixed
 
+## [1.0.0] - 2023-08-18
+Release version. The main features are realized
+### Added
+- gettind version info from readme file and changelog file
+- getting a random quote from previously posted
+- getting all published quotes from the week
+### Fixed
+- updated field in quote model from Date to LocalDateTime
 ## [0.9.0] - 2023-08-16
 ### Added
 - implemented gif retrieval on request to the site api, which answers the question with a dynamic image "yes" or "no"
 - added possibility to get statistics on quotes and books
 ### Fixed
-
 - immediate and delayed posting 
 ## [0.8.0] - 2023-08-15
 The bot already knows how to pick a random quote, edit it, and post it to the group immediately.

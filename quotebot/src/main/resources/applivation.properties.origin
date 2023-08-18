@@ -6,6 +6,8 @@ telegram.bot.token=YOUR_BOT_TOKEN_HERE
 telegram.bot.groupid=YOUR_GROUPID_HERE
 telegram.bot.adminchatid=YOUR_ADMINCHATID_HERE
 spring.task.scheduling.pool.size=1
+readme.file=https://example.com/readme.txt
+changelog.file=https://example.com/changelog.md
 
 # Server adress
 api.base.url=http://localhost:8080/api
