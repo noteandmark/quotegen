@@ -3,16 +3,14 @@ package com.andmark.quotebot.service.impl;
 import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.domain.RequestConfiguration;
 import com.andmark.quotebot.domain.enums.UserRole;
-import com.andmark.quotebot.dto.QuoteDTO;
-import com.andmark.quotebot.dto.StatsDTO;
-import com.andmark.quotebot.dto.UserDTO;
-import com.andmark.quotebot.dto.YesNoApiResponse;
+import com.andmark.quotebot.dto.*;
 import com.andmark.quotebot.service.ApiService;
 import com.andmark.quotebot.service.Bot;
 import com.andmark.quotebot.service.BotAttributes;
 import com.andmark.quotebot.service.keyboard.QuoteKeyboardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -50,11 +48,55 @@ public class ApiServiceImpl implements ApiService {
         log.debug("api service request: getting next quote");
         String quoteUrlGetNext = BotConfig.API_BASE_URL + "/quotes/get-next";
         ResponseEntity<QuoteDTO> response = restTemplate.getForEntity(quoteUrlGetNext, QuoteDTO.class);
+        log.debug("response.getStatusCode() = " + response.getStatusCode());
 
         QuoteDTO quoteDTO = response.getBody();
-        log.info("get quote with id: {}", quoteDTO.getId());
-        telegramBot.sendMessage(adminChatId, quoteKeyboardService.getEditKeyboardMarkup(quoteDTO.getId()), formatQuoteText(quoteDTO));
+        if (quoteDTO.getContent() != null && quoteDTO.getContent().equals("No books available. Please scan the catalogue first.")) {
+            log.debug("No books available. Please scan the catalogue first.");
+            String errorMessage = quoteDTO.getContent();
+            telegramBot.sendMessage(adminChatId, null, errorMessage);
+            return null;
+        } else if (response.getStatusCode() == HttpStatus.OK) {
+            log.debug("getNextQuote HttpStatus.OK");
+            log.info("get quote with id: {}", quoteDTO.getId());
+            telegramBot.sendMessage(adminChatId, quoteKeyboardService.getEditKeyboardMarkup(quoteDTO.getId()), formatQuoteText(quoteDTO));
+        } else {
+            // Handle other status codes
+            log.error("Unexpected response status code: {}", response.getStatusCode());
+        }
+
         return quoteDTO;
+
+
+
+//        log.debug("api service request: getting next quote");
+//        String quoteUrlGetNext = BotConfig.API_BASE_URL + "/quotes/get-next";
+//        ResponseEntity<QuoteDTO> response = restTemplate.getForEntity(quoteUrlGetNext, QuoteDTO.class);
+//
+//        try {
+//            log.debug("response.getStatusCode() = " + response.getStatusCode());
+//        } catch (Exception e) {
+//            log.error("Error occurred while getting response status code: {}", e.getMessage());
+//        }
+//
+//        if (response.getStatusCode() == HttpStatus.OK) {
+//            log.debug("getNextQuote HttpStatus.OK");
+//            QuoteDTO quoteDTO = response.getBody();
+//            log.info("get quote with id: {}", quoteDTO.getId());
+//            telegramBot.sendMessage(adminChatId, quoteKeyboardService.getEditKeyboardMarkup(quoteDTO.getId()), formatQuoteText(quoteDTO));
+//            return quoteDTO;
+//        } else if (response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
+//            log.debug("getNextQuote HttpStatus.INTERNAL_SERVER_ERROR");
+//            QuoteDTO errorResponse = response.getBody();
+//            String errorMessage = errorResponse.getContent();
+//            log.error("Error response: {}", errorMessage);
+//            telegramBot.sendMessage(adminChatId, null, errorMessage);
+//            return null;
+//        } else {
+//            // Handle other status codes
+//            log.error("Unexpected response status code: {}", response.getStatusCode());
+//            return null;
+//        }
     }
 
     @Override
@@ -222,6 +264,38 @@ public class ApiServiceImpl implements ApiService {
             log.warn("getWeekPublishedQuotes responseEntity.getStatusCode() is not OK");
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public String getRandomGreeting() {
+        log.debug("api service: getRandomGreeting");
+        String randomGreetingUrl = BotConfig.API_BASE_URL + "/greetings/random";
+        ResponseEntity<String> response = restTemplate.getForEntity(randomGreetingUrl, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            log.debug("return greeting from response");
+            return response.getBody();
+        }
+        return "";
+    }
+
+    @Override
+    public String scanBooks(String directoryPath) {
+        String message;
+        ResponseEntity<List<BookDTO>> response = restTemplate.exchange(
+                BotConfig.API_BASE_URL + "/scan-books?directoryPath=" + directoryPath,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<BookDTO>>() {
+                }
+        );
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            List<BookDTO> scannedBooks = response.getBody();
+            message = "Scanned books size:\n" + scannedBooks.size();
+        } else {
+            message = "Failed to scan books. Please check the directory path and try again.";
+        }
+        return message;
     }
 
     private String formatQuoteText(QuoteDTO quoteDTO) {

@@ -5,6 +5,7 @@ import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.dto.StatsDTO;
 import com.andmark.quotebot.dto.UserDTO;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.List;
 
@@ -32,4 +33,8 @@ public interface ApiService {
     QuoteDTO getRandomPublishedQuote();
 
     List<QuoteDTO> getWeekPublishedQuotes();
+
+    String getRandomGreeting();
+
+    String scanBooks(String directoryPath);
 }

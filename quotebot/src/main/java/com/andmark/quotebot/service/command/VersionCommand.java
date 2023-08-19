@@ -1,9 +1,6 @@
 package com.andmark.quotebot.service.command;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.FileCopyUtils;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
@@ -14,7 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +32,7 @@ public class VersionCommand extends QuoteCommand {
         String changelogContent = loadFileContent(changelogFile);
 
         if (!readmeContent.isEmpty() || !changelogContent.isEmpty()) {
-            List<String> messages = splitContentIntoMessages(readmeContent + "\n\n" + changelogContent);
+            List<String> messages = splitContentIntoMessages(changelogContent + "\n\n" + readmeContent);
 
             if (!messages.isEmpty()) {
                 for (String message : messages) {
@@ -65,21 +61,6 @@ public class VersionCommand extends QuoteCommand {
             log.error("Error loading resource content", e);
             return "";
         }
-
-//        ClassLoader cl = ClassLoader.getSystemClassLoader();
-//        URL[] urls = ((URLClassLoader) cl).getURLs();
-//        for (URL url : urls) {
-//            System.out.println(url.getFile());
-//        }
-
-//        try {
-//            ClassPathResource resource = new ClassPathResource(resourcePath);
-//            byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-//            return new String(bytes, StandardCharsets.UTF_8);
-//        } catch (IOException e) {
-//            log.error("Error loading resource content", e);
-//            return "";
-//        }
     }
 
     // if needed loading from url address
@@ -106,67 +87,42 @@ public class VersionCommand extends QuoteCommand {
     }
 
     private List<String> splitContentIntoMessages(String content) {
+
         int maxMessageLength = 4000;
         List<String> messages = new ArrayList<>();
+        StringBuilder currentMessage = new StringBuilder();
 
-        for (int startIndex = 0; startIndex < content.length(); startIndex += maxMessageLength) {
-            int endIndex = Math.min(startIndex + maxMessageLength, content.length());
-            String messagePart = content.substring(startIndex, endIndex);
-            messages.add(messagePart);
+        String[] lines = content.split("\n");
+        for (String line : lines) {
+            if (currentMessage.length() + line.length() + 2 <= maxMessageLength) { // +2 for line break
+                if (currentMessage.length() > 0) {
+                    currentMessage.append("\n");
+                }
+                currentMessage.append(line);
+            } else {
+                messages.add(currentMessage.toString());
+                currentMessage.setLength(0);
+                currentMessage.append(line);
+            }
         }
 
+        if (currentMessage.length() > 0) {
+            messages.add(currentMessage.toString());
+        }
+
+        return messages;
 
 
 
 //        int maxMessageLength = 4000;
 //        List<String> messages = new ArrayList<>();
-//        StringBuilder currentMessage = new StringBuilder();
-//        String[] lines = content.split("\\r?\\n");
 //
-//        for (String line : lines) {
-//            if (currentMessage.length() + line.length() + 1 <= maxMessageLength) {
-//                // Adding a line to the current message won't exceed the limit
-//                if (currentMessage.length() > 0) {
-//                    currentMessage.append("\n");
-//                }
-//                currentMessage.append(line);
-//            } else {
-//                // Start a new message and add the line
-//                messages.add(currentMessage.toString());
-//                currentMessage = new StringBuilder(line);
-//            }
+//        for (int startIndex = 0; startIndex < content.length(); startIndex += maxMessageLength) {
+//            int endIndex = Math.min(startIndex + maxMessageLength, content.length());
+//            String messagePart = content.substring(startIndex, endIndex);
+//            messages.add(messagePart);
 //        }
 //
-//        // Add the last message
-//        if (currentMessage.length() > 0) {
-//            messages.add(currentMessage.toString());
-//        }
-
-
-
-        //working code
-        // int maxMessageLength = 4000;
-        //        List<String> messages = new ArrayList<>();
-//        StringBuilder currentMessage = new StringBuilder();
-//        String[] lines = content.split("\\r?\\n");
-//        for (String line : lines) {
-//            if (currentMessage.length() + line.length() + 1 <= maxMessageLength) {
-//                // Adding a line to the current message won't exceed the limit
-//                if (currentMessage.length() > 0) {
-//                    currentMessage.append("\n");
-//                }
-//                currentMessage.append(line);
-//            } else {
-//                // Start a new message and add the line
-//                messages.add(currentMessage.toString());
-//                currentMessage = new StringBuilder(line);
-//            }
-//        }
-//        // Add the last message
-//        if (currentMessage.length() > 0) {
-//            messages.add(currentMessage.toString());
-//        }
-
-        return messages;
+//        return messages;
     }
 }

@@ -20,7 +20,6 @@ public class BotAttributes {
 
     private Long quoteId;
     private int lastMessageId;
-    //TODO: возможно, стоит хранить всю цитату?
     private List<String> imageUrls;
     private String lastCallbackMessage;
     private String confirmedContent;

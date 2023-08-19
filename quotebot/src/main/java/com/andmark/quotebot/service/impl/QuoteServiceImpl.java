@@ -20,13 +20,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Stack;
 
 import static com.andmark.quotebot.config.BotConfig.*;
@@ -119,12 +116,21 @@ public class QuoteServiceImpl implements QuoteService {
     public QuoteDTO publishQuoteToGroup(QuoteDTO quoteDTO) {
         log.debug("quote id = {} service publish to group", quoteDTO.getId());
         if (quoteDTO.getContent() != null && !quoteDTO.getContent().isEmpty()) {
+            String randomGreeting = apiService.getRandomGreeting();
+            String signature = "\nВаш бот Книголюб, " + botUsername;
+            if (!randomGreeting.isEmpty()) {
+                log.debug("sending greeting to user");
+                telegramBot.sendMessage(groupChatId, null, randomGreeting + signature);
+            }
+            log.debug("sending message with content quote id = {} to group chat", quoteDTO.getId());
             telegramBot.sendMessage(groupChatId, null, quoteDTO.getContent());
             quoteDTO.setStatus(QuoteStatus.PUBLISHED);
         }
         if (quoteDTO.getImageUrl() != null && !quoteDTO.getImageUrl().isEmpty()) {
+            log.debug("sending message with image quote id = {} to group chat", quoteDTO.getId());
             telegramBot.sendImageToChat(groupChatId, quoteDTO.getImageUrl());
         }
+        botAttributes.setCurrentState(BotState.FREE_STATE);
         return quoteDTO;
     }
 
@@ -151,6 +157,9 @@ public class QuoteServiceImpl implements QuoteService {
                 chosenImageUrl = botAttributes.getImageUrls().get(Integer.parseInt(userInput) - 1);
                 botAttributes.setConfirmedUrl(chosenImageUrl);
                 log.debug("userInput = {}, chosenImageUrl = {}", userInput, chosenImageUrl);
+            } else {
+                log.debug("no chosenImageUrl, set null");
+                botAttributes.setConfirmedUrl(null);
             }
         } else {
             log.warn("NumberFormatException in NumberFormatException with choice = {}", userInput);
@@ -203,14 +212,10 @@ public class QuoteServiceImpl implements QuoteService {
             botAttributes.setCurrentState(BotState.FREE_STATE);
         } else {
             // Parse the input as a date
-//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 LocalDateTime pendingTime = LocalDateTime.parse(userInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                postponePublishing(chatId, pendingTime);
-//                LocalDateTime pendingTime = dateFormat.parse(userInput);
-//                Date pendingTime = dateFormat.parse(userInput);
                 // send the quote to be saved in the database
-//                postponePublishing(chatId, pendingTime);
+                postponePublishing(chatId, pendingTime);
             } catch (DateTimeParseException e) {
                 // Handle invalid date format error
                 if (!userInput.equals("отложить")) {

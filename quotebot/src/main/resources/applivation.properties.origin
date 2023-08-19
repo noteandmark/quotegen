@@ -1,17 +1,10 @@
-server.port = 8081
 
-# Telegram Bot Configuration
-telegram.bot.username=YOUR_BOT_USERNAME_HERE
-telegram.bot.token=YOUR_BOT_TOKEN_HERE
-telegram.bot.groupid=YOUR_GROUPID_HERE
-telegram.bot.adminchatid=YOUR_ADMINCHATID_HERE
-spring.task.scheduling.pool.size=1
-readme.file=https://example.com/readme.txt
-changelog.file=https://example.com/changelog.md
+spring.profiles.active=dev
 
-# Server adress
-api.base.url=http://localhost:8080/api
+# version docs
+readme.file=static/version_info/readme.txt
+changelog.file=static/version_info/CHANGELOG.md
 
 # Google API Search
-google.api.key = YOUR_API_KEY_HERE
-google.search.engine.id = YOUR_SEARCH_ENGINE_ID_HERE
+google.api.key=YOUR_API_KEY
+google.search.engine.id=YOUR_ENGINE

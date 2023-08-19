@@ -1,18 +1,14 @@
 package com.andmark.quotebot.dto;
 
 import com.andmark.quotebot.domain.enums.QuoteStatus;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@RequiredArgsConstructor
-@Getter
-@Setter
-@ToString
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class QuoteDTO {
     private Long id;
     private String content;
@@ -23,4 +19,9 @@ public class QuoteDTO {
 
     private String bookAuthor;
     private String bookTitle;
+
+    // Static factory method to create QuoteDTO instance with error message
+    public static QuoteDTO createErrorMessage(String errorMessage) {
+        return new QuoteDTO(null, errorMessage, null, null, null, null, null, null);
+    }
 }

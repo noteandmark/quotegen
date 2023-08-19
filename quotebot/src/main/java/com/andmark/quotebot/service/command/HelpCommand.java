@@ -21,10 +21,12 @@ public class HelpCommand extends QuoteCommand{
         message.append("/start - запустить бот\n");
         message.append("/help - отобразить справочную информацию\n");
         message.append("/signup - зарегистрироваться\n");
-        message.append("/da_net - да или нет\n");
-        message.append("/quotes_for_week - цитаты за неделю\n");
+        message.append("/signout - сброс логина, пароля\n");
+        message.append("/da_net - задай вопрос, узнай ответ: да или нет\n");
         message.append("/stats - разная статистика\n");
         message.append("/version - версия и список новшеств\n");
+        message.append("/quotes_for_week - все цитаты за неделю (user)\n");
+        message.append("/getquote - получить цитату из опубликованных (user)\n");
         message.append("/requestquote - сгенерировать цитату (админ)\n");
 
         sendMessage(absSender, chat, message.toString());
