@@ -35,7 +35,7 @@ public class Book {
     private String filePath;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "DEFAULT 'ACTIVE'")
+    @Column(name = "bookstatus", nullable = false, columnDefinition = "DEFAULT 'ACTIVE'")
     private BookStatus bookStatus;
 
     // "book" refers to the field name in the Quote (or Paragraph) entity that maps back to this Book entity

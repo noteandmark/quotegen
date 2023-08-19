@@ -1,0 +1,8 @@
+
+server.port=8090
+
+# Configuration Data Source
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://localhost:5432/booklibrary-test
+spring.datasource.username=YOUR_DB_USERNAME
+spring.datasource.password=YOUR_DB_PASSWORD

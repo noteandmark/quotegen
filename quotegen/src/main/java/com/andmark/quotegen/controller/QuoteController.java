@@ -1,9 +1,11 @@
 package com.andmark.quotegen.controller;
 
 import com.andmark.quotegen.dto.QuoteDTO;
+import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.service.QuoteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,10 +58,19 @@ public class QuoteController {
     @GetMapping("/get-next")
     public ResponseEntity<QuoteDTO> getNextQuote() {
         log.debug("controller getNextQuote");
-        quoteService.checkAndPopulateCache();
-        QuoteDTO quoteDTO = quoteService.provideQuoteToClient();
-        log.info("response with quote = {}", quoteDTO);
-        return ResponseEntity.ok(quoteDTO);
+        try {
+            quoteService.checkAndPopulateCache();
+            QuoteDTO quoteDTO = quoteService.provideQuoteToClient();
+            log.info("response with quote = {}", quoteDTO);
+            return ResponseEntity.ok(quoteDTO);
+        } catch (NotFoundBookException e) {
+            // Handle the case when there are no books
+            String errorMessage = "No books available. Please scan the catalogue first.";
+            log.error(errorMessage);
+            QuoteDTO errorResponse = QuoteDTO.createErrorMessage(errorMessage);
+            log.debug("errorResponse.toString() = {}", errorResponse);
+            return ResponseEntity.ok(errorResponse);
+        }
     }
 
     @GetMapping("/get-pending")

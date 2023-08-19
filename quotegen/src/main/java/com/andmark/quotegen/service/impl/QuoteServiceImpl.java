@@ -5,6 +5,7 @@ import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.dto.QuoteDTO;
+import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.repository.QuotesRepository;
@@ -175,7 +176,17 @@ public class QuoteServiceImpl implements QuoteService {
         int size = (cacheSize != null && cacheSize > 0) ? cacheSize : this.cacheSize;
         log.debug("Populating cache with quotes (cacheSize = {})", size);
         //get list of books from DB
+        Long bookCount = booksRepository.count();
+        log.debug("bookCount = {}", bookCount);
+        if (bookCount == 0) {
+            log.warn("No books! Scan the catalogue first.");
+            throw new NotFoundBookException("No books! Scan the catalogue first.");
+        }
         List<Book> allBooks = getAllActiveBooks();
+//        if (allBooks == null || allBooks.isEmpty()) {
+//            log.warn("No books! Scan the catalogue first.");
+//            throw new NotFoundBookException("No books! Scan the catalogue first.");
+//        }
         //get map of books with the number of identical
         Map<Book, Integer> parsedBooks = selectBooksRandomly(allBooks, size);
 
@@ -188,6 +199,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     public List<Book> getAllActiveBooks() {
+        log.debug("quote service: getAllActiveBooks from repository");
         List<Book> allBooks = booksRepository.findByBookStatus(BookStatus.ACTIVE);
         log.debug("Active books: {}", allBooks);
         if (allBooks.isEmpty()) {
