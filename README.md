@@ -39,7 +39,7 @@ choose from 10 (optional) suggested images.*
 - search for images for text using Google Custom Search engine API
 - menu commands: help, signup, signout, da_net, stats, version, quotes_for_week, getquote, requestquote
 - get a random yes-no answer to your question in the form of a gif image after accessing the site's API
-
+- random bot greetings before sending a quote, added 356 variants
 ---
 RU:
 

@@ -8,6 +8,12 @@
 ### Changed
 ### Fixed
 
+## [1.1.0] - 2023-08-19
+### Added
+- add 356 greetings for bot before sending quote
+- spring profiles for development and production
+### Fixed
+- error when generating a citation if the book catalogue is not scanned
 ## [1.0.0] - 2023-08-18
 Release version. The main features are realized
 ### Added
