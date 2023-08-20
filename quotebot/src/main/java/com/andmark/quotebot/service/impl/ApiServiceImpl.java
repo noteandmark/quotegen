@@ -64,39 +64,7 @@ public class ApiServiceImpl implements ApiService {
             // Handle other status codes
             log.error("Unexpected response status code: {}", response.getStatusCode());
         }
-
         return quoteDTO;
-
-
-
-//        log.debug("api service request: getting next quote");
-//        String quoteUrlGetNext = BotConfig.API_BASE_URL + "/quotes/get-next";
-//        ResponseEntity<QuoteDTO> response = restTemplate.getForEntity(quoteUrlGetNext, QuoteDTO.class);
-//
-//        try {
-//            log.debug("response.getStatusCode() = " + response.getStatusCode());
-//        } catch (Exception e) {
-//            log.error("Error occurred while getting response status code: {}", e.getMessage());
-//        }
-//
-//        if (response.getStatusCode() == HttpStatus.OK) {
-//            log.debug("getNextQuote HttpStatus.OK");
-//            QuoteDTO quoteDTO = response.getBody();
-//            log.info("get quote with id: {}", quoteDTO.getId());
-//            telegramBot.sendMessage(adminChatId, quoteKeyboardService.getEditKeyboardMarkup(quoteDTO.getId()), formatQuoteText(quoteDTO));
-//            return quoteDTO;
-//        } else if (response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
-//            log.debug("getNextQuote HttpStatus.INTERNAL_SERVER_ERROR");
-//            QuoteDTO errorResponse = response.getBody();
-//            String errorMessage = errorResponse.getContent();
-//            log.error("Error response: {}", errorMessage);
-//            telegramBot.sendMessage(adminChatId, null, errorMessage);
-//            return null;
-//        } else {
-//            // Handle other status codes
-//            log.error("Unexpected response status code: {}", response.getStatusCode());
-//            return null;
-//        }
     }
 
     @Override
@@ -288,7 +256,6 @@ public class ApiServiceImpl implements ApiService {
                 new ParameterizedTypeReference<List<BookDTO>>() {
                 }
         );
-
         if (response.getStatusCode() == HttpStatus.OK) {
             List<BookDTO> scannedBooks = response.getBody();
             message = "Scanned books size:\n" + scannedBooks.size();
@@ -296,6 +263,37 @@ public class ApiServiceImpl implements ApiService {
             message = "Failed to scan books. Please check the directory path and try again.";
         }
         return message;
+    }
+
+    @Override
+    public ScheduledActionStatusDTO getScheduledActionStatus() {
+        log.debug("api service: getScheduledActionStatus");
+        String scheduledActionStatusUrl = BotConfig.API_BASE_URL + "/scheduled/random";
+        ResponseEntity<ScheduledActionStatusDTO> response = restTemplate.getForEntity(scheduledActionStatusUrl, ScheduledActionStatusDTO.class);
+        log.debug("getting response");
+        if (response.getStatusCode() == HttpStatus.OK) {
+            log.debug("return schedulled action status from response");
+            return response.getBody();
+        } else {
+            log.warn("response getStatusCode is not OK");
+        }
+        log.debug("return schedulled action status = null");
+        return null;
+    }
+
+    @Override
+    public void updateScheduledActionStatus(ScheduledActionStatusDTO scheduledActionStatusDTO) {
+        log.debug("api service: updateScheduledActionStatus time: {}", scheduledActionStatusDTO.getLastExecuted());
+        String scheduledActionStatusUrl = BotConfig.API_BASE_URL + "/scheduled/update";
+        RequestConfiguration requestConfig = new RequestConfiguration.Builder()
+                .url(scheduledActionStatusUrl)
+                .httpMethod(HttpMethod.POST)
+                .requestBody(scheduledActionStatusDTO)
+                .chatId(adminChatId)
+                .successMessage("Ежедневная цитата доставлена")
+                .keyboard(null)
+                .build();
+        sendRequestAndHandleResponse(requestConfig);
     }
 
     private String formatQuoteText(QuoteDTO quoteDTO) {

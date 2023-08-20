@@ -8,6 +8,9 @@
 ### Changed
 ### Fixed
 
+## [1.2.0] - 2023-08-20
+### Added
+- added possibility to send a bot a quote once a day to admin chat
 ## [1.1.0] - 2023-08-19
 ### Added
 - add 356 greetings for bot before sending quote
