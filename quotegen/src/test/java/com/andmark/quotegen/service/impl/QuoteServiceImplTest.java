@@ -5,6 +5,7 @@ import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.BookFormat;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.domain.enums.QuoteStatus;
+import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.repository.QuotesRepository;
@@ -69,6 +70,7 @@ public class QuoteServiceImplTest {
         when(bookFormatParserFactory.createParser(BookFormat.PDF)).thenReturn(bookFormatParser);
         when(bookFormatParser.parse(any())).thenReturn("PDF Book Content");
         when(booksRepository.findByBookStatus(BookStatus.ACTIVE)).thenReturn(allBooks);
+        when(booksRepository.count()).thenReturn((long) cacheSize);
         quoteService.populateCache(cacheSize);
 
         verify(booksRepository, times(1)).findByBookStatus(BookStatus.ACTIVE);
@@ -138,9 +140,8 @@ public class QuoteServiceImplTest {
 
     @Test
     public void whenNoActiveBooks_thenShouldThrowException() {
-        when(booksRepository.findByBookStatus(BookStatus.ACTIVE)).thenReturn(new ArrayList<>());
-
-        assertThrows(ServiceException.class, () -> quoteService.populateCache(cacheSize));
+//        when(booksRepository.findByBookStatus(BookStatus.ACTIVE)).thenReturn(new ArrayList<>());
+        assertThrows(NotFoundBookException.class, () -> quoteService.populateCache(cacheSize));
     }
 
     @Test
@@ -148,9 +149,11 @@ public class QuoteServiceImplTest {
         quoteService.setCacheSize(0);
 
         try {
+            when(booksRepository.count()).thenReturn(1L);
             quoteService.populateCache(cacheSize);
         } catch (ServiceException ex) {
             // Handle the exception, e.g., log it or perform assertions
+            when(booksRepository.count()).thenReturn(1L);
             assertThrows(ServiceException.class, () -> quoteService.populateCache(cacheSize));
         }
 
@@ -179,7 +182,7 @@ public class QuoteServiceImplTest {
         when(pdfBookFormatParser.parse(any())).thenReturn("PDF Book Content");
         // Set up parser interactions for docBookFormatParser
         when(docBookFormatParser.parse(any())).thenReturn("DOC Book Content");
-
+        when(booksRepository.count()).thenReturn(2L);
         quoteService.populateCache(cacheSize);
 
         verify(pdfBookFormatParser).parse(eq(pdfBook));
