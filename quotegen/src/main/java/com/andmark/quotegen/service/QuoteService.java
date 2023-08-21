@@ -1,5 +1,6 @@
 package com.andmark.quotegen.service;
 
+import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.dto.QuoteDTO;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface QuoteService extends AbstractService<QuoteDTO>{
     QuoteDTO getRandomPublishedQuote();
 
     List<QuoteDTO> getPublishedQuotesForWeek();
+
+    String getBookText(Book book);
 }

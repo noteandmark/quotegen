@@ -12,5 +12,13 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.show_sql=true
 spring.jpa.properties.hibernate.check_nullability=true
 
-# Set the quote's cache size
+# Set the quote's generation cache size
 quote.cache.size=30
+
+# settings for divination by books
+# number of lines on a book page
+quote.countLinesAtPage=43
+# number of characters in a line
+quote.maxCharactersInline=65
+# number of returned strings
+quote.numberNextLines=7

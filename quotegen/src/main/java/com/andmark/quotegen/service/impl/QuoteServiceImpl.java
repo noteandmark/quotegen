@@ -183,6 +183,7 @@ public class QuoteServiceImpl implements QuoteService {
             throw new NotFoundBookException("No books! Scan the catalogue first.");
         }
         List<Book> allBooks = getAllActiveBooks();
+        //TODO: refactoring
 //        if (allBooks == null || allBooks.isEmpty()) {
 //            log.warn("No books! Scan the catalogue first.");
 //            throw new NotFoundBookException("No books! Scan the catalogue first.");
@@ -225,17 +226,6 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    public String getBookText(Book book) {
-        // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
-        BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
-        String bookText = parser.parse(book);
-        if (bookText == null) {
-            log.error("Text from book {} is null!", book);
-            throw new ServiceException("Text from book is null!");
-        }
-        return bookText;
-    }
-
     @Transactional
     public void saveQuotesFromCache(Queue<Quote> quoteCache) {
         List<Quote> quotesToSave = getQuotes(quoteCache);
@@ -247,6 +237,46 @@ public class QuoteServiceImpl implements QuoteService {
         } else {
             log.error("nothing to save, something wrong");
         }
+    }
+
+    @Override
+    public String getBookText(Book book) {
+        log.debug("quoteService: getting text from book with id = {}, format = {}", book.getId(), book.getFormat());
+        // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
+//        BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
+//        String bookText = parser.parse(book);
+//        if (bookText == null) {
+//            log.error("Text from book {} is null!", book);
+//            throw new ServiceException("Text from book is null!");
+//        }
+
+        // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
+        BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
+        String rawBookText = parser.parse(book); // Get the raw text from the parser
+        if (rawBookText == null) {
+            log.error("Text from book {} is null!", book);
+            throw new ServiceException("Text from book is null!");
+        }
+        log.debug("rawBookText length = {}", rawBookText.length());
+        // Fix formatting by adding spaces after punctuation marks if there is none
+        String bookText = fixFormatting(rawBookText);
+        return bookText;
+    }
+
+    private String fixFormatting(String rawText) {
+        log.debug("fixing formatting text");
+        // Define a set of punctuation marks that need a space after them
+        String[] punctuationMarks = {".", ",", "!", "?", ":", ";", "—"};
+
+        // Iterate through the punctuation marks and add a space after each if needed
+        for (String mark : punctuationMarks) {
+            rawText = rawText.replace(mark, mark + " ");
+        }
+
+        // Remove any excessive spaces
+        rawText = rawText.replaceAll("\\s+", " ");
+        log.debug("return fixing text");
+        return rawText.trim(); // Trim leading and trailing spaces
     }
 
     private Map<Book, Integer> selectBooksRandomly(List<Book> allBooks, int size) {
