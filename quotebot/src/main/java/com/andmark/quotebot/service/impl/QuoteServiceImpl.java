@@ -2,12 +2,15 @@ package com.andmark.quotebot.service.impl;
 
 import com.andmark.quotebot.domain.RequestConfiguration;
 import com.andmark.quotebot.domain.enums.QuoteStatus;
+import com.andmark.quotebot.dto.ExtractedLinesDTO;
 import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.dto.UserDTO;
+import com.andmark.quotebot.exception.QuoteException;
 import com.andmark.quotebot.service.*;
 import com.andmark.quotebot.service.enums.BotState;
 import com.andmark.quotebot.service.googleapi.GoogleCustomSearchService;
 import com.andmark.quotebot.service.keyboard.QuoteKeyboardService;
+import com.andmark.quotebot.util.BotAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
@@ -24,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import static com.andmark.quotebot.config.BotConfig.*;
@@ -61,29 +65,50 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("handleIncomingMessage in chatId: {}, messageId: {}", message.getChatId(), message.getMessageId());
         String userInput = message.getText().trim();
         Long chatId = message.getChatId();
+        Long userId = message.getFrom().getId();
+        log.debug("userInput = {}, botState = {}", userInput, BotAttributes.getUserCurrentBotState(userId));
 
-        log.debug("text = {}", userInput);
         if (userInput.equals("сброс")) {
-            clearBotAttributes();
+            clearBotAttributes(userId);
             telegramBot.sendMessage(chatId, null, "Состояние сброшено");
         }
-        if (userInput.startsWith("q:")) {
+        if (userId == adminChatId && userInput.startsWith("q:")) {
             quoteText.push(userInput.substring(2));
             log.debug("quoteText offer text = {}", userInput);
         } else {
-            // selects a picture for the accepted quote
-            if (botAttributes.getCurrentState().equals(BotState.AWAITING_IMAGE_CHOICE)) {
-                log.debug("current state is AWAITING_IMAGE_CHOICE");
-                handleImageChoiceResponse(chatId, userInput);
+            BotState currentState = BotAttributes.getUserCurrentBotState(userId);
+
+            switch (currentState) {
+                case AWAITING_IMAGE_CHOICE -> handleImageChoiceResponse(chatId, userInput);
+                case AWAITING_PUBLISHING -> handlePublishingChoiceResponse(chatId, userInput);
+                case POSTPONE -> handlePostponeChoiceResponse(chatId, userInput);
+                case AWAITING_PAGE_NUMBER -> handlePageNumberInput(userId, userInput);
+                case AWAITING_LINE_NUMBER -> handleLineNumberInput(userId, userInput);
+                default -> log.warn("state encountered: {}", currentState);
             }
-            if (botAttributes.getCurrentState().equals(BotState.AWAITING_PUBLISHING)) {
-                log.debug("current state is AWAITING_PUBLISHING");
-                handlePublishingChoiceResponse(chatId, userInput);
-            }
-            if (botAttributes.getCurrentState().equals(BotState.POSTPONE)) {
-                log.debug("current state is POSTPONE");
-                handlePostponeChoiceResponse(chatId, userInput);
-            }
+
+//            // selects a picture for the accepted quote
+//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.AWAITING_IMAGE_CHOICE)) {
+//                log.debug("current state is AWAITING_IMAGE_CHOICE");
+//                handleImageChoiceResponse(chatId, userInput);
+//            }
+//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.AWAITING_PUBLISHING)) {
+//                log.debug("current state is AWAITING_PUBLISHING");
+//                handlePublishingChoiceResponse(chatId, userInput);
+//            }
+//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.POSTPONE)) {
+//                log.debug("current state is POSTPONE");
+//                handlePostponeChoiceResponse(chatId, userInput);
+//            }
+//            // divination command
+//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.AWAITING_PAGE_NUMBER)) {
+//                log.debug("current state is AWAITING_PAGE_NUMBER");
+//                handlePageNumberInput(userId, userInput);
+//            }
+//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.AWAITING_LINE_NUMBER)) {
+//                log.debug("current state is AWAITING_LINE_NUMBER");
+//                handleLineNumberInput(userId, userInput);
+//            }
         }
     }
 
@@ -96,14 +121,15 @@ public class QuoteServiceImpl implements QuoteService {
         botAttributes.setLastCallbackMessage(callbackQuery.getMessage().getText());
         log.debug("handleCallbackQuery push in lastCallbackMessage: {}", botAttributes.getLastCallbackMessage());
         Long chatId = callbackQuery.getMessage().getChatId();
+        Long userId = callbackQuery.getFrom().getId();
         log.debug("chatID = {}", chatId);
 
         String[] dataParts = callbackQuery.getData().split("-");
         String action = dataParts[0];
         Long quoteId = Long.valueOf(dataParts[1]);
         log.debug("action = {}  quoteId = {}", action, quoteId);
-        log.debug("botAttributes.getCurrentState() = {}", botAttributes.getCurrentState());
-        if (botAttributes.getCurrentState().equals(BotState.FREE_STATE)) {
+        log.debug("botAttributes.getCurrentState() = {}", BotAttributes.getUserCurrentBotState(userId));
+        if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.START)) {
             switch (action) {
                 case "edit" -> editQuote(chatId, quoteId);
                 case "confirm" -> confirmQuote(chatId, quoteId);
@@ -130,7 +156,7 @@ public class QuoteServiceImpl implements QuoteService {
             log.debug("sending message with image quote id = {} to group chat", quoteDTO.getId());
             telegramBot.sendImageToChat(groupChatId, quoteDTO.getImageUrl());
         }
-        botAttributes.setCurrentState(BotState.FREE_STATE);
+        BotAttributes.setUserCurrentBotState(adminChatId, BotState.START);
         return quoteDTO;
     }
 
@@ -149,7 +175,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private void handleImageChoiceResponse(Long chatId, String userInput) {
-        log.debug("handleImageChoiceResponse");
+        log.debug("current state is AWAITING_IMAGE_CHOICE");
         String chosenImageUrl = null;
 
         if (isValidImageChoice(userInput, botAttributes.getImageUrls().size())) {
@@ -172,13 +198,13 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("in postingQuote with lastCallbackMessage: {}, chosenImageUrl: {}",
                 botAttributes.getLastCallbackMessage(), botAttributes.getConfirmedUrl());
         // choose whether to publish the quote immediately or postpone it
-        log.debug("in postingQuote currentState = " + botAttributes.getCurrentState());
+        log.debug("in postingQuote currentState = " + BotAttributes.getUserCurrentBotState(adminChatId));
         telegramBot.sendMessage(chatId, null, "Публиковать [сразу] или [отложить]?");
-        botAttributes.setCurrentState(BotState.AWAITING_PUBLISHING);
+        BotAttributes.setUserCurrentBotState(adminChatId, BotState.AWAITING_PUBLISHING);
     }
 
     private void handlePublishingChoiceResponse(Long chatId, String userInput) {
-        log.debug("in handlePublishingChoiceResponse currentState = {}, userInput = {}", botAttributes.getCurrentState(), userInput);
+        log.debug("current state is AWAITING_PUBLISHING, userInput = {}", userInput);
         switch (userInput) {
             case "сразу":
                 // publishing a post in a telegram group
@@ -195,7 +221,7 @@ public class QuoteServiceImpl implements QuoteService {
             case "отложить":
                 log.debug("case 'отложить'");
                 telegramBot.sendMessage(chatId, null, "Напиши дату публикации в виде: [yyyy-MM-dd HH:mm:ss] или напиши [случайно]");
-                botAttributes.setCurrentState(BotState.POSTPONE);
+                BotAttributes.setUserCurrentBotState(adminChatId, BotState.POSTPONE);
                 break;
             default:
                 log.debug("case default, userInput in handlePublishingChoiceResponse = {}", userInput);
@@ -207,9 +233,10 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private void handlePostponeChoiceResponse(Long chatId, String userInput) {
+        log.debug("current state is POSTPONE");
         if (userInput.equalsIgnoreCase("случайно")) {
             log.debug("quote service: handlePostponeChoiceResponse user input = 'случайно'");
-            botAttributes.setCurrentState(BotState.FREE_STATE);
+            BotAttributes.setUserCurrentBotState(adminChatId, BotState.START);
         } else {
             // Parse the input as a date
             try {
@@ -244,7 +271,7 @@ public class QuoteServiceImpl implements QuoteService {
                 .keyboard(null)
                 .build();
         apiService.sendRequestAndHandleResponse(requestConfig);
-        clearBotAttributes();
+        clearBotAttributes(adminChatId);
     }
 
     private void editQuote(Long chatId, Long quoteId) {
@@ -278,7 +305,6 @@ public class QuoteServiceImpl implements QuoteService {
         String rejectUrl = API_BASE_URL + "/quotes/reject?id=" + quoteId;
         log.debug("rejectUrl quote with url = {}", rejectUrl);
 
-//        apiService.sendRequestAndHandleResponse(rejectUrl, HttpMethod.DELETE, null, "успешно удалена", null);
         RequestConfiguration requestConfig = new RequestConfiguration.Builder()
                 .url(rejectUrl)
                 .httpMethod(HttpMethod.DELETE)
@@ -303,7 +329,7 @@ public class QuoteServiceImpl implements QuoteService {
         // ask for image choice
         telegramBot.removeKeyboard(chatId);
         telegramBot.sendMessage(chatId, null, "Выбери изображение, введя цифру в пределах [1-" + botAttributes.getImageUrls().size() + "]");
-        botAttributes.setCurrentState(BotState.AWAITING_IMAGE_CHOICE);
+        BotAttributes.setUserCurrentBotState(adminChatId, BotState.AWAITING_IMAGE_CHOICE);
     }
 
     private byte[] downloadImage(String imageUrl) {
@@ -355,12 +381,70 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    private void clearBotAttributes() {
-        botAttributes.setCurrentState(BotState.FREE_STATE);
+    public void handlePageNumberInput(Long userId, String userInput) {
+        log.debug("current state is AWAITING_PAGE_NUMBER");
+        int pageNumber = 0;
+        try {
+            log.debug("handle pageNumber for userId = {}, userInput = {}", userId, userInput);
+            pageNumber = Integer.parseInt(userInput);
+        } catch (NumberFormatException e) {
+            log.warn("handlePageNumberInput wrong input");
+            telegramBot.sendMessage(userId, null, "Введите число!");
+            throw new QuoteException("handlePageNumberInput wrong input:" + e);
+        }
+        // Update user's current state
+        BotAttributes.setUserCurrentBotState(userId, BotState.AWAITING_LINE_NUMBER);
+        // Store the page number in user's context
+        botAttributes.setPageNumber(userId, pageNumber);
+        log.debug("set page number = {} to userContext for userId = {}", pageNumber, userId);
+        // Ask for line number
+        telegramBot.sendMessage(userId, null, "Хорошо! Теперь напиши номер строки.");
+    }
+
+    public void handleLineNumberInput(Long userId, String userInput) {
+        log.debug("current state is AWAITING_LINE_NUMBER");
+        int lineNumber = 0;
+        try {
+            lineNumber = Integer.parseInt(userInput);
+        } catch (NumberFormatException e) {
+            log.warn("handleLineNumberInput wrong input");
+            telegramBot.sendMessage(userId, null, "Введите число!");
+            throw new QuoteException("handleLineNumberInput wrong input:" + e);
+        }
+        // Update user's current state
+//        BotAttributes.setUserCurrentBotState(userId, BotState.START);
+        log.debug("set line number = {} for userId = {}", lineNumber, userId);
+        // start divination
+        // Retrieve the user's page number from the UserContext
+        int pageNumber = botAttributes.getPageNumber(userId);
+
+        // Pass page and line numbers to Rest-API service
+        ExtractedLinesDTO extractedLinesDTO = apiService.processPageAndLineNumber(userId, pageNumber, lineNumber);
+
+        List<String> extractedLines = extractedLinesDTO.getLines();
+        log.debug("get extractedLines, size = {}", extractedLines.size());
+        // Send lines to user
+        StringBuilder formattedMessage = new StringBuilder("Книга открыта на странице " + pageNumber +
+                " строки, начиная с " + lineNumber + " такие:\n\n");
+
+        for (int i = 0; i < extractedLines.size(); i++) {
+            formattedMessage.append(extractedLines.get(i) + "\n");
+        }
+
+        formattedMessage.append("\n\n" + extractedLinesDTO.getBookAuthor()
+                + "\n" + extractedLinesDTO.getBookTitle());
+        log.info("sending formattedMessage with divination lines to user: {}", formattedMessage.toString());
+        telegramBot.sendMessage(userId, null, formattedMessage.toString());
+        // Clear user's context after processing
+        botAttributes.clear(userId);
+    }
+
+    private void clearBotAttributes(Long userId) {
+        BotAttributes.setUserCurrentBotState(adminChatId, BotState.START);
         botAttributes.setConfirmedUrl("");
         botAttributes.setConfirmedContent("");
         botAttributes.setImageUrls(new ArrayList<>());
-        log.debug("botAttributes.setImageUrls cleared");
+        log.debug("botAttributes cleared");
     }
 
 }

@@ -1,6 +1,6 @@
 package com.andmark.quotebot.service.command;
 
-import com.andmark.quotebot.service.BotAttributes;
+import com.andmark.quotebot.util.BotAttributes;
 import com.andmark.quotebot.service.UserService;
 import com.andmark.quotebot.service.enums.BotState;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class SignUpCommand extends QuoteCommand{
             return;
         }
         // Initiate the registration process
-        botAttributes.setCurrentState(BotState.FREE_STATE);
+        BotAttributes.setUserCurrentBotState(user.getId(), BotState.START);
         userService.initiateRegistration(chat.getId(), usertgId);
     }
 }

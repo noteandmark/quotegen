@@ -1,7 +1,7 @@
 package com.andmark.quotebot.service.googleapi;
 
 import com.andmark.quotebot.dto.GoogleCustomSearchResponse;
-import com.andmark.quotebot.service.BotAttributes;
+import com.andmark.quotebot.util.BotAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;

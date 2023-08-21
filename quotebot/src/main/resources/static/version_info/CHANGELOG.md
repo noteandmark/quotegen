@@ -8,6 +8,9 @@
 ### Changed
 ### Fixed
 
+## [1.3.0] - 2023-08-21
+### Added
+- added fortune-telling on a random book with page and line indication
 ## [1.2.0] - 2023-08-20
 ### Added
 - added possibility to send a bot a quote once a day to admin chat
