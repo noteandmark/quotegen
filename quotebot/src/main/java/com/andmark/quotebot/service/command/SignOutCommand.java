@@ -26,7 +26,7 @@ public class SignOutCommand extends QuoteCommand{
             userService.initiateRegistration(chat.getId(), usertgId);
         } else {
             // User is not registered, inform them to register first
-            sendMessage(absSender, chat, "Вы еще не зарегистрированы. Используйте команду меню /register");
+            sendMessage(absSender, chat, "Вы еще не зарегистрированы. Используйте команду меню /signout");
         }
     }
 }

@@ -1,11 +1,11 @@
-package com.andmark.quotebot.service.impl;
+package com.andmark.quotebot.service;
 
 import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.dto.QuoteDTO;
-import com.andmark.quotebot.service.*;
 import com.andmark.quotebot.service.command.*;
 import com.andmark.quotebot.service.enums.BotState;
+import com.andmark.quotebot.util.BotAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -48,11 +49,14 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
             // Check if the user is registered and get their role from the cache
             Message message = update.getMessage();
             Long usertgId = message.getFrom().getId();
-            UserRole userRole = userRoleCache.get(usertgId);
+            User user = message.getFrom();
+            String userName = user.getUserName();
+            log.debug("processNonCommandUpdate with user id = {}, name = {}", usertgId, userName);
 
+            UserRole userRole = userRoleCache.get(usertgId);
             if (userRole == null) {
                 log.debug("userRole is null");
-                BotState state = botAttributes.getCurrentState();
+                BotState state = BotAttributes.getUserCurrentBotState(usertgId);
                 Boolean checkReg = false;
                 switch (state) {
                     case AWAITING_USERNAME_INPUT -> quoteService.handleUsernameInputResponse(update);
@@ -162,16 +166,17 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
 
     @Override
     public void onRegister() {
-        botAttributes.setCurrentState(BotState.FREE_STATE);
-        register(new StartCommand());
+        register(new StartCommand(apiService));
         register(new HelpCommand());
+        register(new StatsCommand(apiService));
+        register(new YesNoMagicCommand(apiService));
+        register(new DivinationCommand(apiService));
+        register(new GetQuoteCommand(apiService));
+        register(new QuotesWeekCommand(apiService));
+        register(new VersionCommand());
         register(new SignUpCommand(userService, botAttributes));
         register(new SignOutCommand(userService));
-        register(new YesNoMagicCommand(apiService));
-        register(new StatsCommand(apiService));
-        register(new VersionCommand());
-        register(new QuotesWeekCommand(apiService));
-        register(new GetQuoteCommand(apiService));
+        register(new ResetCommand(botAttributes));
         register(new ScanBooksCommand(apiService));
         register(new RequestQuoteCommand(apiService));
     }

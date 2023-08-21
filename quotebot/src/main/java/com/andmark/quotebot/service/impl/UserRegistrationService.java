@@ -3,8 +3,7 @@ package com.andmark.quotebot.service.impl;
 import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.dto.UserDTO;
 import com.andmark.quotebot.service.Bot;
-import com.andmark.quotebot.service.BotAttributes;
-import com.andmark.quotebot.service.UserService;
+import com.andmark.quotebot.util.BotAttributes;
 import com.andmark.quotebot.service.enums.BotState;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 @Service
 @Slf4j
@@ -28,13 +25,13 @@ public class UserRegistrationService {
     }
 
     public void initiateRegistration(Long usertgId, Long chatId) {
-        if (usersInProgress.contains(usertgId) && (botAttributes.getCurrentState() == BotState.AWAITING_USERNAME_INPUT)) {
+        if (usersInProgress.contains(usertgId) && (BotAttributes.getUserCurrentBotState(usertgId) == BotState.AWAITING_USERNAME_INPUT)) {
             log.warn("User registration is already in progress for user: {}", usertgId);
             return;
         }
         // Mark user as in progress
         usersInProgress.add(usertgId);
-        botAttributes.setCurrentState(BotState.AWAITING_USERNAME_INPUT);
+        BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_USERNAME_INPUT);
         telegramBot.sendMessage(chatId, null, "Введите имя (логин) пользователя");
     }
 
@@ -44,7 +41,7 @@ public class UserRegistrationService {
             log.debug("contains usertgId = {}", usertgId);
             telegramBot.sendMessage(chatId, null, "Имя пользователя принято. Введите пароль.");
             botAttributes.setUsername(username);
-            botAttributes.setCurrentState(BotState.AWAITING_PASSWORD_INPUT);
+            BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_PASSWORD_INPUT);
         }
     }
 

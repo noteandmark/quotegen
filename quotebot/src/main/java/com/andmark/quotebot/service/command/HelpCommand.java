@@ -18,17 +18,20 @@ public class HelpCommand extends QuoteCommand{
         StringBuilder message = new StringBuilder();
         message.append("Добро пожаловать! Книголюб приветствует!\n\n");
         message.append("У меня есть такое меню команд:\n");
-        message.append("/start - запустить бот\n");
+        message.append("/start - проверить: в сети ли бот\n");
         message.append("/help - отобразить справочную информацию\n");
+        message.append("/stats - разная статистика\n");
+        message.append("/da_net - задай вопрос, узнай ответ: да или нет\n");
+        message.append("/divination - гадание на книгах (user)\n");
+        message.append("/getquote - получить случайную цитату из опубликованных (user)\n");
+        message.append("/quotes_for_week - все цитаты за неделю (user)\n");
+        message.append("/version - версия и список изменений\n");
         message.append("/signup - зарегистрироваться\n");
         message.append("/signout - сброс логина, пароля\n");
-        message.append("/da_net - задай вопрос, узнай ответ: да или нет\n");
-        message.append("/stats - разная статистика\n");
-        message.append("/version - версия и список новшеств\n");
-        message.append("/quotes_for_week - все цитаты за неделю (user)\n");
-        message.append("/getquote - получить цитату из опубликованных (user)\n");
+        message.append("/reset - сброс до настроек по умолчанию\n");
+        message.append("/report - сообщить админу что-либо (баги, предложения, отзывы, др.)\n");
+        message.append("/scanbooks - поиск электронных книг (админ)\n");
         message.append("/requestquote - сгенерировать цитату (админ)\n");
-
         sendMessage(absSender, chat, message.toString());
     }
 }

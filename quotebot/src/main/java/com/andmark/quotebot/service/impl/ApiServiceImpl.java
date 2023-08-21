@@ -6,7 +6,7 @@ import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.dto.*;
 import com.andmark.quotebot.service.ApiService;
 import com.andmark.quotebot.service.Bot;
-import com.andmark.quotebot.service.BotAttributes;
+import com.andmark.quotebot.util.BotAttributes;
 import com.andmark.quotebot.service.keyboard.QuoteKeyboardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -275,10 +275,9 @@ public class ApiServiceImpl implements ApiService {
             log.debug("return schedulled action status from response");
             return response.getBody();
         } else {
-            log.warn("response getStatusCode is not OK");
+            log.warn("response getStatusCode is not OK, return null");
+            return null;
         }
-        log.debug("return schedulled action status = null");
-        return null;
     }
 
     @Override
@@ -294,6 +293,27 @@ public class ApiServiceImpl implements ApiService {
                 .keyboard(null)
                 .build();
         sendRequestAndHandleResponse(requestConfig);
+    }
+
+    @Override
+    public ExtractedLinesDTO processPageAndLineNumber(Long userId, int pageNumber, int lineNumber) {
+        log.debug("api service: processPageAndLineNumber userId = {}, pageNumber = {}, lineNumber = {}", userId, pageNumber, lineNumber);
+        // Prepare the request body with page and line numbers
+        PageLineRequestDTO requestDTO = new PageLineRequestDTO(pageNumber, lineNumber);
+        String apiUrl = BotConfig.API_BASE_URL + "/books/process-page-and-line";
+        ResponseEntity<ExtractedLinesDTO> response = restTemplate.exchange(
+                apiUrl,
+                HttpMethod.POST,
+                new HttpEntity<>(requestDTO),
+                ExtractedLinesDTO.class
+        );
+        if (response.getStatusCode() == HttpStatus.OK) {
+            log.debug("api service: processPageAndLineNumber response status code is OK");
+            return response.getBody();
+        } else {
+            log.warn("response getStatusCode is not OK, return null");
+            return null;
+        }
     }
 
     private String formatQuoteText(QuoteDTO quoteDTO) {

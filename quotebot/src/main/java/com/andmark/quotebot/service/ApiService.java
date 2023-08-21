@@ -2,10 +2,7 @@ package com.andmark.quotebot.service;
 
 import com.andmark.quotebot.domain.RequestConfiguration;
 import com.andmark.quotebot.domain.enums.UserRole;
-import com.andmark.quotebot.dto.QuoteDTO;
-import com.andmark.quotebot.dto.ScheduledActionStatusDTO;
-import com.andmark.quotebot.dto.StatsDTO;
-import com.andmark.quotebot.dto.UserDTO;
+import com.andmark.quotebot.dto.*;
 
 import java.util.List;
 
@@ -41,4 +38,6 @@ public interface ApiService {
     ScheduledActionStatusDTO getScheduledActionStatus();
 
     void updateScheduledActionStatus(ScheduledActionStatusDTO now);
+
+    ExtractedLinesDTO processPageAndLineNumber(Long userId, int pageNumber, int lineNumber);
 }
