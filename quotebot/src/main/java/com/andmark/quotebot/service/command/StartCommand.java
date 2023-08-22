@@ -18,14 +18,18 @@ public class StartCommand extends QuoteCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
-        log.debug("user with id = {}, name = {} execute /start", user.getId(), user.getUserName());
         UserRole userRole = apiService.getUserRole(user.getId());
-        String justMessage = (userRole != UserRole.ADMIN || userRole != UserRole.USER) ?
-                "Зарегистрируйся, чтобы получить доступ ко всем :)" :
-                "Приветствую, " + user.getUserName();
+        log.debug("user with id = {}, name = {} execute /start", user.getId(), user.getUserName());
+        String reference = (!user.getFirstName().isEmpty() || !user.getFirstName().isBlank()) ?
+                user.getFirstName() : user.getUserName();
+        String justMessage = (userRole == null) ?
+                "Зарегистрируйся (/signup), чтобы получить доступ ко всем возможностям :)" :
+                "Приветствую, " + user.getFirstName() + "!";
+
+        System.out.println("user = " + user);
 
         sendMessage(absSender, chat, "Добро пожаловать! Меня зовут бот Книголюб. Я в сети.\n"
-                + "Используй /help для просмотра всех возможностей.\n"
+                + "Используй /help для просмотра меню.\n"
                 + justMessage);
     }
 }

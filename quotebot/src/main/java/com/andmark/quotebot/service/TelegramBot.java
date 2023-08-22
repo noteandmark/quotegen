@@ -57,13 +57,17 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
             if (userRole == null) {
                 log.debug("userRole is null");
                 BotState state = BotAttributes.getUserCurrentBotState(usertgId);
-                Boolean checkReg = false;
+//                Boolean checkReg = false;
                 switch (state) {
                     case AWAITING_USERNAME_INPUT -> quoteService.handleUsernameInputResponse(update);
                     case AWAITING_PASSWORD_INPUT -> quoteService.handlePasswordInputResponse(update);
-                    default -> checkReg = registrateUser(usertgId, message);
+                    case AWAITING_REPORT -> quoteService.handleReportInput(update.getMessage().getFrom(), message.getText());
+//                    default -> checkReg = registrateUser(usertgId, message);
+                    default -> {
+                        return;
+                    }
                 }
-                if (!checkReg) return; // Exit processing for unregistered user
+//                if (!checkReg) return; // Exit processing for unregistered user
             }
 
             quoteService.handleIncomingMessage(update);
@@ -177,6 +181,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         register(new SignUpCommand(userService, botAttributes));
         register(new SignOutCommand(userService));
         register(new ResetCommand(botAttributes));
+        register(new ReportCommand());
         register(new ScanBooksCommand(apiService));
         register(new RequestQuoteCommand(apiService));
     }

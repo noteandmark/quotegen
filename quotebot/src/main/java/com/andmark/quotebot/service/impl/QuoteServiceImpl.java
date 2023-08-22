@@ -7,6 +7,7 @@ import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.dto.UserDTO;
 import com.andmark.quotebot.exception.QuoteException;
 import com.andmark.quotebot.service.*;
+import com.andmark.quotebot.service.command.ReportCommand;
 import com.andmark.quotebot.service.enums.BotState;
 import com.andmark.quotebot.service.googleapi.GoogleCustomSearchService;
 import com.andmark.quotebot.service.keyboard.QuoteKeyboardService;
@@ -17,11 +18,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -206,7 +209,7 @@ public class QuoteServiceImpl implements QuoteService {
     private void handlePublishingChoiceResponse(Long chatId, String userInput) {
         log.debug("current state is AWAITING_PUBLISHING, userInput = {}", userInput);
         switch (userInput) {
-            case "сразу":
+            case "сразу" -> {
                 // publishing a post in a telegram group
                 QuoteDTO quoteDTO = new QuoteDTO();
                 quoteDTO.setId(botAttributes.getQuoteId());
@@ -217,18 +220,18 @@ public class QuoteServiceImpl implements QuoteService {
                 quoteDTO = publishQuoteToGroup(quoteDTO);
                 // send the quote to be saved in the database
                 sendQuoteSavedTODatabase(quoteDTO, "пост опубликован сразу");
-                break;
-            case "отложить":
+            }
+            case "отложить" -> {
                 log.debug("case 'отложить'");
                 telegramBot.sendMessage(chatId, null, "Напиши дату публикации в виде: [yyyy-MM-dd HH:mm:ss] или напиши [случайно]");
                 BotAttributes.setUserCurrentBotState(adminChatId, BotState.POSTPONE);
-                break;
-            default:
+            }
+            default -> {
                 log.debug("case default, userInput in handlePublishingChoiceResponse = {}", userInput);
                 if (!isValidImageChoice(userInput, botAttributes.getImageUrls().size())) {
                     telegramBot.sendMessage(chatId, null, "Напиши выбор в виде: [сразу] или [отложить]");
                 }
-                break;
+            }
         }
     }
 
@@ -245,9 +248,8 @@ public class QuoteServiceImpl implements QuoteService {
                 postponePublishing(chatId, pendingTime);
             } catch (DateTimeParseException e) {
                 // Handle invalid date format error
-                if (!userInput.equals("отложить")) {
+                if (!userInput.equals("отложить"))
                     telegramBot.sendMessage(chatId, null, "Неверный формат. Напиши в формате: [yyyy-MM-dd HH:mm:ss] или: [случайно].");
-                }
             }
         }
     }
@@ -295,7 +297,7 @@ public class QuoteServiceImpl implements QuoteService {
         String contentRequest = content.substring(0, Math.min(content.length(), 1024));
         botAttributes.setImageUrls(googleCustomSearchService.searchImagesByKeywords(contentRequest));
         log.debug("size of botAttributes.setImageUrls = {}", botAttributes.getImageUrls().size());
-        botAttributes.setQuoteId(Long.valueOf(quoteId));
+        botAttributes.setQuoteId(quoteId);
         // sending selectable images to the user
         sendImagesToChoice(chatId);
     }
@@ -427,16 +429,24 @@ public class QuoteServiceImpl implements QuoteService {
         StringBuilder formattedMessage = new StringBuilder("Книга открыта на странице " + pageNumber +
                 " строки, начиная с " + lineNumber + " такие:\n\n");
 
-        for (int i = 0; i < extractedLines.size(); i++) {
-            formattedMessage.append(extractedLines.get(i) + "\n");
+        for (String extractedLine : extractedLines) {
+            formattedMessage.append(extractedLine).append("\n");
         }
 
-        formattedMessage.append("\n\n" + extractedLinesDTO.getBookAuthor()
-                + "\n" + extractedLinesDTO.getBookTitle());
+        formattedMessage.append("\n\n").append(extractedLinesDTO.getBookAuthor()).append("\n").append(extractedLinesDTO.getBookTitle());
         log.info("sending formattedMessage with divination lines to user: {}", formattedMessage.toString());
         telegramBot.sendMessage(userId, null, formattedMessage.toString());
         // Clear user's context after processing
-        botAttributes.clear(userId);
+        BotAttributes.clear(userId);
+    }
+
+    public void handleReportInput(User user, String reportMessage) {
+        log.debug("current state is AWAITING_REPORT");
+        reportMessage = "Новое сообщение от пользователя @" + user.getUserName() + ":\n" + reportMessage;
+        telegramBot.sendMessage(adminChatId, null, reportMessage);
+        log.info("new report from user id = {}, username = {}, message = {}", user.getId(), user.getUserName(), reportMessage);
+        telegramBot.sendMessage(user.getId(), null, "Ваше сообщение отправлено.");
+        BotAttributes.clear(user.getId());
     }
 
     private void clearBotAttributes(Long userId) {

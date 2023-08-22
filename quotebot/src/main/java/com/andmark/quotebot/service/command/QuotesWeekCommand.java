@@ -30,7 +30,7 @@ public class QuotesWeekCommand extends QuoteCommand {
             // Make a request to the quotegen API to get a random published quote
             List<QuoteDTO> quotesForWeek = apiService.getWeekPublishedQuotes();
 
-            if (quotesForWeek != null) {
+            if (quotesForWeek != null && !quotesForWeek.isEmpty()) {
                 log.debug("quotesForWeek is not null, sending quotes");
                 for (QuoteDTO quoteDTO : quotesForWeek) {
                     sendMessage(absSender, chat, quoteDTO.getContent());

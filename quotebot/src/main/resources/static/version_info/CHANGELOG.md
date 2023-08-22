@@ -8,6 +8,9 @@
 ### Changed
 ### Fixed
 
+## [1.3.1] - 2023-08-22
+### Added
+- command to send a message about feedback, bugs, suggestions to the admin
 ## [1.3.0] - 2023-08-21
 ### Added
 - added fortune-telling on a random book with page and line indication

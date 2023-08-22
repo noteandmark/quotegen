@@ -28,7 +28,7 @@ public class BotAttributes {
     private String confirmedUrl;
     private String username;
     private static final Map<Long, BotState> userStates = new ConcurrentHashMap<>();
-    private Map<Long, UserSession> userSessions = new ConcurrentHashMap<>();
+    private static final Map<Long, UserSession> userSessions = new ConcurrentHashMap<>();
 
     public static BotState getUserCurrentBotState(Long userId) {
         return userStates.getOrDefault(userId, BotState.START);
@@ -54,7 +54,7 @@ public class BotAttributes {
         return getUserSession(userId).getLineNumber();
     }
 
-    public void clear(long userId) {
+    public static void clear(long userId) {
         log.debug("clear botAttributes for userId = {}", userId);
         userSessions.remove(userId);
         userStates.remove(userId);

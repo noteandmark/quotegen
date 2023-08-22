@@ -4,6 +4,7 @@ import com.andmark.quotebot.dto.QuoteDTO;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 
 public interface QuoteService {
     void handleIncomingMessage(Update update);
@@ -17,4 +18,6 @@ public interface QuoteService {
     void handlePasswordInputResponse(Update update);
 
     void sendQuoteSavedTODatabase(QuoteDTO pendingQuote, String s);
+
+    void handleReportInput(User from, String text);
 }
