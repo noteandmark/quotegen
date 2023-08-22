@@ -5,6 +5,7 @@ import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.StatsDTO;
 import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.ScanService;
+import com.andmark.quotegen.util.BookFormatParser;
 import com.andmark.quotegen.util.impl.Fb2BookFormatParser;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -24,12 +25,14 @@ public class ScanController {
     private final ScanService scanService;
     private final BookService bookService;
     private final ModelMapper mapper;
+    private final BookFormatParser parser;
 
     @Autowired
-    public ScanController(ScanService scanService, BookService bookService, ModelMapper mapper) {
+    public ScanController(ScanService scanService, BookService bookService, ModelMapper mapper, BookFormatParser parser) {
         this.scanService = scanService;
         this.bookService = bookService;
         this.mapper = mapper;
+        this.parser = parser;
     }
 
     @GetMapping("/scan-books")
@@ -49,12 +52,13 @@ public class ScanController {
         return ResponseEntity.ok(stats);
     }
 
-    @GetMapping("/test-parse")
+    @GetMapping("/test-parse-fb2")
     public String parseBook(@RequestParam Long id) {
-        Fb2BookFormatParser parser = new Fb2BookFormatParser();
         BookDTO bookDTO = new BookDTO();
         bookDTO = bookService.findOne(id);
-        return parser.parse(mapper.map(bookDTO, Book.class));
+        Book book = mapper.map(bookDTO, Book.class);
+        String parsedText = parser.parse(book);
+        return parsedText;
     }
 
     @GetMapping("/test-connection")

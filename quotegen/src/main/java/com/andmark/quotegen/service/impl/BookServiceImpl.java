@@ -26,21 +26,18 @@ public class BookServiceImpl implements BookService {
     private final BooksRepository booksRepository;
     private final QuoteService quoteService;
     private final MapperConvert<Book, BookDTO> mapper;
-    private final int countLinesAtPage;
-    private final int maxCharactersInline;
-    private final int numberNextLines;
+    @Value("${quote.countLinesAtPage}")
+    private int countLinesAtPage;
+    @Value("${quote.maxCharactersInline}")
+    private int maxCharactersInline;
+    @Value("${quote.numberNextLines}")
+    private int numberNextLines;
 
     @Autowired
-    public BookServiceImpl(BooksRepository booksRepository, QuoteService quoteService, MapperConvert<Book, BookDTO> mapper,
-                           @Value("${quote.countLinesAtPage}") int countLinesAtPage,
-                           @Value("${quote.maxCharactersInline}") int maxCharactersInline,
-                           @Value("${quote.numberNextLines}") int numberNextLines) {
+    public BookServiceImpl(BooksRepository booksRepository, QuoteService quoteService, MapperConvert<Book, BookDTO> mapper) {
         this.booksRepository = booksRepository;
         this.quoteService = quoteService;
         this.mapper = mapper;
-        this.countLinesAtPage = countLinesAtPage;
-        this.maxCharactersInline = maxCharactersInline;
-        this.numberNextLines = numberNextLines;
     }
 
     @Override
@@ -136,7 +133,8 @@ public class BookServiceImpl implements BookService {
     }
 
     private String getBookContent(Book selectedBook) {
-        String bookContent = quoteService.getBookText(selectedBook);
+//        String bookContent = quoteService.getBookText(selectedBook);
+        String bookContent = null;
         log.debug("length of bookContent = {}", bookContent.length());
         return bookContent;
     }
@@ -201,6 +199,22 @@ public class BookServiceImpl implements BookService {
         dto.setBookTitle(selectedBook.getTitle());
         return dto;
     }
+
+    public BookDTO convertToDTO(Book book) {
+        return mapper.convertToDTO(book, BookDTO.class);
+    }
+
+    public Book convertToEntity(BookDTO bookDTO) {
+        return mapper.convertToEntity(bookDTO, Book.class);
+    }
+
+    List<BookDTO> convertToDtoList(List<Book> books) {
+        return books.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+}
 
 
 //    @Override
@@ -278,18 +292,3 @@ public class BookServiceImpl implements BookService {
 //        dto.setBookTitle(selectedBook.getTitle());
 //        return dto;
 //    }
-
-    public BookDTO convertToDTO(Book book) {
-        return mapper.convertToDTO(book, BookDTO.class);
-    }
-
-    public Book convertToEntity(BookDTO bookDTO) {
-        return mapper.convertToEntity(bookDTO, Book.class);
-    }
-
-    private List<BookDTO> convertToDtoList(List<Book> books) {
-        return books.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-}
