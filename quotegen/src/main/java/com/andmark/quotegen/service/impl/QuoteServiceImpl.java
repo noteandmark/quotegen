@@ -183,14 +183,9 @@ public class QuoteServiceImpl implements QuoteService {
             throw new NotFoundBookException("No books! Scan the catalogue first.");
         }
         List<Book> allBooks = getAllActiveBooks();
-        //TODO: refactoring
-//        if (allBooks == null || allBooks.isEmpty()) {
-//            log.warn("No books! Scan the catalogue first.");
-//            throw new NotFoundBookException("No books! Scan the catalogue first.");
-//        }
+
         //get map of books with the number of identical
         Map<Book, Integer> parsedBooks = selectBooksRandomly(allBooks, size);
-
         //parse books and generate quotes
         generateQuotes(parsedBooks);
         // Save quotes in the cache to the database and clear cache
@@ -243,14 +238,6 @@ public class QuoteServiceImpl implements QuoteService {
     public String getBookText(Book book) {
         log.debug("quoteService: getting text from book with id = {}, format = {}", book.getId(), book.getFormat());
         // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
-//        BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
-//        String bookText = parser.parse(book);
-//        if (bookText == null) {
-//            log.error("Text from book {} is null!", book);
-//            throw new ServiceException("Text from book is null!");
-//        }
-
-        // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
         BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
         String rawBookText = parser.parse(book); // Get the raw text from the parser
         if (rawBookText == null) {
@@ -260,6 +247,7 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("rawBookText length = {}", rawBookText.length());
         // Fix formatting by adding spaces after punctuation marks if there is none
         String bookText = fixFormatting(rawBookText);
+        log.debug("bookText length = {}", bookText.length());
         return bookText;
     }
 
@@ -339,15 +327,6 @@ public class QuoteServiceImpl implements QuoteService {
             occurrences--;
         } while (occurrences > 0);
     }
-
-//    public Quote getNextQuote() {
-//        if (quoteCache.isEmpty()) {
-//            populateCache(cacheSize);
-//        }
-//        Quote pollQuote = quoteCache.poll();
-//        log.info("get NextQuote quote: {}", pollQuote);
-//        return pollQuote;
-//    }
 
     private <T> T getRandomElement(List<T> list) {
         int randomIndex = new Random().nextInt(list.size());

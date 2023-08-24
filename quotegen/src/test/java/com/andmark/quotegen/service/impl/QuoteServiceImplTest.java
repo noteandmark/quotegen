@@ -140,7 +140,6 @@ public class QuoteServiceImplTest {
 
     @Test
     public void whenNoActiveBooks_thenShouldThrowException() {
-//        when(booksRepository.findByBookStatus(BookStatus.ACTIVE)).thenReturn(new ArrayList<>());
         assertThrows(NotFoundBookException.class, () -> quoteService.populateCache(cacheSize));
     }
 

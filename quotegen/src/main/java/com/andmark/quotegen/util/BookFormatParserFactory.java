@@ -21,6 +21,7 @@ public class BookFormatParserFactory {
             case FB2:
                 return new Fb2BookFormatParser();
             default:
+                // it never throws
                 throw new IllegalArgumentException("Unsupported book format: " + format);
         }
     }

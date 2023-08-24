@@ -30,11 +30,11 @@ public class SchedulledActionStatusService {
         return convertToDTO(scheduledActionStatus);
     }
 
-    private ScheduledActionStatusDTO convertToDTO(ScheduledActionStatus scheduledActionStatus) {
+    ScheduledActionStatusDTO convertToDTO(ScheduledActionStatus scheduledActionStatus) {
         return mapper.convertToDTO(scheduledActionStatus, ScheduledActionStatusDTO.class);
     }
 
-    private ScheduledActionStatus convertToEntity(ScheduledActionStatusDTO scheduledActionStatusDTO) {
+    ScheduledActionStatus convertToEntity(ScheduledActionStatusDTO scheduledActionStatusDTO) {
         return mapper.convertToEntity(scheduledActionStatusDTO, ScheduledActionStatus.class);
     }
 
@@ -52,27 +52,5 @@ public class SchedulledActionStatusService {
         scheduledActionStatus.setLastExecuted(scheduledActionStatusDTO.getLastExecuted());
         scheduledActionStatusRepository.save(scheduledActionStatus);
         log.debug("scheduledActionStatus updated or saved");
-
-//        log.debug("schedulledActionStatusService: update with time: {}", scheduledActionStatusDTO.getLastExecuted());
-//        ScheduledActionStatus scheduledActionStatus = new ScheduledActionStatus();
-//        if (scheduledActionStatusDTO.getId() != null) {
-//            log.debug("id scheduled action: {}", scheduledActionStatusDTO.getId());
-//            Optional<ScheduledActionStatus> optionalStatus = scheduledActionStatusRepository.findById(scheduledActionStatusDTO.getId());
-//            if (optionalStatus.isPresent()) {
-//                log.debug("optional action status is present");
-//                scheduledActionStatus = optionalStatus.get();
-//                scheduledActionStatus.setLastExecuted(scheduledActionStatusDTO.getLastExecuted());
-//                scheduledActionStatusRepository.save(scheduledActionStatus);
-//                log.debug("scheduledActionStatus updated");
-//            } else {
-//                log.error("ScheduledActionStatus with ID {} not found.", scheduledActionStatusDTO.getId());
-//            }
-//        } else {
-//            //it's first scheduled start
-//            log.debug("scheduled action first saving in db");
-//            scheduledActionStatus.setLastExecuted(scheduledActionStatusDTO.getLastExecuted());
-//            scheduledActionStatusRepository.save(scheduledActionStatus);
-//            log.debug("scheduled action saved");
-//        }
     }
 }
