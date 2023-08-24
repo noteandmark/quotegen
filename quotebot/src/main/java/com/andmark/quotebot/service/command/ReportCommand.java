@@ -23,28 +23,14 @@ public class ReportCommand extends QuoteCommand {
         log.debug("report command: ");
         SendMessage message = new SendMessage();
 
-//        if (strings.length < 1) {
-            log.debug("report command: strings.length < 1");
-            message.setChatId(chat.getId().toString());
-            message.setText("Отправьте мне сообщение для отправки и вновь нажмите эту команду.");
-            try {
-                absSender.execute(message);
-            } catch (TelegramApiException e) {
-                log.warn("TelegramApiException is = {}", e.getMessage());
-            }
-            BotAttributes.setUserCurrentBotState(user.getId(), BotState.AWAITING_REPORT);
-//            return;
-//        }
-
-//        String reportMessage = String.join(" ", strings);
-//        message.setChatId(adminChatId);
-//        log.info("new report from user id = {}, username = {}, message = {}", user.getId(), user.getUserName(), reportMessage);
-//        message.setText("Новое сообщение от пользователя @" + user.getUserName() + ":\n" + reportMessage);
-//        try {
-//            absSender.execute(message);
-//            log.info("Report sent to admin.");
-//        } catch (TelegramApiException e) {
-//            log.error("Error sending report to admin: {}", e.getMessage());
-//        }
+        log.debug("report command: strings.length < 1");
+        message.setChatId(chat.getId().toString());
+        message.setText("Отправьте мне сообщение, я его переправлю админу.");
+        try {
+            absSender.execute(message);
+        } catch (TelegramApiException e) {
+            log.warn("TelegramApiException is = {}", e.getMessage());
+        }
+        BotAttributes.setUserCurrentBotState(user.getId(), BotState.AWAITING_REPORT);
     }
 }

@@ -20,7 +20,7 @@ public class DivinationCommand extends QuoteCommand {
     private final ApiService apiService;
 
     // Keep track of users who have already used the command today
-    private static final Map<Long, LocalDate> usersLastUsage = new ConcurrentHashMap<>();
+    static final Map<Long, LocalDate> usersLastUsage = new ConcurrentHashMap<>();
 
     public DivinationCommand(ApiService apiService) {
         super("divination", "Request a book divination");
@@ -61,29 +61,6 @@ public class DivinationCommand extends QuoteCommand {
         } catch (TelegramApiException e) {
             log.warn("TelegramApiException is = {}", e.getMessage());
         }
-
-//        SendMessage message = new SendMessage();
-//        message.setChatId(chat.getId().toString());
-//        // Check if the user has the ADMIN role
-//        UserRole userRole = apiService.getUserRole(user.getId());
-//        log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
-//
-//        if (userRole == UserRole.ADMIN || userRole == UserRole.USER) {
-//            // Prompt the user to enter a page number
-//            message.setText("Добро пожаловать в \"Гадание по книге\":\n" +
-//                    "Загадали вопрос?\n" +
-//                    "Напишите номер страницы:");
-//            // Set the next step for the user's input
-//            BotAttributes.setUserCurrentBotState(user.getId(), BotState.AWAITING_PAGE_NUMBER);
-//        } else {
-//            message.setText("Эта возможность только для зарегистрированных пользователей. Воспользуйтесь командой /signup");
-//        }
-//        // Send the message
-//        try {
-//            absSender.execute(message);
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private boolean hasUserUsedCommandToday(Long userId) {

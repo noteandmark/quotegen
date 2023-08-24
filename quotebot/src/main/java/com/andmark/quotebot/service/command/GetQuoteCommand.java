@@ -30,7 +30,7 @@ public class GetQuoteCommand extends QuoteCommand{
 
             if (randomQuote != null) {
                 // Send the received quote to the user
-                String message = "Случайная цитата из опубликованных:\n" +
+                String message = "Случайная цитата из опубликованных:\n\n" +
                         randomQuote.getContent();
                 sendMessage(absSender, chat, message);
             } else {

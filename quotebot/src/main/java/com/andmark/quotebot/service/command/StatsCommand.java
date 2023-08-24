@@ -37,5 +37,4 @@ public class StatsCommand extends QuoteCommand {
             sendMessage(absSender, chat, "An error occurred while retrieving statistics.");
         }
     }
-
 }

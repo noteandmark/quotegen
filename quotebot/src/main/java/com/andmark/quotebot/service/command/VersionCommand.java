@@ -46,10 +46,11 @@ public class VersionCommand extends QuoteCommand {
         }
     }
 
-    private String loadFileContent(String resourcePath) {
+    String loadFileContent(String resourcePath) {
         log.debug("try to load file content from file: {}", resourcePath);
 
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+//        try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
             if (inputStream != null) {
                 byte[] bytes = inputStream.readAllBytes();
                 return new String(bytes, StandardCharsets.UTF_8);
@@ -111,18 +112,5 @@ public class VersionCommand extends QuoteCommand {
         }
 
         return messages;
-
-
-
-//        int maxMessageLength = 4000;
-//        List<String> messages = new ArrayList<>();
-//
-//        for (int startIndex = 0; startIndex < content.length(); startIndex += maxMessageLength) {
-//            int endIndex = Math.min(startIndex + maxMessageLength, content.length());
-//            String messagePart = content.substring(startIndex, endIndex);
-//            messages.add(messagePart);
-//        }
-//
-//        return messages;
     }
 }

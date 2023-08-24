@@ -15,6 +15,10 @@ public class GoogleCustomSearchResponse {
         return items;
     }
 
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
+
     public static class Item {
         @JsonProperty("link")
         private String link;
@@ -23,11 +27,19 @@ public class GoogleCustomSearchResponse {
             return link;
         }
 
+        public void setLink(String link) {
+            this.link = link;
+        }
+
         @JsonProperty("image")
         private Image image;
 
         public Image getImage() {
             return image;
+        }
+
+        public void setImage(Image image) {
+            this.image = image;
         }
     }
 
@@ -37,6 +49,10 @@ public class GoogleCustomSearchResponse {
 
         public String getThumbnailLink() {
             return thumbnailLink;
+        }
+
+        public void setThumbnailLink(String thumbnailLink) {
+            this.thumbnailLink = thumbnailLink;
         }
     }
 

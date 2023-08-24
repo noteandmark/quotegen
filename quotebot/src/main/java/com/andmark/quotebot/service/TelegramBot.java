@@ -51,25 +51,36 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
             Long usertgId = message.getFrom().getId();
             User user = message.getFrom();
             String userName = user.getUserName();
-            log.debug("processNonCommandUpdate with user id = {}, name = {}", usertgId, userName);
+            log.debug("processNonCommandUpdate with user id = {}, name = {}, botState = {}", usertgId, userName, BotAttributes.getUserCurrentBotState(usertgId));
 
+            // Check if the user is registered and in cache memory
             UserRole userRole = userRoleCache.get(usertgId);
+            // no in cache memory, check in database
             if (userRole == null) {
-                log.debug("userRole is null");
-                BotState state = BotAttributes.getUserCurrentBotState(usertgId);
-//                Boolean checkReg = false;
-                switch (state) {
-                    case AWAITING_USERNAME_INPUT -> quoteService.handleUsernameInputResponse(update);
-                    case AWAITING_PASSWORD_INPUT -> quoteService.handlePasswordInputResponse(update);
-                    case AWAITING_REPORT -> quoteService.handleReportInput(update.getMessage().getFrom(), message.getText());
-//                    default -> checkReg = registrateUser(usertgId, message);
-                    default -> {
-                        return;
+                boolean isRegistered = userService.isRegistered(usertgId);
+                // the user has not yet registered anywhere, can only send a message in these cases:
+                if (!isRegistered) {
+                    log.debug("user is not registered");
+                    BotState state = BotAttributes.getUserCurrentBotState(usertgId);
+                    switch (state) {
+                        case AWAITING_USERNAME_INPUT -> quoteService.handleUsernameInputResponse(update);
+                        case AWAITING_PASSWORD_INPUT -> quoteService.handlePasswordInputResponse(update);
+                        case AWAITING_REPORT ->
+                                quoteService.handleReportInput(update.getMessage().getFrom(), message.getText());
+                        default -> {
+                            log.debug("the bot is silent");
+                            return;
+                        }
                     }
                 }
-//                if (!checkReg) return; // Exit processing for unregistered user
+                // user found in the database, temporarily stores
+                else {
+                    userRole = apiService.getUserRole(usertgId);
+                    userRoleCache.put(usertgId, userRole);
+                    // processing his message
+                }
             }
-
+            log.debug("handle incoming message");
             quoteService.handleIncomingMessage(update);
         } else if (update.hasCallbackQuery()) {
             quoteService.handleCallbackQuery(update);
@@ -194,7 +205,6 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
     public String getBotToken() {
         return BotConfig.botToken;
     }
-
 
     public UserRole getUserRole(Long usertgId) {
         return userRoleCache.get(usertgId);

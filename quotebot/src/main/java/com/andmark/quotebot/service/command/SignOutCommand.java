@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
 @Slf4j
-public class SignOutCommand extends QuoteCommand{
+public class SignOutCommand extends QuoteCommand {
     private final UserService userService;
 
     public SignOutCommand(UserService userService) {
@@ -24,9 +24,10 @@ public class SignOutCommand extends QuoteCommand{
             userService.deleteUser(chat.getId(), usertgId);
             // Initiate registration process
             userService.initiateRegistration(chat.getId(), usertgId);
+            sendMessage(absSender, chat, "Логин, пароль удалены. Для регистрации вновь используйте команду меню /signup");
         } else {
             // User is not registered, inform them to register first
-            sendMessage(absSender, chat, "Вы еще не зарегистрированы. Используйте команду меню /signout");
+            sendMessage(absSender, chat, "Вы еще не зарегистрированы. Используйте команду меню /signup");
         }
     }
 }

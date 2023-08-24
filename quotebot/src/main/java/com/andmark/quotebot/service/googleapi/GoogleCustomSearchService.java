@@ -67,5 +67,4 @@ public class GoogleCustomSearchService {
         }
         return imageUrls;
     }
-
 }

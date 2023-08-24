@@ -43,5 +43,4 @@ public class QuotesWeekCommand extends QuoteCommand {
             sendMessage(absSender, chat, "Эта возможность только для зарегистрированных пользователей. Воспользуйтесь командой /signup");
         }
     }
-
 }

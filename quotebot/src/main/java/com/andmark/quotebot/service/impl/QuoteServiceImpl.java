@@ -75,9 +75,9 @@ public class QuoteServiceImpl implements QuoteService {
             clearBotAttributes(userId);
             telegramBot.sendMessage(chatId, null, "Состояние сброшено");
         }
-        if (userId == adminChatId && userInput.startsWith("q:")) {
-            quoteText.push(userInput.substring(2));
+        if (userId.equals(adminChatId) && userInput.startsWith("q:")) {
             log.debug("quoteText offer text = {}", userInput);
+            quoteText.push(userInput.substring(2));
         } else {
             BotState currentState = BotAttributes.getUserCurrentBotState(userId);
 
@@ -378,6 +378,7 @@ public class QuoteServiceImpl implements QuoteService {
             apiService.registerUser(chatId, userDTO);
             // Remove the user from the registration in progress list
             userRegistrationService.completeRegistration(usertgId, chatId);
+            BotAttributes.clear(usertgId);
         } else {
             log.warn("userRegistrationService.handlePasswordInput return null in userDTO ");
         }
