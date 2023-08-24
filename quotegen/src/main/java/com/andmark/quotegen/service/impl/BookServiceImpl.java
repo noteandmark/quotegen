@@ -115,7 +115,7 @@ public class BookServiceImpl implements BookService {
         return dto;
     }
 
-    private List<Book> getActiveBooks() {
+    List<Book> getActiveBooks() {
         List<Book> activeBooks = booksRepository.findByBookStatus(BookStatus.ACTIVE);
         if (activeBooks.isEmpty()) {
             log.warn("No active books available.");
@@ -125,25 +125,27 @@ public class BookServiceImpl implements BookService {
         return activeBooks;
     }
 
-    private Book selectRandomBook(List<Book> activeBooks) {
+    Book selectRandomBook(List<Book> activeBooks) {
         Random random = new Random();
         Book selectedBook = activeBooks.get(random.nextInt(activeBooks.size()));
         log.debug("select book with id = {}", selectedBook.getId());
         return selectedBook;
     }
 
-    private String getBookContent(Book selectedBook) {
-//        String bookContent = quoteService.getBookText(selectedBook);
-        String bookContent = null;
+    String getBookContent(Book selectedBook) {
+        String bookContent = quoteService.getBookText(selectedBook);
         log.debug("length of bookContent = {}", bookContent.length());
         return bookContent;
     }
 
-    private List<String> breakContentIntoLines(String bookContent) {
+    List<String> breakContentIntoLines(String bookContent) {
         List<String> lines = new ArrayList<>();
         int startPos = 0;
         while (startPos < bookContent.length()) {
+            System.out.println("startPos = " + startPos);
             int endPos = calculateEndPosition(bookContent, startPos);
+            System.out.println("endPos = " + endPos);
+            System.out.println("line to add: " + bookContent.substring(startPos, endPos).trim());
             lines.add(bookContent.substring(startPos, endPos).trim());
             startPos = endPos;
         }
@@ -152,10 +154,18 @@ public class BookServiceImpl implements BookService {
     }
 
     private int calculateEndPosition(String bookContent, int startPos) {
+        int remainingLength = bookContent.length() - startPos;
         int endPos = Math.min(startPos + maxCharactersInline, bookContent.length());
+
+        // Check if the remaining length is less than the specified limit
+        if (remainingLength < maxCharactersInline) {
+            return bookContent.length();
+        }
+
         while (endPos > startPos && !Character.isWhitespace(bookContent.charAt(endPos - 1))) {
             endPos--;
         }
+
         if (endPos == startPos) {
             while (endPos < bookContent.length() && !Character.isWhitespace(bookContent.charAt(endPos))) {
                 endPos++;
@@ -164,27 +174,27 @@ public class BookServiceImpl implements BookService {
         return endPos;
     }
 
-    private int calculateTotalPages(int totalLines) {
+    int calculateTotalPages(int totalLines) {
         return (int) Math.ceil((double) totalLines / countLinesAtPage);
     }
 
-    private int adjustPageNumber(int pageNumber, int totalPages) {
+    int adjustPageNumber(int pageNumber, int totalPages) {
         return (pageNumber - 1) % totalPages + 1;
     }
 
-    private int calculateStartIndex(int pageNumber) {
+    int calculateStartIndex(int pageNumber) {
         return (pageNumber - 1) * countLinesAtPage;
     }
 
-    private int adjustLineNumber(int lineNumber) {
+    int adjustLineNumber(int lineNumber) {
         return (lineNumber - 1) % countLinesAtPage + 1;
     }
 
-    private int calculateUserLineIndex(int startIndex, int lineNumber) {
+    int calculateUserLineIndex(int startIndex, int lineNumber) {
         return startIndex + lineNumber - 1;
     }
 
-    private List<String> extractRequestedLines(List<String> lines, int userLineIndex) {
+    List<String> extractRequestedLines(List<String> lines, int userLineIndex) {
         List<String> extractedLines = new ArrayList<>();
         for (int i = userLineIndex; i < lines.size() && i < userLineIndex + numberNextLines; i++) {
             extractedLines.add(lines.get(i));
@@ -192,7 +202,7 @@ public class BookServiceImpl implements BookService {
         return extractedLines;
     }
 
-    private ExtractedLinesDTO createDTO(List<String> extractedLines, Book selectedBook) {
+    ExtractedLinesDTO createDTO(List<String> extractedLines, Book selectedBook) {
         ExtractedLinesDTO dto = new ExtractedLinesDTO();
         dto.setLines(extractedLines);
         dto.setBookAuthor(selectedBook.getAuthor());
@@ -215,80 +225,3 @@ public class BookServiceImpl implements BookService {
     }
 
 }
-
-
-//    @Override
-//    public ExtractedLinesDTO processPageAndLineNumber(PageLineRequestDTO requestDTO) {
-//        // Extract page and line numbers from the requestDTO
-//        int pageNumber = requestDTO.getPageNumber();
-//        int lineNumber = requestDTO.getLineNumber();
-//        log.debug("bookService make divination with pageNumber = {} , lineNumber = {}", pageNumber);
-//        // Fetch all active books from the database
-//        List<Book> activeBooks = booksRepository.findByBookStatus(BookStatus.ACTIVE);
-//        log.debug("find activeBooks in size: {}", activeBooks.size());
-//        if (activeBooks.isEmpty()) {
-//            log.warn("No active books available.");
-//            throw new NotFoundBookException("No active books available.");
-//        }
-//        // Randomly select one book from the list of active books
-//        Random random = new Random();
-//        Book selectedBook = activeBooks.get(random.nextInt(activeBooks.size()));
-//        log.debug("select book with id = {}", selectedBook.getId());
-//        // Parse the selected book's text to get the content
-//        String bookContent = quoteService.getBookText(selectedBook);
-//        log.debug("length of bookContent = {}", bookContent.length());
-//
-//        // Break the content into lines
-//        List<String> lines = new ArrayList<>();
-//        int startPos = 0;
-//        while (startPos < bookContent.length()) {
-//            int endPos = Math.min(startPos + maxCharactersInline, bookContent.length());
-//
-//            // Move endPos to the left until a whitespace character is found
-//            while (endPos > startPos && !Character.isWhitespace(bookContent.charAt(endPos - 1))) {
-//                endPos--;
-//            }
-//            // Check if the endPos reached startPos
-//            if (endPos == startPos) {
-//                // Move endPos to the right until a whitespace character is found
-//                while (endPos < bookContent.length() && !Character.isWhitespace(bookContent.charAt(endPos))) {
-//                    endPos++;
-//                }
-//            }
-//            lines.add(bookContent.substring(startPos, endPos).trim());
-//            startPos = endPos;
-//        }
-//        log.debug("count of book's lines = {}", lines.size());
-//
-//        // Calculate the total number of pages based on lines per page
-//        int totalPages = (int) Math.ceil((double) lines.size() / countLinesAtPage);
-//        log.debug("totalPages in book = {}", totalPages);
-//        // Adjust page number if it exceeds the total number of pages
-//        pageNumber = (pageNumber - 1) % totalPages + 1;
-//        log.debug("pageNumber = {}", pageNumber);
-//
-//        // Calculate the starting index of the requested page
-//        int startIndex = (pageNumber - 1) * countLinesAtPage;
-//        log.debug("startIndex = {}", startIndex);
-//
-//        // Adjust line number if it exceeds the total number of lines in page
-//        lineNumber = (lineNumber - 1) % countLinesAtPage + 1;
-//        // Calculate the index of the user-defined line within the requested page
-//        int userLineIndex = startIndex + lineNumber - 1;
-//        log.debug("userLineIndex = {}", userLineIndex);
-//
-//        // Extract the requested lines and the next n lines (numberNextLines)
-//        List<String> extractedLines = new ArrayList<>();
-//        log.debug("lines.size() = {}", lines.size());
-//        log.debug("userLineIndex + numberNextLines - 1 = {}", userLineIndex + numberNextLines - 1);
-//        for (int i = userLineIndex; i < lines.size() && i < userLineIndex + numberNextLines; i++) {
-//            extractedLines.add(lines.get(i));
-//        }
-//        log.info("return extractedLines: {}", extractedLines);
-//        // Create and return the DTO
-//        ExtractedLinesDTO dto = new ExtractedLinesDTO();
-//        dto.setLines(extractedLines);
-//        dto.setBookAuthor(selectedBook.getAuthor());
-//        dto.setBookTitle(selectedBook.getTitle());
-//        return dto;
-//    }

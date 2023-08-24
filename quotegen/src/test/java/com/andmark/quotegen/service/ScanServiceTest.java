@@ -3,8 +3,11 @@ package com.andmark.quotegen.service;
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.enums.BookFormat;
 import com.andmark.quotegen.domain.enums.BookStatus;
+import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.dto.BookDTO;
+import com.andmark.quotegen.dto.StatsDTO;
 import com.andmark.quotegen.repository.BooksRepository;
+import com.andmark.quotegen.repository.QuotesRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -18,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +40,8 @@ public class ScanServiceTest {
 
     @Mock
     private BooksRepository booksRepository;
-
+    @Mock
+    private QuotesRepository quotesRepository;
     @Mock
     private ModelMapper mapper;
 
@@ -223,6 +229,27 @@ public class ScanServiceTest {
         assertEquals("document", scanService.removeExtension(new File("document")));
         assertEquals("data", scanService.removeExtension(new File("data")));
         assertEquals("image", scanService.removeExtension(new File("image")));
+    }
+
+    @Test
+    public void testGetStatistics() {
+        LocalDate currentDate = LocalDate.of(2023, 8, 22);
+        LocalDate startOfYear = LocalDate.of(2023, 1, 1);
+        LocalDateTime startOfYearDateTime = startOfYear.atStartOfDay();
+
+        when(booksRepository.count()).thenReturn(10L);
+        when(quotesRepository.countByStatusAndUsedAtAfter(QuoteStatus.PUBLISHED, startOfYearDateTime)).thenReturn(5L);
+        when(quotesRepository.countByStatus(QuoteStatus.PENDING)).thenReturn(3L);
+
+        StatsDTO result = scanService.getStatistics();
+
+        verify(booksRepository).count();
+        verify(quotesRepository).countByStatusAndUsedAtAfter(QuoteStatus.PUBLISHED, startOfYearDateTime);
+        verify(quotesRepository).countByStatus(QuoteStatus.PENDING);
+
+        assertEquals(10L, result.getBookCount());
+        assertEquals(5L, result.getPublishedQuotesThisYear());
+        assertEquals(3L, result.getPendingQuotesCount());
     }
 
     private File createTempDirectory() throws IOException {

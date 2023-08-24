@@ -25,10 +25,10 @@ public class ScanController {
     private final ScanService scanService;
     private final BookService bookService;
     private final ModelMapper mapper;
-    private final BookFormatParser parser;
+    private final Fb2BookFormatParser parser;
 
     @Autowired
-    public ScanController(ScanService scanService, BookService bookService, ModelMapper mapper, BookFormatParser parser) {
+    public ScanController(ScanService scanService, BookService bookService, ModelMapper mapper, Fb2BookFormatParser parser) {
         this.scanService = scanService;
         this.bookService = bookService;
         this.mapper = mapper;

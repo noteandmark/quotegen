@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
         return mapper.convertToDTO(user, UserDTO.class);
     }
 
-    private User convertToEntity(UserDTO userDTO) {
+    User convertToEntity(UserDTO userDTO) {
         return mapper.convertToEntity(userDTO, User.class);
     }
 
