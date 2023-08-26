@@ -8,6 +8,18 @@
 ### Changed
 ### Fixed
 
+## [1.3.2] - 2023-08-25
+### Added
+### Fixed
+- changed schedules and start conditions in ScheduledQuoteSenderService
+- checking for user role
+- fix method calculateEndPosition
+## [1.3.1] - 2023-08-22
+### Added
+- command to send a message about feedback, bugs, suggestions to the admin
+## [1.3.0] - 2023-08-21
+### Added
+- added fortune-telling on a random book with page and line indication
 ## [1.2.0] - 2023-08-20
 ### Added
 - added possibility to send a bot a quote once a day to admin chat
