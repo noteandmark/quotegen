@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class QuoteKeyboardService {
+public class QuoteKeyboardService{
 
     public InlineKeyboardMarkup createInlineKeyboard(List<InlineButton> buttons) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();

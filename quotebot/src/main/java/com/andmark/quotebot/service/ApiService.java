@@ -40,4 +40,6 @@ public interface ApiService {
     void updateScheduledActionStatus(ScheduledActionStatusDTO now);
 
     ExtractedLinesDTO processPageAndLineNumber(Long userId, int pageNumber, int lineNumber);
+
+    byte[] downloadImage(String imageUrl);
 }

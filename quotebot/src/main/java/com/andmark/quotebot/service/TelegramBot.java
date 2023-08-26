@@ -57,11 +57,14 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
             UserRole userRole = userRoleCache.get(usertgId);
             // no in cache memory, check in database
             if (userRole == null) {
+                log.debug("user role from cache is null");
                 boolean isRegistered = userService.isRegistered(usertgId);
+                log.debug("isRegistered = {}", isRegistered);
                 // the user has not yet registered anywhere, can only send a message in these cases:
                 if (!isRegistered) {
                     log.debug("user is not registered");
                     BotState state = BotAttributes.getUserCurrentBotState(usertgId);
+                    log.debug("state = {}", state);
                     switch (state) {
                         case AWAITING_USERNAME_INPUT -> quoteService.handleUsernameInputResponse(update);
                         case AWAITING_PASSWORD_INPUT -> quoteService.handlePasswordInputResponse(update);
@@ -75,32 +78,17 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
                 }
                 // user found in the database, temporarily stores
                 else {
+                    log.debug("getting registered user role");
                     userRole = apiService.getUserRole(usertgId);
                     userRoleCache.put(usertgId, userRole);
                     // processing his message
                 }
             }
-            log.debug("handle incoming message");
+            log.debug("permit handle incoming message");
             quoteService.handleIncomingMessage(update);
         } else if (update.hasCallbackQuery()) {
             quoteService.handleCallbackQuery(update);
         }
-    }
-
-    private boolean registrateUser(Long usertgId, Message message) {
-        UserRole userRole;
-        // Check if the user is registered
-        boolean isRegistered = userService.isRegistered(usertgId);
-        if (!isRegistered) {
-            log.debug("user is not registered");
-            // Initiate the registration process
-            userService.initiateRegistration(message.getChatId(), usertgId);
-            return false;
-        }
-        // If user is registered, fetch and cache their role
-        userRole = apiService.getUserRole(usertgId);
-        userRoleCache.put(usertgId, userRole);
-        return true;
     }
 
     // publishes pending quotes, run every hour (3600000)

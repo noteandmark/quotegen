@@ -21,6 +21,7 @@ public class BotConfig {
     public static Long adminChatId;
     public static String readmeFile;
     public static String changelogFile;
+    public static Integer hoursScheduleExecution;
 
     @Value("${api.base.url}")
     public void setApiBaseUrl(String API_BASE_URL) {
@@ -55,6 +56,11 @@ public class BotConfig {
     @Value("${changelog.file}")
     public void setChangelogFile(String changelogFile) {
         BotConfig.changelogFile = changelogFile;
+    }
+
+    @Value("${telegram.bot.hours-schedule-execution}")
+    public void setHoursScheduleExecution(Integer hoursScheduleExecution) {
+        BotConfig.hoursScheduleExecution = hoursScheduleExecution;
     }
 
     @Bean

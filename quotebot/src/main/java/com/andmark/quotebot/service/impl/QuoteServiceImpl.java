@@ -7,7 +7,6 @@ import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.dto.UserDTO;
 import com.andmark.quotebot.exception.QuoteException;
 import com.andmark.quotebot.service.*;
-import com.andmark.quotebot.service.command.ReportCommand;
 import com.andmark.quotebot.service.enums.BotState;
 import com.andmark.quotebot.service.googleapi.GoogleCustomSearchService;
 import com.andmark.quotebot.service.keyboard.QuoteKeyboardService;
@@ -15,16 +14,12 @@ import com.andmark.quotebot.util.BotAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,18 +64,19 @@ public class QuoteServiceImpl implements QuoteService {
         String userInput = message.getText().trim();
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
-        log.debug("userInput = {}, botState = {}", userInput, BotAttributes.getUserCurrentBotState(userId));
+        BotState currentState = BotAttributes.getUserCurrentBotState(userId);
+        log.debug("userInput = {}, botState = {}", userInput, currentState);
 
         if (userInput.equals("сброс")) {
             clearBotAttributes(userId);
             telegramBot.sendMessage(chatId, null, "Состояние сброшено");
+            log.debug("reset made after input 'сброс'");
+            return;
         }
         if (userId.equals(adminChatId) && userInput.startsWith("q:")) {
             log.debug("quoteText offer text = {}", userInput);
             quoteText.push(userInput.substring(2));
         } else {
-            BotState currentState = BotAttributes.getUserCurrentBotState(userId);
-
             switch (currentState) {
                 case AWAITING_IMAGE_CHOICE -> handleImageChoiceResponse(chatId, userInput);
                 case AWAITING_PUBLISHING -> handlePublishingChoiceResponse(chatId, userInput);
@@ -89,29 +85,6 @@ public class QuoteServiceImpl implements QuoteService {
                 case AWAITING_LINE_NUMBER -> handleLineNumberInput(userId, userInput);
                 default -> log.warn("state encountered: {}", currentState);
             }
-
-//            // selects a picture for the accepted quote
-//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.AWAITING_IMAGE_CHOICE)) {
-//                log.debug("current state is AWAITING_IMAGE_CHOICE");
-//                handleImageChoiceResponse(chatId, userInput);
-//            }
-//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.AWAITING_PUBLISHING)) {
-//                log.debug("current state is AWAITING_PUBLISHING");
-//                handlePublishingChoiceResponse(chatId, userInput);
-//            }
-//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.POSTPONE)) {
-//                log.debug("current state is POSTPONE");
-//                handlePostponeChoiceResponse(chatId, userInput);
-//            }
-//            // divination command
-//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.AWAITING_PAGE_NUMBER)) {
-//                log.debug("current state is AWAITING_PAGE_NUMBER");
-//                handlePageNumberInput(userId, userInput);
-//            }
-//            if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.AWAITING_LINE_NUMBER)) {
-//                log.debug("current state is AWAITING_LINE_NUMBER");
-//                handleLineNumberInput(userId, userInput);
-//            }
         }
     }
 
@@ -122,17 +95,18 @@ public class QuoteServiceImpl implements QuoteService {
         botAttributes.setLastMessageId(callbackQuery.getMessage().getMessageId());
         log.debug("handleCallbackQuery with lastMessageId: {}", botAttributes.getLastMessageId());
         botAttributes.setLastCallbackMessage(callbackQuery.getMessage().getText());
-        log.debug("handleCallbackQuery push in lastCallbackMessage: {}", botAttributes.getLastCallbackMessage());
+        log.debug("handleCallbackQuery push in lastCallbackMessage: {}", callbackQuery.getMessage().getText());
         Long chatId = callbackQuery.getMessage().getChatId();
         Long userId = callbackQuery.getFrom().getId();
         log.debug("chatID = {}", chatId);
+        BotState currentBotState = BotAttributes.getUserCurrentBotState(userId);
 
         String[] dataParts = callbackQuery.getData().split("-");
         String action = dataParts[0];
         Long quoteId = Long.valueOf(dataParts[1]);
         log.debug("action = {}  quoteId = {}", action, quoteId);
-        log.debug("botAttributes.getCurrentState() = {}", BotAttributes.getUserCurrentBotState(userId));
-        if (BotAttributes.getUserCurrentBotState(userId).equals(BotState.START)) {
+        log.debug("botAttributes.getCurrentState() = {}", currentBotState);
+        if (currentBotState.equals(BotState.START)) {
             switch (action) {
                 case "edit" -> editQuote(chatId, quoteId);
                 case "confirm" -> confirmQuote(chatId, quoteId);
@@ -144,7 +118,11 @@ public class QuoteServiceImpl implements QuoteService {
 
     public QuoteDTO publishQuoteToGroup(QuoteDTO quoteDTO) {
         log.debug("quote id = {} service publish to group", quoteDTO.getId());
-        if (quoteDTO.getContent() != null && !quoteDTO.getContent().isEmpty()) {
+
+        boolean hasContent = quoteDTO.getContent() != null && !quoteDTO.getContent().isEmpty();
+        boolean hasImage = quoteDTO.getImageUrl() != null && !quoteDTO.getImageUrl().isEmpty();
+
+        if (hasContent) {
             String randomGreeting = apiService.getRandomGreeting();
             String signature = "\nВаш бот Книголюб, " + botUsername;
             if (!randomGreeting.isEmpty()) {
@@ -153,12 +131,15 @@ public class QuoteServiceImpl implements QuoteService {
             }
             log.debug("sending message with content quote id = {} to group chat", quoteDTO.getId());
             telegramBot.sendMessage(groupChatId, null, quoteDTO.getContent());
+
+            if (hasImage) {
+                log.debug("sending message with image quote id = {} to group chat", quoteDTO.getId());
+                telegramBot.sendImageToChat(groupChatId, quoteDTO.getImageUrl());
+            }
             quoteDTO.setStatus(QuoteStatus.PUBLISHED);
+
         }
-        if (quoteDTO.getImageUrl() != null && !quoteDTO.getImageUrl().isEmpty()) {
-            log.debug("sending message with image quote id = {} to group chat", quoteDTO.getId());
-            telegramBot.sendImageToChat(groupChatId, quoteDTO.getImageUrl());
-        }
+
         BotAttributes.setUserCurrentBotState(adminChatId, BotState.START);
         return quoteDTO;
     }
@@ -177,7 +158,7 @@ public class QuoteServiceImpl implements QuoteService {
         apiService.sendRequestAndHandleResponse(requestConfig);
     }
 
-    private void handleImageChoiceResponse(Long chatId, String userInput) {
+    void handleImageChoiceResponse(Long chatId, String userInput) {
         log.debug("current state is AWAITING_IMAGE_CHOICE");
         String chosenImageUrl = null;
 
@@ -193,20 +174,23 @@ public class QuoteServiceImpl implements QuoteService {
         } else {
             log.warn("NumberFormatException in NumberFormatException with choice = {}", userInput);
             telegramBot.sendMessage(chatId, null, "Выбери изображение от 0 до 10 (0 - пост без изображений).");
+            return;
         }
         postingQuote(chatId);
     }
 
-    private void postingQuote(Long chatId) {
+    void postingQuote(Long chatId) {
+        String lastCallbackMessage = botAttributes.getLastCallbackMessage();
+        BotState currentBotState = BotAttributes.getUserCurrentBotState(adminChatId);
         log.debug("in postingQuote with lastCallbackMessage: {}, chosenImageUrl: {}",
-                botAttributes.getLastCallbackMessage(), botAttributes.getConfirmedUrl());
+                lastCallbackMessage, botAttributes.getConfirmedUrl());
         // choose whether to publish the quote immediately or postpone it
-        log.debug("in postingQuote currentState = " + BotAttributes.getUserCurrentBotState(adminChatId));
+        log.debug("in postingQuote currentState = {}", currentBotState);
         telegramBot.sendMessage(chatId, null, "Публиковать [сразу] или [отложить]?");
         BotAttributes.setUserCurrentBotState(adminChatId, BotState.AWAITING_PUBLISHING);
     }
 
-    private void handlePublishingChoiceResponse(Long chatId, String userInput) {
+    void handlePublishingChoiceResponse(Long chatId, String userInput) {
         log.debug("current state is AWAITING_PUBLISHING, userInput = {}", userInput);
         switch (userInput) {
             case "сразу" -> {
@@ -254,7 +238,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    private void postponePublishing(Long chatId, LocalDateTime pendingTime) {
+    void postponePublishing(Long chatId, LocalDateTime pendingTime) {
         QuoteDTO quoteDTO = new QuoteDTO();
         quoteDTO.setId(botAttributes.getQuoteId());
         quoteDTO.setContent(botAttributes.getConfirmedContent());
@@ -263,7 +247,6 @@ public class QuoteServiceImpl implements QuoteService {
         quoteDTO.setImageUrl(botAttributes.getConfirmedUrl());
 
         String confirmUrl = API_BASE_URL + "/quotes/pending";
-//        apiService.sendRequestAndHandleResponse(confirmUrl, HttpMethod.POST, quoteDTO, "успешно отложена на " + pendingTime, null);
         RequestConfiguration requestConfig = new RequestConfiguration.Builder()
                 .url(confirmUrl)
                 .httpMethod(HttpMethod.POST)
@@ -276,7 +259,7 @@ public class QuoteServiceImpl implements QuoteService {
         clearBotAttributes(adminChatId);
     }
 
-    private void editQuote(Long chatId, Long quoteId) {
+    void editQuote(Long chatId, Long quoteId) {
         log.debug("editQuote with chatId: {} and quoteId: {}", chatId, quoteId);
         // Edit the original message to remove the inline keyboard
         telegramBot.removeKeyboard(chatId);
@@ -287,7 +270,7 @@ public class QuoteServiceImpl implements QuoteService {
         telegramBot.sendMessage(chatId, keyboard, editedText);
     }
 
-    private void confirmQuote(Long chatId, Long quoteId) {
+    void confirmQuote(Long chatId, Long quoteId) {
         log.debug("confirmQuote with chatId: {} and quoteId: {} and quoteText.isEmpty: {}", chatId, quoteId, quoteText.isEmpty());
         String content = (!quoteText.isEmpty()) ? quoteText.pop() : botAttributes.getLastCallbackMessage();
         botAttributes.setConfirmedContent(content);
@@ -302,7 +285,7 @@ public class QuoteServiceImpl implements QuoteService {
         sendImagesToChoice(chatId);
     }
 
-    private void rejectQuote(Long chatId, Long quoteId) {
+    void rejectQuote(Long chatId, Long quoteId) {
         log.debug("rejectQuote with chatId: {} and quoteId: {}", chatId, quoteId);
         String rejectUrl = API_BASE_URL + "/quotes/reject?id=" + quoteId;
         log.debug("rejectUrl quote with url = {}", rejectUrl);
@@ -318,12 +301,12 @@ public class QuoteServiceImpl implements QuoteService {
         apiService.sendRequestAndHandleResponse(requestConfig);
     }
 
-    private void sendImagesToChoice(Long chatId) {
+    void sendImagesToChoice(Long chatId) {
         for (int i = 0; i < IMAGE_COUNT_TO_CHOICE; i++) {
             log.debug("in sendImagesToChoice botAttributes.getImageUrls().size() = {}", botAttributes.getImageUrls().size());
             if (botAttributes.getImageUrls().size() > i) {
                 String imageUrl = botAttributes.getImageUrls().get(i);
-                byte[] imageBytes = downloadImage(imageUrl);
+                byte[] imageBytes = apiService.downloadImage(imageUrl);
                 // Send the image as an attachment
                 telegramBot.sendImageAttachment(chatId, imageBytes, i + 1);
             }
@@ -332,12 +315,6 @@ public class QuoteServiceImpl implements QuoteService {
         telegramBot.removeKeyboard(chatId);
         telegramBot.sendMessage(chatId, null, "Выбери изображение, введя цифру в пределах [1-" + botAttributes.getImageUrls().size() + "]");
         BotAttributes.setUserCurrentBotState(adminChatId, BotState.AWAITING_IMAGE_CHOICE);
-    }
-
-    private byte[] downloadImage(String imageUrl) {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<byte[]> response = restTemplate.exchange(imageUrl, HttpMethod.GET, null, byte[].class);
-        return response.getBody();
     }
 
     private boolean isValidImageChoice(String userInput, int countImages) {
@@ -360,6 +337,7 @@ public class QuoteServiceImpl implements QuoteService {
         if (!userService.isUsernameTaken(username)) {
             log.debug("username is available, proceed with registration");
             userRegistrationService.handleUsernameInput(usertgId, chatId, username);
+            BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_PASSWORD_INPUT);
         } else {
             log.warn("username is already taken");
             telegramBot.sendMessage(chatId, null, "Имя пользователя уже занято. Пожалуйста, выберите другое имя.");
@@ -415,7 +393,6 @@ public class QuoteServiceImpl implements QuoteService {
             throw new QuoteException("handleLineNumberInput wrong input:" + e);
         }
         // Update user's current state
-//        BotAttributes.setUserCurrentBotState(userId, BotState.START);
         log.debug("set line number = {} for userId = {}", lineNumber, userId);
         // start divination
         // Retrieve the user's page number from the UserContext

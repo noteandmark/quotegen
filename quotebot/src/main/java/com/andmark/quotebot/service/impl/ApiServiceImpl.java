@@ -316,6 +316,12 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
+    public byte[] downloadImage(String imageUrl) {
+        log.debug("downloadImage from imageUrl = {}", imageUrl);
+        ResponseEntity<byte[]> response = restTemplate.exchange(imageUrl, HttpMethod.GET, null, byte[].class);
+        return response.getBody();
+    }
+
     private String formatQuoteText(QuoteDTO quoteDTO) {
         return quoteDTO.getContent() + "\n\n"
                 + quoteDTO.getBookAuthor() + "\n"

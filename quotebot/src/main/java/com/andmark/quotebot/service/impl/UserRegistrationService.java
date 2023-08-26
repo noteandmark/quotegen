@@ -41,7 +41,6 @@ public class UserRegistrationService {
             log.debug("contains usertgId = {}", usertgId);
             telegramBot.sendMessage(chatId, null, "Имя пользователя принято. Введите пароль.");
             botAttributes.setUsername(username);
-            BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_PASSWORD_INPUT);
         }
     }
 
@@ -63,9 +62,18 @@ public class UserRegistrationService {
         return userDTO;
     }
 
+    public boolean isUserInProgress(Long userId) {
+        return usersInProgress.contains(userId);
+    }
+
+    public void setUsersInProgress(Long userId) {
+        usersInProgress.add(userId);
+    }
+
     public void completeRegistration(Long usertgId, Long chatId) {
         log.info("success registration");
         usersInProgress.remove(usertgId);
+        log.debug("removed usertgId from usersInProgress");
         botAttributes.setUsername(null);
         telegramBot.sendMessage(chatId, null, "Вы зарегистрированы. Теперь можете пользоваться командами бота");
     }

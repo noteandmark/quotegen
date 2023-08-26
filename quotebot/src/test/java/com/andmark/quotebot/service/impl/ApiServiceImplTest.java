@@ -19,6 +19,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
@@ -414,6 +415,26 @@ public class ApiServiceImplTest {
 
         // Verify the result
         assertEquals(mockExtractedLinesDTO, result);
+    }
+
+    @Test
+    public void testDownloadImage() {
+        // Given
+        String imageUrl = "http://example.com/image.jpg";
+        byte[] imageBytes = "sample image data".getBytes();
+        ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(imageBytes, HttpStatus.OK);
+
+        // Configure the restTemplate mock
+        when(restTemplate.exchange(eq(imageUrl), eq(HttpMethod.GET), any(), eq(byte[].class)))
+                .thenReturn(responseEntity);
+
+        // When
+        byte[] downloadedImage = apiService.downloadImage(imageUrl);
+
+        // Then
+        assertNotNull(downloadedImage);
+        assertArrayEquals(imageBytes, downloadedImage);
+        verify(restTemplate, times(1)).exchange(eq(imageUrl), eq(HttpMethod.GET), any(), eq(byte[].class));
     }
 
 }
