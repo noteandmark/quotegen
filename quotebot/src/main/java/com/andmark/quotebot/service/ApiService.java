@@ -4,6 +4,7 @@ import com.andmark.quotebot.domain.RequestConfiguration;
 import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.dto.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ApiService {
@@ -42,4 +43,6 @@ public interface ApiService {
     ExtractedLinesDTO processPageAndLineNumber(Long userId, int pageNumber, int lineNumber);
 
     byte[] downloadImage(String imageUrl);
+
+    AvailableDaysResponseDTO findAvailableDays();
 }

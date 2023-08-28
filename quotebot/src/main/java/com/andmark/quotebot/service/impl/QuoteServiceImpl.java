@@ -2,6 +2,7 @@ package com.andmark.quotebot.service.impl;
 
 import com.andmark.quotebot.domain.RequestConfiguration;
 import com.andmark.quotebot.domain.enums.QuoteStatus;
+import com.andmark.quotebot.dto.AvailableDaysResponseDTO;
 import com.andmark.quotebot.dto.ExtractedLinesDTO;
 import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.dto.UserDTO;
@@ -21,11 +22,14 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 
 import static com.andmark.quotebot.config.BotConfig.*;
@@ -139,7 +143,6 @@ public class QuoteServiceImpl implements QuoteService {
             quoteDTO.setStatus(QuoteStatus.PUBLISHED);
 
         }
-
         BotAttributes.setUserCurrentBotState(adminChatId, BotState.START);
         return quoteDTO;
     }
@@ -221,15 +224,20 @@ public class QuoteServiceImpl implements QuoteService {
 
     private void handlePostponeChoiceResponse(Long chatId, String userInput) {
         log.debug("current state is POSTPONE");
+        // random selection of publication date
         if (userInput.equalsIgnoreCase("случайно")) {
             log.debug("quote service: handlePostponeChoiceResponse user input = 'случайно'");
+            // run logic of random publication
+            scheduleRandomPendingPublication();
             BotAttributes.setUserCurrentBotState(adminChatId, BotState.START);
-        } else {
+        }
+        // selection for a specific date and time
+        else {
             // Parse the input as a date
             try {
                 LocalDateTime pendingTime = LocalDateTime.parse(userInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 // send the quote to be saved in the database
-                postponePublishing(chatId, pendingTime);
+                postponePublishing(pendingTime);
             } catch (DateTimeParseException e) {
                 // Handle invalid date format error
                 if (!userInput.equals("отложить"))
@@ -238,7 +246,22 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    void postponePublishing(Long chatId, LocalDateTime pendingTime) {
+    void scheduleRandomPendingPublication() {
+        log.debug("random pending publication");
+        AvailableDaysResponseDTO availableDays = apiService.findAvailableDays();
+        if (availableDays.getAvailableDay() != null && availableDays.getAvailableDay().isAfter(LocalDateTime.now())) {
+            // The availableDay field is not null and contains a date-time value in the future
+
+        } else if (availableDays.getAvailableDay() != null) {
+            // The availableDay field is not null and contains a valid past date-time value
+
+        } else {
+            // The availableDay field is null or doesn't contain a valid date-time value
+
+        }
+    }
+
+    void postponePublishing(LocalDateTime pendingTime) {
         QuoteDTO quoteDTO = new QuoteDTO();
         quoteDTO.setId(botAttributes.getQuoteId());
         quoteDTO.setContent(botAttributes.getConfirmedContent());

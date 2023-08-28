@@ -50,7 +50,6 @@ public class VersionCommand extends QuoteCommand {
         log.debug("try to load file content from file: {}", resourcePath);
 
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-//        try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
             if (inputStream != null) {
                 byte[] bytes = inputStream.readAllBytes();
                 return new String(bytes, StandardCharsets.UTF_8);

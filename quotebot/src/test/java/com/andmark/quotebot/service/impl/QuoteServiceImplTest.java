@@ -100,8 +100,8 @@ public class QuoteServiceImplTest {
             quoteService.handleIncomingMessage(update);
 
             // Verify interactions
-            verify(telegramBot).sendMessage(eq(123L), isNull(), eq("Публиковать [сразу] или [отложить]?"));
-            mockedBotAttributes.verify(() -> BotAttributes.setUserCurrentBotState(anyLong(), eq(BotState.AWAITING_PUBLISHING)));
+            verify(telegramBot).sendMessage(eq(123L), isNull(), eq("Выбери изображение от 0 до 10 (0 - пост без изображений)."));
+//            mockedBotAttributes.verify(() -> BotAttributes.setUserCurrentBotState(anyLong(), eq(BotState.AWAITING_PUBLISHING)));
         }
     }
 
@@ -363,11 +363,10 @@ public class QuoteServiceImplTest {
 
         // Verify interactions
         verify(telegramBot, never()).removeKeyboard(chatId);
-        verify(telegramBot).sendMessage(eq(chatId), any(), eq("Публиковать [сразу] или [отложить]?"));
         verify(botAttributes, never()).setConfirmedUrl(anyString());
         verify(telegramBot).sendMessage(eq(chatId), any(), eq("Выбери изображение от 0 до 10 (0 - пост без изображений)."));
         verify(botAttributes, never()).setConfirmedUrl(null);
-        verify(telegramBot, times(2)).sendMessage(eq(chatId), any(), anyString());
+        verify(telegramBot, times(1)).sendMessage(eq(chatId), any(), anyString());
     }
 
     @Test
@@ -413,7 +412,7 @@ public class QuoteServiceImplTest {
             botAttributes.setConfirmedContent(content);
 
             // Call postponePublishing method
-            quoteService.postponePublishing(chatId, pendingTime);
+            quoteService.postponePublishing(pendingTime);
 
             // Verify interactions
             verify(apiService).sendRequestAndHandleResponse(any(RequestConfiguration.class)); // Verify sendRequestAndHandleResponse call

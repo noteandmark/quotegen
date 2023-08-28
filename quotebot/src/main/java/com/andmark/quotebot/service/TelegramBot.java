@@ -19,6 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
@@ -36,7 +37,10 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
     // a map to store user roles (in-memory cache)
     private final Map<Long, UserRole> userRoleCache = new ConcurrentHashMap<>();
 
-    public TelegramBot(BotAttributes botAttributes, ApiService apiService, QuoteService quoteService, UserService userService) {
+    public TelegramBot(BotAttributes botAttributes,
+                       ApiService apiService,
+                       QuoteService quoteService,
+                       UserService userService) {
         this.botAttributes = botAttributes;
         this.apiService = apiService;
         this.quoteService = quoteService;

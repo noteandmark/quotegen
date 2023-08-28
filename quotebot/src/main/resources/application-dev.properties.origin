@@ -7,5 +7,8 @@ telegram.bot.token=YOUR_BOT_TOKEN
 telegram.bot.groupid=YOUR_GROUP_ID
 telegram.bot.adminchatid=YOUR_ADMIN_CHAT_ID
 
+# schedule send quote to admin check one time per hours
+telegram.bot.hours-schedule-execution=8
+
 spring.task.scheduling.pool.size=1
 api.base.url=http://localhost:8090/api

@@ -10,7 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class YesNoApiResponse {
+public class YesNoApiResponseDTO {
 
     private String answer;
     private boolean forced;

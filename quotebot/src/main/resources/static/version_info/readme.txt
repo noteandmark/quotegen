@@ -1,6 +1,6 @@
 Quote Generator REST API and Client Telegram Bot
 
-version 1.3.1 (22.08.2023)
+version 1.3.2 (25.08.2023)
 author: andmark
 email to contact: noteandmark@gmail.com
 

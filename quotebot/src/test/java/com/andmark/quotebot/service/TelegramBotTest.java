@@ -1,28 +1,41 @@
 package com.andmark.quotebot.service;
 
 
+import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.dto.QuoteDTO;
+import com.andmark.quotebot.service.command.HelpCommand;
+import com.andmark.quotebot.service.command.QuoteCommand;
+import com.andmark.quotebot.service.command.StartCommand;
+import com.andmark.quotebot.service.command.VersionCommand;
 import com.andmark.quotebot.service.enums.BotState;
 import com.andmark.quotebot.util.BotAttributes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.bots.AbsSender;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class TelegramBotTest {
     @Mock
     private BotAttributes botAttributes;
+    @Mock
+    private BotConfig botConfigMock;
     @Mock
     private ApiService apiService;
     @Mock
@@ -209,6 +222,16 @@ public class TelegramBotTest {
 
         verify(apiService).getPendingQuotes();
         verifyNoMoreInteractions(apiService, quoteService);
+    }
+
+    @Test
+    public void testGetBotUsername() {
+        String expectedBotUsername = "your_expected_bot_username";
+        when(botConfigMock.getBotUsername()).thenReturn(expectedBotUsername);
+
+        String botUsername = telegramBot.getBotUsername();
+
+        assertEquals(expectedBotUsername, botUsername);
     }
 
     private Update createUpdateWithMessageText(String text) {

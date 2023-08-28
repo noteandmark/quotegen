@@ -18,6 +18,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -169,13 +170,13 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public String getResponseYesOrNo(String apiUrl) {
-        ResponseEntity<YesNoApiResponse> response = restTemplate.exchange(
-                apiUrl, HttpMethod.GET, null, YesNoApiResponse.class);
+        ResponseEntity<YesNoApiResponseDTO> response = restTemplate.exchange(
+                apiUrl, HttpMethod.GET, null, YesNoApiResponseDTO.class);
 
         if (response.getStatusCode() == HttpStatus.OK) {
-            YesNoApiResponse yesNoApiResponse = response.getBody();
-            if (yesNoApiResponse != null) {
-                return yesNoApiResponse.getImage();
+            YesNoApiResponseDTO yesNoApiResponseDTO = response.getBody();
+            if (yesNoApiResponseDTO != null) {
+                return yesNoApiResponseDTO.getImage();
             }
         } else {
             log.error("Error fetching response from API: {}", response.getStatusCode());
@@ -316,11 +317,39 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
+    @Override
     public byte[] downloadImage(String imageUrl) {
         log.debug("downloadImage from imageUrl = {}", imageUrl);
-        ResponseEntity<byte[]> response = restTemplate.exchange(imageUrl, HttpMethod.GET, null, byte[].class);
+        ResponseEntity<byte[]> response = restTemplate.exchange(imageUrl,
+                HttpMethod.GET,
+                null,
+                byte[].class);
         return response.getBody();
     }
+
+    @Override
+    public AvailableDaysResponseDTO findAvailableDays() {
+        log.debug("api service: send request findAvailableDays");
+        String imageUrl = BotConfig.API_BASE_URL + "/quotes/get-available-days";
+
+        ResponseEntity<AvailableDaysResponseDTO> response = restTemplate.exchange(imageUrl,
+                HttpMethod.GET,
+                null,
+                AvailableDaysResponseDTO.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            log.debug("Response received with available days");
+            AvailableDaysResponseDTO responseDTO = response.getBody();
+            if (responseDTO != null) {
+                log.debug("return response with available days list");
+                return responseDTO;
+            }
+        } else {
+            log.error("Error fetching available days. Status code: {}", response.getStatusCode());
+        }
+        return new AvailableDaysResponseDTO();
+    }
+
 
     private String formatQuoteText(QuoteDTO quoteDTO) {
         return quoteDTO.getContent() + "\n\n"

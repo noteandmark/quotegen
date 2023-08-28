@@ -1,13 +1,10 @@
 package com.andmark.quotebot.service;
 
 import com.andmark.quotebot.dto.ScheduledActionStatusDTO;
-import com.andmark.quotebot.exception.QuoteException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -17,8 +14,12 @@ import static java.lang.Thread.sleep;
 @Service
 @Slf4j
 public class ScheduledQuoteSenderService {
-    @Autowired
-    private ApiService apiService;
+
+    private final ApiService apiService;
+
+    public ScheduledQuoteSenderService(ApiService apiService) {
+        this.apiService = apiService;
+    }
 
 // @Scheduled(fixedRate = 4 * 60 * 60 * 1000) // this line will be if we need scheduled to run every 4 hours
 
