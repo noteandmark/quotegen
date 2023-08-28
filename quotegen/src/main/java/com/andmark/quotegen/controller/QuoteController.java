@@ -1,5 +1,6 @@
 package com.andmark.quotegen.controller;
 
+import com.andmark.quotegen.dto.AvailableDayResponseDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.service.QuoteService;
@@ -121,6 +122,7 @@ public class QuoteController {
 
     @GetMapping("/random/published")
     public ResponseEntity<QuoteDTO> getRandomPublishedQuote() {
+        log.debug("quote controller: getRandomPublishedQuote");
         QuoteDTO randomPublishedQuote = quoteService.getRandomPublishedQuote();
 
         if (randomPublishedQuote != null) {
@@ -134,8 +136,16 @@ public class QuoteController {
 
     @GetMapping("/week")
     public ResponseEntity<List<QuoteDTO>> getPublishedQuotesForWeek() {
+        log.debug("quote controller: getPublishedQuotesForWeek");
         List<QuoteDTO> quotes = quoteService.getPublishedQuotesForWeek();
         return ResponseEntity.ok(quotes);
+    }
+
+    @GetMapping("/get-available-days")
+    public ResponseEntity<AvailableDayResponseDTO> getAvailableDays() {
+        log.debug("quote controller: getAvailableDays");
+        AvailableDayResponseDTO availableDayResponseDTO = quoteService.getAvailableDays();
+        return ResponseEntity.ok(availableDayResponseDTO);
     }
 
 }

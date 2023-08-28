@@ -4,6 +4,7 @@ import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.domain.enums.QuoteStatus;
+import com.andmark.quotegen.dto.AvailableDayResponseDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.exception.ServiceException;
@@ -20,10 +21,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.andmark.quotegen.config.AppConfig.*;
+import static java.lang.Thread.sleep;
 
 @Service
 @Transactional(readOnly = true)
@@ -93,6 +98,7 @@ public class QuoteServiceImpl implements QuoteService {
         log.info("delete quote with id {} perform", id);
     }
 
+    @Override
     @Transactional
     public void checkAndPopulateCache() {
         log.debug("service checkAndPopulateCache");
@@ -105,6 +111,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
+    @Override
     public QuoteDTO provideQuoteToClient() {
         log.debug("service provideQuoteToClient");
         Quote quote = quotesRepository.findFirstByUsedAtIsNull();
@@ -112,6 +119,7 @@ public class QuoteServiceImpl implements QuoteService {
         return convertToDTO(quote);
     }
 
+    @Override
     @Transactional
     public void pendingQuote(QuoteDTO quoteDTO) {
         log.debug("service pendingQuote");
@@ -141,6 +149,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
+    @Override
     public List<QuoteDTO> getPublishedQuotesForWeek() {
         log.debug("quote service getPublishedQuotesForWeek");
 
@@ -155,6 +164,7 @@ public class QuoteServiceImpl implements QuoteService {
         return convertToDtoList(quotes);
     }
 
+    @Override
     @Transactional
     public void confirmQuote(QuoteDTO quoteDTO) {
         log.debug("service confirmQuote");
@@ -205,7 +215,9 @@ public class QuoteServiceImpl implements QuoteService {
         return allBooks;
     }
 
+    @Override
     public List<QuoteDTO> getPendingQuotes() {
+        log.debug("quote service: getPendingQuotes");
         List<Quote> pendingQuoteEntities = quotesRepository.findByStatus(QuoteStatus.PENDING);
         return convertToDtoList(pendingQuoteEntities);
     }
@@ -249,6 +261,112 @@ public class QuoteServiceImpl implements QuoteService {
         String bookText = fixFormatting(rawBookText);
         log.debug("bookText length = {}", bookText.length());
         return bookText;
+    }
+
+    @Override
+    public AvailableDayResponseDTO getAvailableDays() {
+        log.debug("quote service: getAvailableDays");
+        AvailableDayResponseDTO availableDayResponseDTO = new AvailableDayResponseDTO();
+        StringBuilder messageText = new StringBuilder();
+
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalDateTime beginningOfDay = currentDateTime.toLocalDate().plusDays(1).atStartOfDay();
+        log.debug("beginningOfDay = {}", beginningOfDay);
+        LocalDateTime startDate = beginningOfDay; // Start from tomorrow
+        log.debug("startDate = {}", startDate);
+        LocalDateTime endDate = startDate.plusDays(daysPublicationAhead); // n days in advance
+        log.debug("endDate = {}", endDate);
+        // the maximum end date based on maxPeriodDaysAhead and beginningOfDay
+        LocalDateTime maxEndDate = beginningOfDay.plusDays(maxPeriodDaysAhead);
+        log.debug("maxEndDate = {}", maxEndDate);
+
+        boolean foundAvailableDay = false;
+        Random random = new Random();
+        // searching until we find a free day to publish, or go beyond the maximum period
+        do {
+            log.debug("sending request to database");
+            // a list of all days between startDate and endDate
+            List<LocalDate> allDaysInRange = generateDateRange(startDate.toLocalDate(), endDate.minusMinutes(1).toLocalDate());
+            // Initialize the dayToCountMap with 0 counts for all days in the range
+            System.out.println("allDaysInRange = " + allDaysInRange);
+            Map<LocalDate, Long> dayToCountMap = allDaysInRange.stream()
+                    .collect(Collectors.toMap(day -> day, day -> 0L));
+
+            // Fetch pending times between startTime and endTime
+            List<LocalDateTime> pendingTimes = quotesRepository.findPendingTimesBetween(startDate, endDate);
+            log.debug("get pendingTimes size: {}", pendingTimes.size());
+
+            // Populate the dayToCountMap with actual counts from pendingTimes
+            pendingTimes.stream()
+                    .map(LocalDateTime::toLocalDate)
+                    .forEach(day -> dayToCountMap.put(day, dayToCountMap.getOrDefault(day, 0L) + 1));
+
+            // Filter days with no more than 2 occurrences of pending times
+            List<LocalDate> availableDays = dayToCountMap.entrySet().stream()
+                    .filter(entry -> entry.getValue() < quotesInDay)
+                    .map(Map.Entry::getKey)
+                    .toList();
+            log.debug("availableDays in size: {}", availableDays.size());
+
+            if (!availableDays.isEmpty()) {
+                log.debug("availableDays is not empty");
+                foundAvailableDay = true;
+                LocalDate selectedDay = availableDays.get(random.nextInt(availableDays.size()));
+                log.debug("getting selectedDay: {}", selectedDay);
+
+                LocalDateTime scheduledDate = generateRandomTime(selectedDay);
+                log.debug("return random date+time = {}", scheduledDate);
+
+                messageText.append("Случайная дата публикации выбрана: ");
+                availableDayResponseDTO.setAvailableDay(scheduledDate);
+                availableDayResponseDTO.setMessage(messageText.toString());
+                return availableDayResponseDTO;
+            }
+            // in the specified period all days are filled
+            else {
+                log.debug("no any pending publications");
+                // Extend the search window by another "daysPublicationAhead" days
+                messageText.append("Нет свободных дней для отложенных публикаций до даты: ")
+                        .append(endDate)
+                        .append("\n")
+                        .append("Переношу поиск на следующий период.")
+                        .append("\n");
+                startDate = endDate;
+                // Calculate the new endDate based on daysPublicationAhead
+                LocalDateTime newEndDate = endDate.plusDays(daysPublicationAhead);
+                if (endDate.equals(maxEndDate)) {
+                    foundAvailableDay = true;
+                    log.debug("Didn't find any available days right up to the date: {}", maxEndDate);
+                    messageText.setLength(0);
+                    messageText.append("Назначьте дату вручную, всё заполнено. Не нашли свободных дней до даты: ").append(maxEndDate);
+                    availableDayResponseDTO.setMessage(messageText.toString());
+                }
+                // Adjust the newEndDate to be the minimum of maxEndDate and the calculated newEndDate
+                endDate = newEndDate.isBefore(maxEndDate) ? newEndDate : maxEndDate;
+                log.debug("new startDate = {}, endDate = {}", startDate, endDate);
+            }
+        } while (!foundAvailableDay);
+        return availableDayResponseDTO;
+    }
+
+    private LocalDateTime generateRandomTime(LocalDate date) {
+        log.debug("generating random time");
+        int hour = 8 + new Random().nextInt(16); // Random hour between 8 and 23
+        int minute = new Random().nextInt(60);    // Random minute between 0 and 59
+        log.debug("hour = {}, minute = {}", hour, minute);
+        return LocalDateTime.of(date, LocalTime.of(hour, minute));
+    }
+
+    private List<LocalDate> generateDateRange(LocalDate startDate, LocalDate endDate) {
+        List<LocalDate> dateRange = new ArrayList<>();
+        LocalDate currentDate = startDate;
+
+        while (!currentDate.isAfter(endDate)) {
+            dateRange.add(currentDate);
+            currentDate = currentDate.plusDays(1);
+        }
+
+        return dateRange;
     }
 
     private String fixFormatting(String rawText) {

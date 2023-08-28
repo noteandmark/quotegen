@@ -6,3 +6,10 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5432/booklibrary
 spring.datasource.username=YOUR_DB_USERNAME
 spring.datasource.password=YOUR_DB_PASSWORD
+
+# number of citations per day for publications
+telegram.bot.quotes-in-day=2
+# period of days in which free days for deferred random publication will be searched for
+telegram.bot.days-publication-ahead=30
+# quotation period (in days)
+telegram.bot.max-period-days-ahead=365
