@@ -102,11 +102,11 @@ public class QuoteServiceImpl implements QuoteService {
     @Transactional
     public void checkAndPopulateCache() {
         log.debug("service checkAndPopulateCache");
-        int usedQuotesCount = quotesRepository.countByUsedAtIsNull();
-        log.debug("usedQuotesCount is {}", usedQuotesCount);
+        int unusedQuotesCount = quotesRepository.countByUsedAtIsNullAndPendingTimeIsNull();
+        log.debug("usedQuotesCount is {}", unusedQuotesCount);
 
-        if (usedQuotesCount < 5) {
-            log.debug("usedQuotesCount < 5");
+        if (unusedQuotesCount < 5) {
+            log.debug("unusedQuotesCount < 5");
             populateCache(cacheSize);
         }
     }
@@ -317,7 +317,7 @@ public class QuoteServiceImpl implements QuoteService {
                 LocalDateTime scheduledDate = generateRandomTime(selectedDay);
                 log.debug("return random date+time = {}", scheduledDate);
 
-                messageText.append("Случайная дата публикации выбрана: ");
+                messageText.append("Выбрана случайная дата публикации.");
                 availableDayResponseDTO.setAvailableDay(scheduledDate);
                 availableDayResponseDTO.setMessage(messageText.toString());
                 return availableDayResponseDTO;

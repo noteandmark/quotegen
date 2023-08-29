@@ -12,6 +12,7 @@ import java.util.List;
 public interface QuotesRepository extends JpaRepository<Quote, Long> {
 
     int countByUsedAtIsNull();
+    int countByUsedAtIsNullAndPendingTimeIsNull();
 
     Quote findFirstByUsedAtIsNull();
 
@@ -27,4 +28,5 @@ public interface QuotesRepository extends JpaRepository<Quote, Long> {
     @Query("SELECT q.pendingTime FROM Quote q WHERE q.pendingTime BETWEEN :startTime AND :endTime")
     List<LocalDateTime> findPendingTimesBetween(@Param("startTime") LocalDateTime startTime,
                                                 @Param("endTime") LocalDateTime endTime);
+
 }
