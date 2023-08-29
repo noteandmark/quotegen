@@ -9,12 +9,10 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static com.andmark.quotebot.config.BotConfig.hoursScheduleExecution;
-import static java.lang.Thread.sleep;
 
 @Service
 @Slf4j
 public class ScheduledQuoteSenderService {
-
     private final ApiService apiService;
 
     public ScheduledQuoteSenderService(ApiService apiService) {
@@ -28,10 +26,13 @@ public class ScheduledQuoteSenderService {
     public void sendQuoteToAdmin() {
         log.debug("scheduled run sendQuoteToAdmin check in {}", LocalDateTime.now());
         // Check if the action was already performed today
-        ScheduledActionStatusDTO status = apiService.getScheduledActionStatus();
-        log.debug("get ScheduledActionStatusDTO status = {}", status.getLastExecuted());
+        ScheduledActionStatusDTO status = new ScheduledActionStatusDTO();
+        status = apiService.getScheduledActionStatus();
+
+        System.out.println("status = " + status);
 
         LocalDateTime lastExecuted = status.getLastExecuted();
+        log.debug("get ScheduledActionStatusDTO status lastExecuted = {}", lastExecuted);
 
         if (lastExecuted == null || shouldExecute(lastExecuted)) {
             // Execute the action

@@ -26,7 +26,6 @@ public class UserServiceImplTest {
         Long userId = 123L;
         Long chatId = 456L;
 
-        // When
         userService.initiateRegistration(userId, chatId);
 
         // Then
@@ -39,7 +38,6 @@ public class UserServiceImplTest {
         Long chatId = 456L;
         Long userId = 123L;
 
-        // When
         userService.deleteUser(chatId, userId);
 
         // Then
@@ -50,9 +48,10 @@ public class UserServiceImplTest {
     public void testIsRegistered_True() {
         // Given
         Long userId = 123L;
-        when(apiService.existsByUsertgId(userId)).thenReturn(true);
 
         // When
+        when(apiService.existsByUsertgId(userId)).thenReturn(true);
+
         boolean result = userService.isRegistered(userId);
 
         // Then
@@ -63,9 +62,10 @@ public class UserServiceImplTest {
     public void testIsRegistered_False() {
         // Given
         Long userId = 123L;
-        when(apiService.existsByUsertgId(userId)).thenReturn(false);
 
         // When
+        when(apiService.existsByUsertgId(userId)).thenReturn(false);
+
         boolean result = userService.isRegistered(userId);
 
         // Then
@@ -76,9 +76,9 @@ public class UserServiceImplTest {
     public void testIsUsernameTaken_True() {
         // Given
         String username = "testUsername";
+        // When
         when(apiService.existsByUsername(username)).thenReturn(true);
 
-        // When
         boolean result = userService.isUsernameTaken(username);
 
         // Then
@@ -89,9 +89,9 @@ public class UserServiceImplTest {
     public void testIsUsernameTaken_False() {
         // Given
         String username = "testUsername";
+        // When
         when(apiService.existsByUsername(username)).thenReturn(false);
 
-        // When
         boolean result = userService.isUsernameTaken(username);
 
         // Then

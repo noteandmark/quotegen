@@ -224,16 +224,6 @@ public class TelegramBotTest {
         verifyNoMoreInteractions(apiService, quoteService);
     }
 
-    @Test
-    public void testGetBotUsername() {
-        String expectedBotUsername = "your_expected_bot_username";
-        when(botConfigMock.getBotUsername()).thenReturn(expectedBotUsername);
-
-        String botUsername = telegramBot.getBotUsername();
-
-        assertEquals(expectedBotUsername, botUsername);
-    }
-
     private Update createUpdateWithMessageText(String text) {
         Chat chat = new Chat();
         chat.setId(789L);

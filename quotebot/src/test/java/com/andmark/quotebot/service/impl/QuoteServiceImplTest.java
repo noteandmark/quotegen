@@ -19,8 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.test.context.TestPropertySource;
 import org.telegram.telegrambots.meta.api.objects.*;
 
-import static com.andmark.quotebot.config.BotConfig.API_BASE_URL;
-import static com.andmark.quotebot.config.BotConfig.adminChatId;
+import static com.andmark.quotebot.config.BotConfig.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -164,7 +163,8 @@ public class QuoteServiceImplTest {
             mockedBotAttributes.verify(() -> BotAttributes.getUserCurrentBotState(anyLong()));
             verify(botAttributes).getLastCallbackMessage();
             verify(telegramBot).removeKeyboard(chatId); // You can add any necessary verifications for telegramBot interactions
-            verify(telegramBot).sendMessage(chatId, null, "Выбери изображение, введя цифру в пределах [1-" + botAttributes.getImageUrls().size() + "]");
+            verify(telegramBot).sendMessage(chatId, null, "Выбери изображение, введя цифру в пределах [1-" + botAttributes.getImageUrls().size() + "]"
+                    + "\n" + "Или введи [0] для поста без картинки");
             mockedBotAttributes.verify(() -> BotAttributes.setUserCurrentBotState(adminChatId, BotState.AWAITING_IMAGE_CHOICE));
         }
     }
@@ -257,7 +257,9 @@ public class QuoteServiceImplTest {
     @Test
     public void testPublishQuoteToGroup_WithContent() {
         // Set up mock values
-        Long groupId = -849307184L; // here is needed your testing telegram chat id
+//        Long groupId = -849307184L; // test case: here is needed your testing telegram chat id
+        Long groupId = groupChatId; // prod package case
+
         String content = "Test content";
         String botUsername = "@test_quote_bot"; // here is your testing bot name
         String randomGreeting = "Hello!";
@@ -283,7 +285,9 @@ public class QuoteServiceImplTest {
     @Test
     public void testPublishQuoteToGroup_WithImage() {
         // Set up mock values
-        Long groupId = -849307184L; // here is needed your testing telegram chat id
+//        Long groupId = -849307184L; // test case: here is needed your testing telegram chat id
+        Long groupId = groupChatId; // test case: here is needed your testing telegram chat id
+
         String imageUrl = "image.jpg";
 
         // Call publishQuoteToGroup method

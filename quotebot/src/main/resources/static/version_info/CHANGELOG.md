@@ -4,10 +4,15 @@
 - [QUOTEGEN](http://)
   MAJOR HTTP access.
 - [QUOTEBOT](http://t.me/rimay_bot)
-  MINOR add random publishing pending quotes.
+  MINOR add ...
 ### Changed
 ### Fixed
 
+## [1.3.3] - 2023-08-29
+### Added
+- add random publishing pending quotes
+### Fixed
+- fix method checkAndPopulateCache
 ## [1.3.2] - 2023-08-25
 ### Added
 ### Fixed

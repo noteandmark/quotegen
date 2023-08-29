@@ -1,13 +1,10 @@
 package com.andmark.quotebot.service;
 
-
 import com.andmark.quotebot.dto.QuoteDTO;
 import com.andmark.quotebot.dto.ScheduledActionStatusDTO;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -30,16 +27,12 @@ public class ScheduledQuoteSenderServiceTest {
     @Value("${telegram.bot.hours-schedule-execution}")
     public Integer hoursScheduleExecution;
 
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
     public void testSendQuoteToAdmin_ShouldExecute() {
         // Given
         ScheduledActionStatusDTO status = new ScheduledActionStatusDTO();
         status.setLastExecuted(LocalDateTime.now().minusHours(10)); // last executed 10 hours ago
+
         when(apiService.getScheduledActionStatus()).thenReturn(status);
         when(apiService.getNextQuote()).thenReturn(new QuoteDTO());
 
@@ -54,11 +47,13 @@ public class ScheduledQuoteSenderServiceTest {
     @Test
     public void testSendQuoteToAdmin_ShouldNotExecute() {
         // Given
-        ScheduledActionStatusDTO status = new ScheduledActionStatusDTO();
-        status.setLastExecuted(LocalDateTime.now().minusHours(2)); // last executed 2 hours ago
-        when(apiService.getScheduledActionStatus()).thenReturn(status);
+        ScheduledActionStatusDTO mockStatus = new ScheduledActionStatusDTO();
+        mockStatus.setLastExecuted(LocalDateTime.now().minusHours(1)); // last executed 1 hour ago
 
+        System.out.println("status in test = " + mockStatus);
         // When
+        when(apiService.getScheduledActionStatus()).thenReturn(mockStatus);
+
         scheduledQuoteSenderService.sendQuoteToAdmin();
 
         // Then
