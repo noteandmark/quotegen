@@ -67,10 +67,12 @@ public class BotConfig {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public Map<Long, UserRole> userRoleCache() {
         return new ConcurrentHashMap<>();

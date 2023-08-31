@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
 @Slf4j
-public class GetQuoteCommand extends QuoteCommand{
+public class GetQuoteCommand extends QuoteCommand {
     private final ApiService apiService;
 
     public GetQuoteCommand(ApiService apiService) {
@@ -38,7 +38,7 @@ public class GetQuoteCommand extends QuoteCommand{
                 sendMessage(absSender, chat, "К сожалению, или нет опубликованных цитат, или какая-то ошибка на сервере.");
             }
         } else {
-            sendMessage(absSender,chat,"Эта возможность только для зарегистрированных пользователей. Воспользуйтесь командой /signup");
+            sendMessage(absSender, chat, "Эта возможность только для зарегистрированных пользователей. Воспользуйтесь командой /signup");
         }
     }
 }

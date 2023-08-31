@@ -45,9 +45,9 @@ public class GoogleCustomSearchService {
     }
 
     public GoogleCustomSearchResponse searchImages(String keywords) {
+        log.debug("sending keywords to google api");
         String apiUrl = "https://www.googleapis.com/customsearch/v1";
         String requestUrl = apiUrl + "?key=" + apiKey + "&cx=" + searchEngineId + "&searchType=image&q=" + keywords;
-        log.debug("requestUrl = {}", requestUrl);
         ResponseEntity<GoogleCustomSearchResponse> responseEntity = restTemplate.getForEntity(requestUrl, GoogleCustomSearchResponse.class);
         return responseEntity.getBody();
     }

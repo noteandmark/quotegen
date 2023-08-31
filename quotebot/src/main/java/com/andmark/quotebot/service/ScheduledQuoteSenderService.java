@@ -21,7 +21,7 @@ public class ScheduledQuoteSenderService {
 
 // @Scheduled(fixedRate = 4 * 60 * 60 * 1000) // this line will be if we need scheduled to run every 4 hours
 
-// Scheduled to run at 9 am, 12 pm, 3 pm, 6 pm, and 9 pm
+    // Scheduled to run at 9 am, 12 pm, 3 pm, 6 pm, and 9 pm
     @Scheduled(cron = "0 0 9,12,15,18,21 * * *")
     public void sendQuoteToAdmin() {
         log.debug("scheduled run sendQuoteToAdmin check in {}", LocalDateTime.now());

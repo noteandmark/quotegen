@@ -22,14 +22,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Stack;
 
 import static com.andmark.quotebot.config.BotConfig.*;
@@ -99,7 +96,7 @@ public class QuoteServiceImpl implements QuoteService {
         botAttributes.setLastMessageId(callbackQuery.getMessage().getMessageId());
         log.debug("handleCallbackQuery with lastMessageId: {}", botAttributes.getLastMessageId());
         botAttributes.setLastCallbackMessage(callbackQuery.getMessage().getText());
-        log.debug("handleCallbackQuery push in lastCallbackMessage: {}", callbackQuery.getMessage().getText());
+        log.debug("botAttributes setLastCallbackMessage");
         Long chatId = callbackQuery.getMessage().getChatId();
         Long userId = callbackQuery.getFrom().getId();
         log.debug("chatID = {}", chatId);
@@ -183,10 +180,10 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     void postingQuote(Long chatId) {
-        String lastCallbackMessage = botAttributes.getLastCallbackMessage();
+        int lastCallbackMessageLength = botAttributes.getLastCallbackMessage().length();
         BotState currentBotState = BotAttributes.getUserCurrentBotState(adminChatId);
-        log.debug("in postingQuote with lastCallbackMessage: {}, chosenImageUrl: {}",
-                lastCallbackMessage, botAttributes.getConfirmedUrl());
+        log.debug("in postingQuote with lastCallbackMessage length: {}, chosenImageUrl: {}",
+                lastCallbackMessageLength, botAttributes.getConfirmedUrl());
         // choose whether to publish the quote immediately or postpone it
         log.debug("in postingQuote currentState = {}", currentBotState);
         telegramBot.sendMessage(chatId, null, "Публиковать [сразу] или [отложить]?");

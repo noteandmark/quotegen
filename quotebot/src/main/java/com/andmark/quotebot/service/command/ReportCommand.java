@@ -9,8 +9,6 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import static com.andmark.quotebot.config.BotConfig.adminChatId;
-
 @Slf4j
 public class ReportCommand extends QuoteCommand {
 

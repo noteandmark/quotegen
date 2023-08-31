@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
 @Slf4j
-public class SignUpCommand extends QuoteCommand{
+public class SignUpCommand extends QuoteCommand {
     private final UserService userService;
     private final BotAttributes botAttributes;
 

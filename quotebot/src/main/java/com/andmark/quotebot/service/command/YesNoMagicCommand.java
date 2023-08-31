@@ -4,7 +4,6 @@ import com.andmark.quotebot.service.ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -12,8 +11,9 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Slf4j
-public class YesNoMagicCommand extends QuoteCommand{
+public class YesNoMagicCommand extends QuoteCommand {
     private final ApiService apiService;
+
     public YesNoMagicCommand(ApiService apiService) {
         super("da_net", "Ask a question and get an answer in the form of a gif");
         this.apiService = apiService;
@@ -47,7 +47,7 @@ public class YesNoMagicCommand extends QuoteCommand{
 
         } else {
             log.warn("imageUrl in YesNoMagicCommand is null");
-            sendMessage(absSender,chat, "Возникла ошибка. Попробуйте повторить позже.");
+            sendMessage(absSender, chat, "Возникла ошибка. Попробуйте повторить позже.");
         }
         sendImage(absSender, chat, imageUrl);
     }

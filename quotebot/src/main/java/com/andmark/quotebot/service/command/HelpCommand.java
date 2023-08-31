@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
 @Slf4j
-public class HelpCommand extends QuoteCommand{
+public class HelpCommand extends QuoteCommand {
 
     public HelpCommand() {
         super("help", "Get information about available commands");
