@@ -16,7 +16,6 @@ import java.util.Objects;
 @Setter
 @ToString
 public class Book {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

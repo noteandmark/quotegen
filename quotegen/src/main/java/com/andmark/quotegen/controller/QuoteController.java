@@ -61,7 +61,7 @@ public class QuoteController {
         try {
             quoteService.checkAndPopulateCache();
             QuoteDTO quoteDTO = quoteService.provideQuoteToClient();
-            log.info("response with quote = {}", quoteDTO);
+            log.info("response with quote id = {}", quoteDTO.getId());
             return ResponseEntity.ok(quoteDTO);
         } catch (NotFoundBookException e) {
             // Handle the case when there are no books

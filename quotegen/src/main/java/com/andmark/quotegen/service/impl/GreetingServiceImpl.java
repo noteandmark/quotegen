@@ -1,7 +1,6 @@
 package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Greeting;
-import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.dto.GreetingDTO;
 import com.andmark.quotegen.repository.GreetingRepository;
 import com.andmark.quotegen.service.GreetingService;

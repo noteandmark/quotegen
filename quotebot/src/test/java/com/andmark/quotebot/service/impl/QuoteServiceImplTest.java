@@ -261,7 +261,8 @@ public class QuoteServiceImplTest {
         Long groupId = groupChatId; // prod package case
 
         String content = "Test content";
-        String botUsername = "@test_quote_bot"; // here is your testing bot name
+//        String botUsername = "@test_quote_bot"; // here is your testing bot name
+        String botUsername = "@rimay_bot"; // here is your prod bot name
         String randomGreeting = "Hello!";
 
         // Mock apiService
@@ -338,16 +339,18 @@ public class QuoteServiceImplTest {
         // Set up mock values
         Long chatId = 123456789L;
         String userInput = "2"; // Valid choice
+        String messageText = "Публиковать [сразу] или [отложить]?";
 
         // Set up botAttributes
         botAttributes.setImageUrls(Arrays.asList("image1.jpg", "image2.jpg", "image3.jpg"));
+        when(botAttributes.getLastCallbackMessage()).thenReturn(messageText);
         when(botAttributes.getImageUrls()).thenReturn(Arrays.asList("image1.jpg", "image2.jpg", "image3.jpg"));
 
         // Call handleImageChoiceResponse method
         quoteService.handleImageChoiceResponse(chatId, userInput);
 
         // Verify interactions
-        verify(telegramBot).sendMessage(eq(chatId), any(), eq("Публиковать [сразу] или [отложить]?"));
+        verify(telegramBot).sendMessage(eq(chatId), any(), eq(messageText));
         verify(botAttributes).setConfirmedUrl(eq("image2.jpg"));
         verify(telegramBot, times(1)).sendMessage(eq(chatId), any(), anyString());
     }
@@ -384,17 +387,20 @@ public class QuoteServiceImplTest {
             Long quoteId = 987654321L;
             String content = "Test quote content";
             String confirmedImageUrl = "image.jpg";
+            String messageText = "Публиковать [сразу] или [отложить]?";
 
             // Set up botAttributes
             botAttributes.setQuoteId(quoteId);
             botAttributes.setConfirmedContent(content);
             botAttributes.setConfirmedUrl(confirmedImageUrl);
+            // When
+            when(botAttributes.getLastCallbackMessage()).thenReturn(messageText);
 
             // Call postingQuote method
             quoteService.postingQuote(chatId);
 
             // Verify interactions
-            verify(telegramBot).sendMessage(eq(chatId), any(), eq("Публиковать [сразу] или [отложить]?"));
+            verify(telegramBot).sendMessage(eq(chatId), any(), eq(messageText));
             verify(telegramBot, times(1)).sendMessage(eq(chatId), any(), anyString());
         }
     }

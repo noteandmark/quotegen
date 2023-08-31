@@ -28,7 +28,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.andmark.quotegen.config.AppConfig.*;
-import static java.lang.Thread.sleep;
 
 @Service
 @Transactional(readOnly = true)
@@ -114,8 +113,8 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     public QuoteDTO provideQuoteToClient() {
         log.debug("service provideQuoteToClient");
-        Quote quote = quotesRepository.findFirstByUsedAtIsNull();
-        log.info("provideQuoteToClient = {}", quote);
+        Quote quote = quotesRepository.findFirstByUsedAtIsNullAndPendingTimeIsNull();
+        log.info("provideQuoteToClient id = {}", quote.getId());
         return convertToDTO(quote);
     }
 

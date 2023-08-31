@@ -16,7 +16,6 @@ import java.util.Objects;
 @Setter
 @ToString
 public class Quote {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

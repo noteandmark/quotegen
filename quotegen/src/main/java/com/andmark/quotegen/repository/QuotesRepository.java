@@ -11,10 +11,9 @@ import java.util.List;
 
 public interface QuotesRepository extends JpaRepository<Quote, Long> {
 
-    int countByUsedAtIsNull();
     int countByUsedAtIsNullAndPendingTimeIsNull();
 
-    Quote findFirstByUsedAtIsNull();
+    Quote findFirstByUsedAtIsNullAndPendingTimeIsNull();
 
     List<Quote> findByStatus(QuoteStatus status);
 

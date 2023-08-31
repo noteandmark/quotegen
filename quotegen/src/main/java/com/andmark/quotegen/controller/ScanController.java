@@ -5,7 +5,6 @@ import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.StatsDTO;
 import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.ScanService;
-import com.andmark.quotegen.util.BookFormatParser;
 import com.andmark.quotegen.util.impl.Fb2BookFormatParser;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;

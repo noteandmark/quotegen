@@ -1,9 +1,7 @@
 package com.andmark.quotegen.service;
 
 import com.andmark.quotegen.domain.ScheduledActionStatus;
-import com.andmark.quotegen.domain.User;
 import com.andmark.quotegen.dto.ScheduledActionStatusDTO;
-import com.andmark.quotegen.dto.UserDTO;
 import com.andmark.quotegen.repository.ScheduledActionStatusRepository;
 import com.andmark.quotegen.util.impl.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
