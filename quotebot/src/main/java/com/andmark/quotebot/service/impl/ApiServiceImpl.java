@@ -351,9 +351,20 @@ public class ApiServiceImpl implements ApiService {
 
 
     private String formatQuoteText(QuoteDTO quoteDTO) {
-        return quoteDTO.getContent() + "\n\n"
-                + quoteDTO.getBookAuthor() + "\n"
-                + quoteDTO.getBookTitle();
+        StringBuilder formattingText = new StringBuilder();
+        formattingText.append(quoteDTO.getContent())
+                .append("\n\n")
+                .append(quoteDTO.getBookAuthor())
+                .append("\n")
+                .append(quoteDTO.getBookTitle());
+        String resultText = formattingText.toString();
+        int instagramLimitChar = 4096;
+        int textLength = resultText.length();
+        if (textLength > instagramLimitChar) {
+            log.debug("text length: {}", textLength);
+            resultText = resultText.substring(textLength - instagramLimitChar);
+        }
+        return resultText;
     }
 
 }

@@ -33,17 +33,20 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
     private final ApiService apiService;
     private final QuoteService quoteService;
     private final UserService userService;
+    private final ScheduledQuoteSenderService scheduledQuoteSenderService;
     // a map to store user roles (in-memory cache)
     private final Map<Long, UserRole> userRoleCache = new ConcurrentHashMap<>();
 
     public TelegramBot(BotAttributes botAttributes,
                        ApiService apiService,
                        QuoteService quoteService,
-                       UserService userService) {
+                       UserService userService,
+                       ScheduledQuoteSenderService scheduledQuoteSenderService) {
         this.botAttributes = botAttributes;
         this.apiService = apiService;
         this.quoteService = quoteService;
         this.userService = userService;
+        this.scheduledQuoteSenderService = scheduledQuoteSenderService;
     }
 
     @Override
@@ -94,8 +97,17 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         }
     }
 
-    // publishes pending quotes, run every hour (3600000)
+    // Scheduled to run at 9 am, 12 pm, 3 pm, 6 pm, and 9 pm:
+    // @Scheduled(cron = "0 0 9,12,15,18,21 * * *")
+    // run every hour (3600000 sec.):
     @Scheduled(fixedDelay = 3_600_000)
+    public void scheduledOperations() {
+        // publishes pending quotes
+        checkAndPublishPendingQuotes();
+        // send next quote to admin with a period of time
+        scheduledQuoteSenderService.sendQuoteToAdmin();
+    }
+
     public void checkAndPublishPendingQuotes() {
         log.debug("Time: {} .Checking for pending quotes...", new Date());
         List<QuoteDTO> pendingQuotes = apiService.getPendingQuotes();
@@ -131,7 +143,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
     @Override
     public void sendMessage(Long chatId, InlineKeyboardMarkup keyboard, String textToSend) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(Long.valueOf(chatId));
+        sendMessage.setChatId(chatId);
         if (keyboard != null) {
             sendMessage.setReplyMarkup(keyboard);
         }
