@@ -8,6 +8,16 @@
 ### Changed
 ### Fixed
 
+## [1.3.5] - 2023-09-01
+### Added
+### Fixed
+- fix character limit when sending a quote
+- merged the delayed action methods
+## [1.3.4] - 2023-08-30
+### Added
+### Fixed
+- fix some bugs
+- some stylistic changes
 ## [1.3.3] - 2023-08-29
 ### Added
 - add random publishing pending quotes
