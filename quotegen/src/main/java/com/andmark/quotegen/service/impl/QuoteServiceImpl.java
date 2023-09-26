@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -250,10 +251,11 @@ public class QuoteServiceImpl implements QuoteService {
         log.debug("quoteService: getting text from book with id = {}, format = {}", book.getId(), book.getFormat());
         // "Factory Object" variation of the Factory Method pattern, where a separate class is responsible for creating objects
         BookFormatParser parser = bookFormatParserFactory.createParser(book.getFormat());
-        String rawBookText = parser.parse(book); // Get the raw text from the parser
+        String rawBookText;
+        rawBookText = parser.parse(book); // Get the raw text from the parser
         if (rawBookText == null) {
-            log.error("Text from book {} is null!", book);
-            throw new ServiceException("Text from book is null!");
+            log.error("Text is null from book {}", book);
+            return "";
         }
         log.debug("rawBookText length = {}", rawBookText.length());
         // Fix formatting by adding spaces after punctuation marks if there is none

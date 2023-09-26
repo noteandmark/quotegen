@@ -98,8 +98,29 @@ public class BookServiceImpl implements BookService {
         log.debug("bookService make divination with pageNumber = {} , lineNumber = {}", pageNumber, lineNumber);
 
         List<Book> activeBooks = getActiveBooks();
-        Book selectedBook = selectRandomBook(activeBooks);
-        String bookContent = getBookContent(selectedBook);
+//        Book selectedBook = selectRandomBook(activeBooks);
+        Book selectedBook = null;
+
+//        String bookContent = getBookContent(selectedBook);
+
+        //test counter
+        int counter = 0;
+
+        //upgrade
+        String bookContent = "";
+        while (bookContent.isEmpty()) {
+            selectedBook = selectRandomBook(activeBooks);
+            log.debug("selected book has id = {}", selectedBook.getId());
+            if (counter == 0) {
+                log.debug("counter == 0");
+                Long testBookId = 3282L;
+                selectedBook = booksRepository.findById(testBookId).get();
+                counter++;
+            }
+            bookContent = getBookContent(selectedBook);
+            log.debug("bookContent length = {}", bookContent.length());
+        }
+
         List<String> lines = breakContentIntoLines(bookContent);
 
         int totalPages = calculateTotalPages(lines.size());
@@ -142,10 +163,7 @@ public class BookServiceImpl implements BookService {
         List<String> lines = new ArrayList<>();
         int startPos = 0;
         while (startPos < bookContent.length()) {
-            System.out.println("startPos = " + startPos);
             int endPos = calculateEndPosition(bookContent, startPos);
-            System.out.println("endPos = " + endPos);
-            System.out.println("line to add: " + bookContent.substring(startPos, endPos).trim());
             lines.add(bookContent.substring(startPos, endPos).trim());
             startPos = endPos;
         }

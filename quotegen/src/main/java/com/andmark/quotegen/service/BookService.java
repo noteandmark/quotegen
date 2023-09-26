@@ -6,6 +6,5 @@ import com.andmark.quotegen.dto.PageLineRequestDTO;
 
 public interface BookService extends AbstractService<BookDTO>{
     void clearDeletedBooks();
-
     ExtractedLinesDTO processPageAndLineNumber(PageLineRequestDTO requestDTO);
 }
