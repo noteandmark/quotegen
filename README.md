@@ -109,4 +109,7 @@ Java, Spring Boot, Spring Data JPA, PostgreSQL, Telegram API, Google Custom Sear
 Бот обращается к API сайта https://yesno.wtf и получает рандомную гифку. 
 С шансом 1 к 10000 может выпасть ответ "наверное".
 
+Бот живет по адресу:
+https://t.me/rimay_bot
+
 Приятного пользования! И хороших книг!
