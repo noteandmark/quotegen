@@ -45,7 +45,7 @@ RU:
 
 # Quote Generator REST API and Client Telegram Bot
 
-version 1.3.2 (25.08.2023)
+version 1.3.6 (26.09.2023)
 
 author: Andrei M.
 
