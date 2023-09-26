@@ -8,6 +8,10 @@
 ### Changed
 ### Fixed
 
+## [1.3.6] - 2023-09-26
+### Added
+### Fixed
+- fixed an issue where a book could not be read on divination and nothing was sent to the user
 ## [1.3.5] - 2023-09-01
 ### Added
 ### Fixed
