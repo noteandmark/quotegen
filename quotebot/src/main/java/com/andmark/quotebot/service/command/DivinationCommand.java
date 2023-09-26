@@ -37,14 +37,31 @@ public class DivinationCommand extends QuoteCommand {
         log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
 
         if (userRole == UserRole.ADMIN || userRole == UserRole.USER) {
-            if (!hasUserUsedCommandToday(user.getId())) {
-                // Prompt the user to enter a page number
-                message.setText("Добро пожаловать в \"Гадание по книге\":\n" +
+
+            String messageText;
+            if (arguments.length == 0) {
+                log.debug("arguments is null");
+                messageText = "Добро пожаловать в \"Гадание по книге\":\n" +
                         "Загадали вопрос?\n" +
                         "Я выберу наугад книгу и верну вам отрывок по заданным странице и строке.\n" +
                         "Правда, без редактирования там может быть всё, что угодно... Попробуем?\n" +
                         "Один раз в день можем сыграть в такую игру ;)\n" +
-                        "Напишите номер страницы:");
+                        "Напишите номер страницы:";
+            } else {
+                log.debug("argument has value: {}", arguments[0]);
+                usersLastUsage.put(user.getId(), null);
+                messageText = arguments[0];
+            }
+
+            if (!hasUserUsedCommandToday(user.getId())) {
+                // Prompt the user to enter a page number
+//                message.setText("Добро пожаловать в \"Гадание по книге\":\n" +
+//                        "Загадали вопрос?\n" +
+//                        "Я выберу наугад книгу и верну вам отрывок по заданным странице и строке.\n" +
+//                        "Правда, без редактирования там может быть всё, что угодно... Попробуем?\n" +
+//                        "Один раз в день можем сыграть в такую игру ;)\n" +
+//                        "Напишите номер страницы:");
+                message.setText(messageText);
                 // Set the next step for the user's input
                 BotAttributes.setUserCurrentBotState(user.getId(), BotState.AWAITING_PAGE_NUMBER);
 

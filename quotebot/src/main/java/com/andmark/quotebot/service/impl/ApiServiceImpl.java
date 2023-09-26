@@ -349,7 +349,6 @@ public class ApiServiceImpl implements ApiService {
         return new AvailableDaysResponseDTO();
     }
 
-
     private String formatQuoteText(QuoteDTO quoteDTO) {
         StringBuilder formattingText = new StringBuilder();
         formattingText.append(quoteDTO.getContent())

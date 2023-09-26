@@ -26,8 +26,6 @@ public class StartCommand extends QuoteCommand {
                 "Зарегистрируйся (/signup), чтобы получить доступ ко всем возможностям :)" :
                 "Приветствую, " + user.getFirstName() + "!";
 
-        System.out.println("user = " + user);
-
         sendMessage(absSender, chat, "Добро пожаловать! Меня зовут бот Книголюб. Я в сети.\n"
                 + "Используй /help для просмотра меню.\n"
                 + justMessage);

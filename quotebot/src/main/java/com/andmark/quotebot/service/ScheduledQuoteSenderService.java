@@ -25,8 +25,6 @@ public class ScheduledQuoteSenderService {
         ScheduledActionStatusDTO status = new ScheduledActionStatusDTO();
         status = apiService.getScheduledActionStatus();
 
-        System.out.println("status = " + status);
-
         LocalDateTime lastExecuted = status.getLastExecuted();
         log.debug("get ScheduledActionStatusDTO status lastExecuted = {}", lastExecuted);
 

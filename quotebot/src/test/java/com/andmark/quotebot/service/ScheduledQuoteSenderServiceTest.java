@@ -50,7 +50,6 @@ public class ScheduledQuoteSenderServiceTest {
         ScheduledActionStatusDTO mockStatus = new ScheduledActionStatusDTO();
         mockStatus.setLastExecuted(LocalDateTime.now().minusHours(1)); // last executed 1 hour ago
 
-        System.out.println("status in test = " + mockStatus);
         // When
         when(apiService.getScheduledActionStatus()).thenReturn(mockStatus);
 

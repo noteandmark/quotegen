@@ -74,6 +74,7 @@ public class QuoteServiceImpl implements QuoteService {
             log.debug("reset made after input 'сброс'");
             return;
         }
+
         if (userId.equals(adminChatId) && userInput.startsWith("q:")) {
             log.debug("quoteText offer text = {}", userInput);
             quoteText.push(userInput.substring(2));
@@ -438,7 +439,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
 
         formattedMessage.append("\n\n").append(extractedLinesDTO.getBookAuthor()).append("\n").append(extractedLinesDTO.getBookTitle());
-        log.info("sending formattedMessage with divination lines to user: {}", formattedMessage.toString());
+        log.info("sending formattedMessage with divination lines to user: {}", formattedMessage);
         telegramBot.sendMessage(userId, null, formattedMessage.toString());
         // Clear user's context after processing
         BotAttributes.clear(userId);
