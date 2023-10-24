@@ -98,27 +98,20 @@ public class BookServiceImpl implements BookService {
         log.debug("bookService make divination with pageNumber = {} , lineNumber = {}", pageNumber, lineNumber);
 
         List<Book> activeBooks = getActiveBooks();
-//        Book selectedBook = selectRandomBook(activeBooks);
         Book selectedBook = null;
 
-//        String bookContent = getBookContent(selectedBook);
-
-        //test counter
-        int counter = 0;
-
-        //upgrade
         String bookContent = "";
+        int limitCounter = 0;
         while (bookContent.isEmpty()) {
             selectedBook = selectRandomBook(activeBooks);
             log.debug("selected book has id = {}", selectedBook.getId());
-            if (counter == 0) {
-                log.debug("counter == 0");
-                Long testBookId = 3282L;
-                selectedBook = booksRepository.findById(testBookId).get();
-                counter++;
-            }
             bookContent = getBookContent(selectedBook);
             log.debug("bookContent length = {}", bookContent.length());
+            limitCounter++;
+            if (limitCounter > 10) {
+                log.error("10 times failed to found book with not null bookContent!");
+                bookContent = "К сожалению, сегодня не удалось ничего найти. Попробуйте завтра.";
+            }
         }
 
         List<String> lines = breakContentIntoLines(bookContent);
