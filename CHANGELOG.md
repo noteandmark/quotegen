@@ -8,6 +8,10 @@
 ### Changed
 ### Fixed
 
+## [1.3.7] - 2023-10-24
+### Added
+### Fixed
+- changed number of citations per day for publications to 1
 ## [1.3.6] - 2023-09-26
 ### Added
 ### Fixed
