@@ -1,5 +1,6 @@
-package com.andmark.quotegen.controller;
+package com.andmark.quotegen.controller.api;
 
+import com.andmark.quotegen.controller.api.ScheduledActionStatusController;
 import com.andmark.quotegen.service.SchedulledActionStatusService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.andmark.quotegen.dto.ScheduledActionStatusDTO;

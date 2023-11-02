@@ -84,6 +84,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO findByUsername(String username) {
+        log.debug("user service findByUsername = {}", username);
+        return null;
+    }
+
+    @Override
     public UserRole getUserRole(Long usertgId) {
         User user = usersRepository.findByUsertgId(usertgId);
         if (user != null) {

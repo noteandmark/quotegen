@@ -1,14 +1,13 @@
-package com.andmark.quotegen.controller;
+package com.andmark.quotegen.controller.api;
 
+import com.andmark.quotegen.controller.api.GreetingController;
 import com.andmark.quotegen.service.GreetingService;
-import org.apache.coyote.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;

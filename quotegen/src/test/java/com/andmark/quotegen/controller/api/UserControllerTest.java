@@ -1,5 +1,6 @@
-package com.andmark.quotegen.controller;
+package com.andmark.quotegen.controller.api;
 
+import com.andmark.quotegen.controller.api.UserController;
 import com.andmark.quotegen.domain.enums.UserRole;
 import com.andmark.quotegen.dto.UserDTO;
 import com.andmark.quotegen.service.UserService;

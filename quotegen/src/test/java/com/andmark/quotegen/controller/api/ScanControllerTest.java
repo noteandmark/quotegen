@@ -1,5 +1,6 @@
-package com.andmark.quotegen.controller;
+package com.andmark.quotegen.controller.api;
 
+import com.andmark.quotegen.controller.api.ScanController;
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.StatsDTO;

@@ -1,5 +1,6 @@
-package com.andmark.quotegen.controller;
+package com.andmark.quotegen.controller.api;
 
+import com.andmark.quotegen.controller.api.QuoteController;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.service.QuoteService;

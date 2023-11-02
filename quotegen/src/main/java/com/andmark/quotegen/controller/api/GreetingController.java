@@ -1,4 +1,4 @@
-package com.andmark.quotegen.controller;
+package com.andmark.quotegen.controller.api;
 
 import com.andmark.quotegen.service.GreetingService;
 import lombok.extern.slf4j.Slf4j;
