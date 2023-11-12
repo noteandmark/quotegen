@@ -2,6 +2,7 @@ package com.andmark.quotebot.service.command;
 
 import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.service.ApiService;
+import com.andmark.quotebot.service.UserRoleService;
 import org.mockito.ArgumentCaptor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -20,6 +21,8 @@ class RequestQuoteCommandTest {
     @Mock
     private ApiService mockApiService;
     @Mock
+    private UserRoleService userRoleService;
+    @Mock
     private AbsSender mockAbsSender;
     @Mock
     private Chat mockChat;
@@ -29,7 +32,7 @@ class RequestQuoteCommandTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        requestQuoteCommand = new RequestQuoteCommand(mockApiService);
+        requestQuoteCommand = new RequestQuoteCommand(mockApiService, userRoleService);
     }
 
     @Test

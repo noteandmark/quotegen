@@ -187,6 +187,7 @@ public class ApiServiceImpl implements ApiService {
     public StatsDTO getStats() {
         log.debug("api service: get stats");
         String apiUrl = BotConfig.API_BASE_URL + "/stats";
+        log.debug("apiUrl = {}", apiUrl);
         try {
             ResponseEntity<StatsDTO> response = restTemplate.getForEntity(apiUrl, StatsDTO.class);
             log.debug("getting response in api service getStats");
@@ -301,6 +302,7 @@ public class ApiServiceImpl implements ApiService {
         // Prepare the request body with page and line numbers
         PageLineRequestDTO requestDTO = new PageLineRequestDTO(pageNumber, lineNumber);
         String apiUrl = BotConfig.API_BASE_URL + "/books/process-page-and-line";
+        log.debug("apiUrl = {}, requestDTO = {}",apiUrl, requestDTO);
         ResponseEntity<ExtractedLinesDTO> response = restTemplate.exchange(
                 apiUrl,
                 HttpMethod.POST,

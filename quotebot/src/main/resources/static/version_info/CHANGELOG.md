@@ -4,7 +4,9 @@
 - [QUOTEGEN](http://)
   MAJOR HTTP access.
 - [QUOTEBOT](http://t.me/rimay_bot)
-  MINOR add ...
+  MINOR add ... :
+- submit a quote for publication
+- view the dates of pending publications
 ### Changed
 ### Fixed
 

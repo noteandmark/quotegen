@@ -2,6 +2,7 @@ package com.andmark.quotebot.service.command;
 
 import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.service.ApiService;
+import com.andmark.quotebot.service.UserRoleService;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -11,21 +12,24 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 public class RequestQuoteCommand extends QuoteCommand {
 
     private final ApiService apiService;
+    private final UserRoleService userRoleService;
 
-    public RequestQuoteCommand(ApiService apiService) {
+    public RequestQuoteCommand(ApiService apiService, UserRoleService userRoleService) {
         super("requestquote", "Request a new quote");
         this.apiService = apiService;
+        this.userRoleService = userRoleService;
     }
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
         log.debug("user with id = {} execute /requestquote", user.getId());
 
-        // Check if the user has the ADMIN role
-        UserRole userRole = apiService.getUserRole(user.getId());
-        log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
+//        // Check if the user has the ADMIN role
+//        UserRole userRole = apiService.getUserRole(user.getId());
+//        log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
 
-        if (userRole == UserRole.ADMIN) {
+        if (userRoleService.hasRequiredRole(user.getId(), UserRole.ADMIN)) {
+//        if (userRole == UserRole.ADMIN) {
             // Make a request to the REST API to get the next quote
             log.debug("user with role ADMIN run request quote command");
             apiService.getNextQuote();

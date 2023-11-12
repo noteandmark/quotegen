@@ -33,6 +33,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
     private final ApiService apiService;
     private final QuoteService quoteService;
     private final UserService userService;
+    private final UserRoleService userRoleService;
     private final ScheduledQuoteSenderService scheduledQuoteSenderService;
     // a map to store user roles (in-memory cache)
     private final Map<Long, UserRole> userRoleCache = new ConcurrentHashMap<>();
@@ -40,12 +41,13 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
     public TelegramBot(BotAttributes botAttributes,
                        ApiService apiService,
                        QuoteService quoteService,
-                       UserService userService,
+                       UserService userService, UserRoleService userRoleService,
                        ScheduledQuoteSenderService scheduledQuoteSenderService) {
         this.botAttributes = botAttributes;
         this.apiService = apiService;
         this.quoteService = quoteService;
         this.userService = userService;
+        this.userRoleService = userRoleService;
         this.scheduledQuoteSenderService = scheduledQuoteSenderService;
     }
 
@@ -197,7 +199,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         register(new ResetCommand(botAttributes));
         register(new ReportCommand());
         register(new ScanBooksCommand(apiService));
-        register(new RequestQuoteCommand(apiService));
+        register(new RequestQuoteCommand(apiService, userRoleService));
     }
 
     @Override
