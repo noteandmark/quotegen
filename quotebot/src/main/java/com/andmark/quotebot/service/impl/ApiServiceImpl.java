@@ -309,6 +309,7 @@ public class ApiServiceImpl implements ApiService {
                 new HttpEntity<>(requestDTO),
                 ExtractedLinesDTO.class
         );
+        log.debug("response.getStatusCode() = {}", response.getStatusCode());
         if (response.getStatusCode() == HttpStatus.OK) {
             log.debug("api service: processPageAndLineNumber response status code is OK");
             return response.getBody();

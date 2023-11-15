@@ -1,44 +1,70 @@
-//package com.andmark.quotegen.config;
-//
-//import com.andmark.quotegen.service.impl.CustomUserDetailsServiceImpl;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.authentication.AuthenticationManager;
-//import org.springframework.security.authentication.ProviderManager;
-//import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.web.SecurityFilterChain;
-//
-//import static org.springframework.security.config.Customizer.withDefaults;
-//
-//@Configuration
-//@EnableWebSecurity
-//@Slf4j
-//public class SecurityConfig {
-//
+package com.andmark.quotegen.config;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+
+@Configuration
+@EnableWebSecurity
+@Slf4j
+public class SecurityConfig {
+
+    @Bean
+    @Order(1)
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher(new AntPathRequestMatcher("/api/**"))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(new AntPathRequestMatcher("/api/books/process-page-and-line")).permitAll()
+                        .anyRequest().permitAll()
+                )
+                .httpBasic(withDefaults())
+                .csrf(AbstractHttpConfigurer::disable); // disable CSRF for API-request
+        return http.build();
+    }
+
+    @Bean
+    public SecurityFilterChain formLoginFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests(authorize -> authorize
+                        .requestMatchers("/", "/index.html", "/public/**").permitAll() // Allow access to the home page
+                        .anyRequest().authenticated()
+                )
+                .formLogin(withDefaults());
+        return http.build();
+    }
+
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf((csrf) -> csrf.disable())
+//                .authorizeHttpRequests(auth -> auth
+//                .anyRequest().permitAll());
+//        return http.build();
+//    }
+
 //    @Bean
 //    public UserDetailsService userDetailsService(CustomUserDetailsServiceImpl customUserDetailsService) {
 //        return customUserDetailsService;
 //    }
-//
-//    @Bean
-//    public SecurityFilterChain customSecurityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeHttpRequests((authz) -> authz
-//                        .requestMatchers("/api/books/process-page-and-line").permitAll()
-//                        .requestMatchers("/", "/auth/login", "/auth/registration", "/error", "/api/**").permitAll()
-//                        .anyRequest().authenticated()
-//                );
-////                .formLogin(withDefaults());
-//        return http.build();
-//    }
-//
+
+
 //    @Bean
 //    public AuthenticationManager authenticationManager(
 //            UserDetailsService userDetailsService,
@@ -49,10 +75,10 @@
 //
 //        return new ProviderManager(authenticationProvider);
 //    }
-//
+
 //    @Bean
 //    public PasswordEncoder passwordEncoder() {
 //        return new BCryptPasswordEncoder();
 //    }
-//
-//}
+
+}

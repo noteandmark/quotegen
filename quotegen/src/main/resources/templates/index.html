@@ -8,14 +8,18 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.2.0/css/bootstrap.min.css}"/>
 </head>
+
 <body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">linkedin.com/in/noteandmark/</a>
+</nav>
 <div class="container">
     <div class="row">
         <div class="col-md-8">
             <section class="header">
-                <h1>Home Page</h1>
+                <h1>Quotegen Application</h1>
                 <button class="btn btn-info" onclick="window.location.href='/help.html'">Помощь</button>
-                <button class="btn btn-primary" onclick="window.location.href='/stats.html'">Статистика</button>
+                <button class="btn btn-primary" onclick="window.location.href='/public/stats.html'">Статистика</button>
                 <button class="btn btn-primary" onclick="window.location.href='/da-net.html'">Да/Нет</button>
                 <button class="btn btn-primary" onclick="window.location.href='/version.html'">Версия</button>
                 <button class="btn btn-primary" onclick="window.location.href='/report.html'">Репорт</button>
@@ -23,7 +27,7 @@
         </div>
         <div class="col-md-4">
             <section class="login">
-                <h5>Вход</h5>
+                <h5>Вход для расширенных возможностей</h5>
                 <form th:action="@{/login}" method="post">
                     <!-- Поля для ввода логина и пароля -->
                     <div class="form-group">
@@ -33,6 +37,7 @@
                         <input type="password" class="form-control" name="password" placeholder="Пароль" required>
                     </div>
                     <button type="submit" class="btn btn-success">Войти</button>
+                    <button type="submit" class="btn btn-success">Зарегистрироваться</button>
                 </form>
             </section>
         </div>

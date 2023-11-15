@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Statistics</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.2.0/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div class="container">
+    <h1>Statistics:</h1>
+    <p th:text="'Количество книг в каталоге: ' + ${bookCount}"></p>
+    <p th:text="'Количество опубликованных Книголюбом цитат за год: ' + ${publishedQuotesThisYear}"></p>
+    <p th:text="'Количество ожидаемых к публикации цитат: ' + ${pendingQuotesCount}"></p>
+</div>
+</body>
+</html>
