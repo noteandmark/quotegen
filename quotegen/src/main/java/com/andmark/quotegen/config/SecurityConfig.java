@@ -26,12 +26,24 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 public class SecurityConfig {
 
     @Bean
+    @Order(2)
+    public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher(new AntPathRequestMatcher("/public/**"))
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().permitAll()
+                )
+                .httpBasic(withDefaults())
+                .csrf(AbstractHttpConfigurer::disable); // disable CSRF for API-request
+        return http.build();
+    }
+
+    @Bean
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher(new AntPathRequestMatcher("/api/**"))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(new AntPathRequestMatcher("/api/books/process-page-and-line")).permitAll()
                         .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults())
@@ -42,22 +54,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain formLoginFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/", "/index.html", "/public/**").permitAll() // Allow access to the home page
+                .securityMatcher(new AntPathRequestMatcher("/public/**"))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/", "/index.html","/public/**").permitAll() // Allow access to the home page
                         .anyRequest().authenticated()
                 )
                 .formLogin(withDefaults());
         return http.build();
     }
-
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf((csrf) -> csrf.disable())
-//                .authorizeHttpRequests(auth -> auth
-//                .anyRequest().permitAll());
-//        return http.build();
-//    }
 
 //    @Bean
 //    public UserDetailsService userDetailsService(CustomUserDetailsServiceImpl customUserDetailsService) {
