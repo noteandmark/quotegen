@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>YesNoMagic</title>
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+            crossorigin="anonymous"></script>
+    <!-- Подключение стилей из отдельного CSS-файла -->
+    <link rel="stylesheet" th:href="@{/css/da-net-styles.css}"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="/">На главную</a>
+    </div>
+</nav>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <section class="header">
+                <h1>Quotegen Application - Да/Нет</h1>
+                <h4 class="display-4 text-primary">Загадайте вопрос и нажмите на кнопку</h4>
+                <!-- Да-нет кнопка и изображение -->
+                <div class="container text-center">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="getYesNoImage()">Да/Нет</button>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для отображения результата запроса Да/Нет -->
+<div id="resultContainer"></div>
+
+<!-- JavaScript код для обработки нажатия кнопки "Да/Нет" -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    // Функция для обработки нажатия кнопки "Да/Нет"
+    function getYesNoImage() {
+        // Отправка асинхронного запроса к API
+        $.get("https://yesno.wtf/api", function (data) {
+            // Обработка ответа от API
+            if (data.image) {
+                // Отображение изображения на вашей странице
+                var imgElement = $("<img>").attr("src", data.image);
+                $("#resultContainer").html(imgElement);
+            } else {
+                // Обработка случая ошибки
+                console.error("Ошибка получения ответа от API");
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/public")
 @Slf4j
-public class StatsController {
+public class PublicController {
     private final ScanService scanService;
 
     @Autowired
-    public StatsController(ScanService scanService) {
+    public PublicController(ScanService scanService) {
         this.scanService = scanService;
     }
 
-    @GetMapping({"/stats","/stats.html"})
+    @GetMapping("/stats")
     public String showStats(Model model) {
-        log.debug("stats controller showStats");
+        log.debug("public controller showStats");
         StatsDTO stats = scanService.getStatistics();
 
         model.addAttribute("bookCount", stats.getBookCount());
@@ -31,5 +31,17 @@ public class StatsController {
         log.debug("showStats added models");
 
         return "public/stats";
+    }
+
+    @GetMapping("/help")
+    public String showHelpPage() {
+        log.debug("public controller showHelpPage");
+        return "public/help";
+    }
+
+    @GetMapping("/da-net")
+    public String showYesNoMagic() {
+        log.debug("public controller showYesNoMagic");
+        return "public/da-net";
     }
 }
