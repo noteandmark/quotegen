@@ -2,6 +2,7 @@ package com.andmark.quotegen.controller.web;
 
 import com.andmark.quotegen.dto.StatsDTO;
 import com.andmark.quotegen.service.ScanService;
+import com.andmark.quotegen.service.WebVersionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Slf4j
 public class PublicController {
     private final ScanService scanService;
+    private final WebVersionService versionService;
 
     @Autowired
-    public PublicController(ScanService scanService) {
+    public PublicController(ScanService scanService, WebVersionService versionService) {
         this.scanService = scanService;
+        this.versionService = versionService;
     }
 
     @GetMapping("/stats")
@@ -43,5 +46,16 @@ public class PublicController {
     public String showYesNoMagic() {
         log.debug("public controller showYesNoMagic");
         return "public/da-net";
+    }
+
+    @GetMapping("/version")
+    public String showVersionPage(Model model) {
+        String readmeContent = versionService.getReadmeContent();
+        String changelogContent = versionService.getChangelogContent();
+
+        model.addAttribute("readmeContent", readmeContent);
+        model.addAttribute("changelogContent", changelogContent);
+
+        return "public/version";
     }
 }
