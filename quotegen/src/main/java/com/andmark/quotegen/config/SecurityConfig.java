@@ -1,6 +1,8 @@
 package com.andmark.quotegen.config;
 
+import com.andmark.quotegen.service.impl.UserDetailsServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -10,6 +12,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -26,19 +29,6 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 public class SecurityConfig {
 
     @Bean
-    @Order(2)
-    public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher(new AntPathRequestMatcher("/public/**"))
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll()
-                )
-                .httpBasic(withDefaults())
-                .csrf(AbstractHttpConfigurer::disable); // disable CSRF for API-request
-        return http.build();
-    }
-
-    @Bean
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http
@@ -51,38 +41,56 @@ public class SecurityConfig {
         return http.build();
     }
 
+    //config Spring Security and authorisation
     @Bean
     public SecurityFilterChain formLoginFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher(new AntPathRequestMatcher("/public/**"))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/index.html","/public/**").permitAll() // Allow access to the home page
+                        .requestMatchers("/", "/index.html", "/public/**", "/auth/**").permitAll() // Allow access to the home page
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/web/**").hasAuthority("USER")
                         .anyRequest().authenticated()
                 )
-                .formLogin(withDefaults());
+
+                .formLogin(formLogin ->
+                        formLogin
+                                .loginPage("/auth/login")
+                                .loginProcessingUrl("/process_login")
+                                .defaultSuccessUrl("/", true)
+                                .failureUrl("/auth/login?error")
+                                .permitAll())
+
+                .logout(logout -> logout
+                        .logoutUrl("/signout")
+                        .logoutSuccessUrl("/")
+                        .permitAll())
+
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)); // made STATELESS when will be token authentications
+
         return http.build();
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService(CustomUserDetailsServiceImpl customUserDetailsService) {
-//        return customUserDetailsService;
-//    }
+    @Bean
+    public UserDetailsServiceImpl userDetailsService(UserDetailsServiceImpl userDetailsServiceImpl) {
+        return userDetailsServiceImpl;
+    }
 
+    @Bean
+    public AuthenticationManager authenticationManager(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
 
-//    @Bean
-//    public AuthenticationManager authenticationManager(
-//            UserDetailsService userDetailsService,
-//            PasswordEncoder passwordEncoder) {
-//        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-//        authenticationProvider.setUserDetailsService(userDetailsService);
-//        authenticationProvider.setPasswordEncoder(passwordEncoder);
-//
-//        return new ProviderManager(authenticationProvider);
-//    }
+        return new ProviderManager(authenticationProvider);
+    }
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
+    @Bean
+    public PasswordEncoder getPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 }

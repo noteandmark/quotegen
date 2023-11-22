@@ -22,6 +22,7 @@
         <div class="col-md-8">
             <section class="header">
                 <h1 class="display-4">Quotegen Application</h1>
+
                 <div class="btn-group mt-3" role="group">
                     <button type="button" class="btn btn-info" onclick="window.location.href='public/help'">Помощь
                     </button>
@@ -33,15 +34,36 @@
                     <button type="button" class="btn btn-primary" onclick="window.location.href='public/version'">
                         Версия
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="window.location.href='public/report'">Репорт
+                    <button type="button" class="btn btn-primary" onclick="window.location.href='public/report'">
+                        Репорт[TODO]
                     </button>
+
+                    <!-- Кнопки для роли USER -->
+                    <th:block th:if="${isUser}">
+                        <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='/public/divination'">Гадание
+                        </button>
+                    </th:block>
+
+                    <!-- Кнопки для роли ADMIN -->
+                    <th:block th:if="${isAdmin}">
+                        <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='/public/divination'">Гадание
+                        </button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='/public/requestquote'">Запрос цитаты
+                        </button>
+                    </th:block>
                 </div>
+
             </section>
         </div>
+
+        <!--        // Authorisation and registration-->
         <div class="col-md-4">
             <section class="login">
                 <h5>Вход для расширенных возможностей</h5>
-                <form th:action="@{/login}" method="post">
+                <form th:action="@{/auth/process_login}" method="post">
                     <!-- Поля для ввода логина и пароля -->
                     <div class="form-group">
                         <input type="text" class="form-control" name="username" placeholder="Логин" required>
@@ -50,10 +72,11 @@
                         <input type="password" class="form-control" name="password" placeholder="Пароль" required>
                     </div>
                     <button type="submit" class="btn btn-success">Войти</button>
-                    <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+                    <a th:href="@{/auth/registration}" class="btn btn-success">Зарегистрироваться</a>
                 </form>
             </section>
         </div>
+
     </div>
 </div>
 </body>
