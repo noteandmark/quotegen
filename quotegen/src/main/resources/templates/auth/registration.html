@@ -20,7 +20,7 @@
 
 <div class="row justify-content-center">
     <div class="container mt-5">
-        <div class="col-md-6">
+        <div class="col-md-6 offset-md-1">
             <span class="d-block p-2 bg-primary text-white">Регистрация</span>
 
             <form th:method="POST" th:action="@{/auth/registration}" th:object="${userDTO}">

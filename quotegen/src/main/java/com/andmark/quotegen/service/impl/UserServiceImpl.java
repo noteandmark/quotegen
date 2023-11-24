@@ -8,6 +8,8 @@ import com.andmark.quotegen.service.UserService;
 import com.andmark.quotegen.util.impl.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,7 +88,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO findByUsername(String username) {
         log.debug("user service findByUsername = {}", username);
-        return null;
+        Optional<User> byUsername = usersRepository.findByUsername(username);
+        log.info("find byUsername = {}", byUsername);
+        return byUsername.map(this::convertToDTO).orElse(null);
     }
 
     @Override
@@ -96,6 +100,36 @@ public class UserServiceImpl implements UserService {
             return user.getRole();
         }
         return null; // User not found
+    }
+
+    @Override
+    public boolean isAuthenticated(Authentication authentication) {
+        log.debug("user service: isAuthenticated");
+        return authentication != null && authentication.isAuthenticated();
+    }
+
+    @Override
+    public boolean isAdmin(Authentication authentication) {
+        log.debug("user service: isAdmin");
+
+        if (isAuthenticated(authentication)) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return userDetails.getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ADMIN"));
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isUser(Authentication authentication) {
+        log.debug("user service: isUser");
+
+        if (isAuthenticated(authentication)) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return userDetails.getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("USER"));
+        }
+        return false;
     }
 
     private UserDTO convertToDTO(User user) {

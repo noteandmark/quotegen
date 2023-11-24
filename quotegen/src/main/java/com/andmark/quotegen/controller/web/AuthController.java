@@ -2,6 +2,7 @@ package com.andmark.quotegen.controller.web;
 
 import com.andmark.quotegen.dto.UserDTO;
 import com.andmark.quotegen.service.RegistrationService;
+import com.andmark.quotegen.service.UserService;
 import com.andmark.quotegen.util.PersonValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,13 +28,15 @@ public class AuthController {
     private final ModelMapper mapper;
     private final PersonValidator personValidator;
     private final RegistrationService registrationService;
+    private final UserService userService;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, ModelMapper mapper, PersonValidator personValidator, RegistrationService registrationService) {
+    public AuthController(AuthenticationManager authenticationManager, ModelMapper mapper, PersonValidator personValidator, RegistrationService registrationService, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.mapper = mapper;
         this.personValidator = personValidator;
         this.registrationService = registrationService;
+        this.userService = userService;
     }
 
     @GetMapping("/login")
@@ -50,12 +53,24 @@ public class AuthController {
     }
 
     @PostMapping("/process_login")
-    public String processLogin(@RequestParam String username, @RequestParam String password, Model model) {
+    public String processLogin(@RequestParam String username,
+                               @RequestParam String password,
+                               Model model,
+                               Authentication authentication) {
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            log.debug("try get authentication with username = {}", username);
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            boolean isAdmin = userService.isAdmin(authentication);
+            boolean isUser = userService.isUser(authentication);
+
+            model.addAttribute("isAdmin", isAdmin);
+            model.addAttribute("isUser", isUser);
+
             return "redirect:/index";
         } catch (AuthenticationException e) {
+            log.warn("AuthenticationException with username = {}", username);
             // Обработка ошибок аутентификации, например, неправильный логин/пароль
             model.addAttribute("error", "Invalid username or password");
             return "redirect:/auth/login?error";
