@@ -54,7 +54,7 @@ class UserControllerTest {
     public void testGetUserRole() throws Exception {
         // Mocking
         long userId = 1L;
-        UserRole mockUserRole = UserRole.ADMIN;
+        UserRole mockUserRole = UserRole.ROLE_ADMIN;
         when(userService.getUserRole(userId)).thenReturn(mockUserRole);
 
         // Testing

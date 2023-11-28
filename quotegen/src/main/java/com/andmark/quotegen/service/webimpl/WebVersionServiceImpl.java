@@ -15,12 +15,6 @@ import java.nio.file.Files;
 @Service
 @Slf4j
 public class WebVersionServiceImpl implements WebVersionService {
-//    private final ResourceLoader resourceLoader;
-//
-//    @Autowired
-//    public WebVersionServiceImpl(ResourceLoader resourceLoader) {
-//        this.resourceLoader = resourceLoader;
-//    }
 
     @Override
     public String getReadmeContent() {
@@ -31,15 +25,6 @@ public class WebVersionServiceImpl implements WebVersionService {
     public String getChangelogContent() {
         return loadFileContent("static/version-info/CHANGELOG.md");
     }
-
-//    private String loadFileContent(String filePath) {
-//        try {
-//            Resource resource = resourceLoader.getResource("classpath:" + filePath);
-//            return new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
-//        } catch (IOException e) {
-//            return "Unable to load file content.";
-//        }
-//    }
 
     private String loadFileContent(String resourcePath) {
         log.debug("try to load file content from file: {}", resourcePath);

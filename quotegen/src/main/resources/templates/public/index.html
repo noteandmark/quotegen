@@ -2,6 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -60,10 +61,38 @@
             </section>
         </div>
 
+        ---*1*---
 <!--        work with xmlns:sec= etc.-->
         <div sec:authorize="isAuthenticated()">
+            <p th:text="${#authentication.name}"></p>
             <h5 class="card-title" th:text="'Здравствуй, ' + ${#authentication.name}"></h5>
         </div>
+
+        ---*2*---
+
+        <div sec:authorize="hasRole('ROLE_USER')">
+            <span>Role USER is authorize</span>
+        </div>
+
+        ---*3*---
+
+        <div sec:authorize="isAuthenticated()">
+            This content is only shown to authenticated users.
+        </div>
+        <div sec:authorize="hasRole('ROLE_ADMIN')">
+            This content is only shown to administrators.
+        </div>
+        <div sec:authorize="hasRole('ROLE_USER')">
+            This content is only shown to users.
+        </div>
+
+        ---*4*---
+
+        <div sec:authorize="isAuthenticated()">
+
+            Authenticated as <span sec:authentication="name"></span></div>
+
+        ---*5*---
 
         <!--        // Authorisation and registration-->
         <div class="col-md-4 mt-5">
@@ -71,24 +100,29 @@
                 <div class="card-body">
 
                     <!-- Condition for displaying the login and registration -->
-                    <div th:if="${#authentication == null}">
+                    <div th:if="${#authentication.name == 'anonymousUser'}">
                         <h5 class="card-title">Вход для расширенных возможностей</h5>
+                        <p th:text="${#authentication.name}"></p>
                         <form th:action="@{/auth/process_login}" method="post">
                             <!-- Fields for entering login and password -->
                             <div class="mb-3">
-                                <input type="text" class="form-control" name="username" placeholder="Логин" required>
+                                <label for="username" class="form-label">Имя пользователя</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
                             </div>
                             <div class="mb-3">
-                                <input type="password" class="form-control" name="password" placeholder="Пароль"
-                                       required>
+                                <label for="password" class="form-label">Пароль</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
                             </div>
                             <button type="submit" class="btn btn-success">Войти</button>
                             <a th:href="@{/auth/registration}" class="btn btn-success">Зарегистрироваться</a>
+                            <div th:if="${errorMessage}" class="alert alert-danger">
+                                <p th:text="${errorMessage}"></p>
+                            </div>
                         </form>
                     </div>
 
                     <!-- Condition of profile display and exit button -->
-                    <div th:if="${#authentication != null}">
+                    <div th:if="${#authentication.name != 'anonymousUser'}">
                         <h5 class="card-title">Профиль пользователя</h5>
                         <p th:text="${#authentication.name}"></p>
                         <a th:href="@{/web/profile}" class="btn btn-primary">Профиль</a>

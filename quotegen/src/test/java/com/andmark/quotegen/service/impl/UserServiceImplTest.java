@@ -118,13 +118,13 @@ class UserServiceImplTest {
     @Test
     void testGetUserRole_UserExists() {
         User mockUser = new User();
-        mockUser.setRole(UserRole.ADMIN);
+        mockUser.setRole(UserRole.ROLE_ADMIN);
 
         when(usersRepository.findByUsertgId(userId)).thenReturn(mockUser);
 
         UserRole result = userService.getUserRole(userId);
 
-        assertEquals(UserRole.ADMIN, result);
+        assertEquals(UserRole.ROLE_ADMIN, result);
     }
 
     @Test

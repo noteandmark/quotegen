@@ -8,8 +8,11 @@ import com.andmark.quotegen.service.UserService;
 import com.andmark.quotegen.util.impl.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @Slf4j
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UsersRepository usersRepository;
     private final MapperConvert<User, UserDTO> mapper;
 
@@ -86,14 +89,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO findByUsername(String username) {
-        log.debug("user service findByUsername = {}", username);
-        Optional<User> byUsername = usersRepository.findByUsername(username);
-        log.info("find byUsername = {}", byUsername);
-        return byUsername.map(this::convertToDTO).orElse(null);
-    }
-
-    @Override
     public UserRole getUserRole(Long usertgId) {
         User user = usersRepository.findByUsertgId(usertgId);
         if (user != null) {
@@ -103,33 +98,68 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO findByUsername(String username) {
+        log.debug("user service findByUsername = {}", username);
+        Optional<User> byUsername = usersRepository.findByUsername(username);
+        log.info("find byUsername = {}", byUsername);
+        return byUsername.map(this::convertToDTO).orElse(null);
+    }
+
+    @Override
     public boolean isAuthenticated(Authentication authentication) {
         log.debug("user service: isAuthenticated");
+        if (authentication != null)
+            System.out.println("auth = " + authentication.toString());
+        if (authentication != null && authentication.isAuthenticated()) {
+            log.debug("isAuthenticated true");
+        } else {
+            log.debug("isAuthenticated false");
+        }
         return authentication != null && authentication.isAuthenticated();
     }
 
     @Override
     public boolean isAdmin(Authentication authentication) {
         log.debug("user service: isAdmin");
-
-        if (isAuthenticated(authentication)) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return userDetails.getAuthorities().stream()
-                    .anyMatch(authority -> authority.getAuthority().equals("ADMIN"));
-        }
-        return false;
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        log.debug("isAdmin: {}", userDetails);
+        return userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
     }
 
     @Override
     public boolean isUser(Authentication authentication) {
         log.debug("user service: isUser");
+        log.debug("authentication = {}", authentication);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        log.debug("isUser: {}", userDetails);
+        return userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_USER"));
 
-        if (isAuthenticated(authentication)) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return userDetails.getAuthorities().stream()
-                    .anyMatch(authority -> authority.getAuthority().equals("USER"));
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.debug("in method loadUserByUsername find username: {}", username);
+
+        UserDTO userDTO = findByUsername(username);
+
+        if (userDTO == null) {
+            log.debug("user not found with username: {}", username);
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        } else {
+            log.debug("found userDTO = {}", userDTO);
         }
-        return false;
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(userDTO.getUsername())
+                .password(userDTO.getPassword())
+                .authorities(userDTO.getRole().name()) // Добавление роли как SimpleGrantedAuthority
+                .disabled(false)
+                .accountExpired(false)
+                .accountLocked(false)
+                .credentialsExpired(false)
+                .build();
     }
 
     private UserDTO convertToDTO(User user) {
@@ -145,5 +175,6 @@ public class UserServiceImpl implements UserService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+
 
 }

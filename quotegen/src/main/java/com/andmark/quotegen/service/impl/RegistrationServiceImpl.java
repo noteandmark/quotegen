@@ -26,9 +26,10 @@ public class RegistrationServiceImpl implements RegistrationService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Override
     @Transactional
-    public void registerNewUser(UserDTO userDTO) {
-        log.debug("starting registrate new user");
+    public Long registerNewUser(UserDTO userDTO) {
+        log.debug("starting registration new user");
         // Checking for the existence of a user with this name
         if (usersRepository.findByUsername(userDTO.getUsername()).isPresent()) {
             throw new RuntimeException("Пользователь с таким логином уже существует");
@@ -37,12 +38,14 @@ public class RegistrationServiceImpl implements RegistrationService {
         String encode = passwordEncoder.encode(userDTO.getPassword());
 
         userDTO.setPassword(encode);
-        userDTO.setRole(UserRole.USER);
+        userDTO.setRole(UserRole.ROLE_USER);
 
         log.debug("userDTO = {}", userDTO);
 
         log.debug("registration service starting to save new user");
         usersRepository.save(mapper.map(userDTO, User.class));
         log.debug("user with name = {} is registered", userDTO.getUsername());
+
+        return mapper.map(userDTO,User.class).getId();
     }
 }

@@ -1,8 +1,10 @@
 package com.andmark.quotegen.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @Profile({"dev", "prod"}) // Both profiles will use this component
@@ -26,4 +28,8 @@ public class AppConfig {
         AppConfig.maxPeriodDaysAhead = maxPeriodDaysAhead;
     }
 
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
