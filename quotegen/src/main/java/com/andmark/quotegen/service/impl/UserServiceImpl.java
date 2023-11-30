@@ -8,11 +8,10 @@ import com.andmark.quotegen.service.UserService;
 import com.andmark.quotegen.util.impl.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +25,13 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UsersRepository usersRepository;
     private final MapperConvert<User, UserDTO> mapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UsersRepository usersRepository, MapperConvert<User, UserDTO> mapper) {
+    public UserServiceImpl(UsersRepository usersRepository, MapperConvert<User, UserDTO> mapper, PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
         this.mapper = mapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -90,6 +91,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserRole getUserRole(Long usertgId) {
+        log.debug("user service getUserRole");
         User user = usersRepository.findByUsertgId(usertgId);
         if (user != null) {
             return user.getRole();
@@ -98,44 +100,34 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        log.debug("user service changePassword");
+
+        User user = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        // Check if the current password matches the password in the database
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            log.warn("Incorrect current password");
+            throw new IllegalArgumentException("Incorrect current password");
+        }
+
+        // Coding and setting a new password
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedNewPassword);
+
+        // Save the user with a new password
+        usersRepository.save(user);
+        log.debug("Password changed successfully for user: {}", username);
+    }
+
+    @Override
     public UserDTO findByUsername(String username) {
         log.debug("user service findByUsername = {}", username);
         Optional<User> byUsername = usersRepository.findByUsername(username);
         log.info("find byUsername = {}", byUsername);
         return byUsername.map(this::convertToDTO).orElse(null);
-    }
-
-    @Override
-    public boolean isAuthenticated(Authentication authentication) {
-        log.debug("user service: isAuthenticated");
-        if (authentication != null)
-            System.out.println("auth = " + authentication.toString());
-        if (authentication != null && authentication.isAuthenticated()) {
-            log.debug("isAuthenticated true");
-        } else {
-            log.debug("isAuthenticated false");
-        }
-        return authentication != null && authentication.isAuthenticated();
-    }
-
-    @Override
-    public boolean isAdmin(Authentication authentication) {
-        log.debug("user service: isAdmin");
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        log.debug("isAdmin: {}", userDetails);
-        return userDetails.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-    }
-
-    @Override
-    public boolean isUser(Authentication authentication) {
-        log.debug("user service: isUser");
-        log.debug("authentication = {}", authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        log.debug("isUser: {}", userDetails);
-        return userDetails.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_USER"));
-
     }
 
     @Override

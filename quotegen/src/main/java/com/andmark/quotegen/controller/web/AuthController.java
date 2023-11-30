@@ -1,6 +1,5 @@
 package com.andmark.quotegen.controller.web;
 
-
 import com.andmark.quotegen.dto.UserDTO;
 import com.andmark.quotegen.exception.UsernameAlreadyExistsException;
 import com.andmark.quotegen.service.RegistrationService;
@@ -65,48 +64,13 @@ public class AuthController {
             log.debug("try get authentication with username = {}, password = {}", username, password);
 
             // Authenticate the user
-//            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-//            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-//                    username, password);
-//            Authentication authentication = this.authenticationManager.authenticate(token);
-//            SecurityContext context = SecurityContextHolder.createEmptyContext();
-//            context.setAuthentication(authentication);
-//            SecurityContextHolder.setContext(context);
-
-//            it worked
-//            UserDetails principal = userService.loadUserByUsername(username);
-//            Authentication authentication = new UsernamePasswordAuthenticationToken(principal, principal.getPassword(), principal.getAuthorities());
-//            SecurityContext context = SecurityContextHolder.createEmptyContext();
-//            context.setAuthentication(authentication);
-
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
             Authentication authentication = authenticationManager.authenticate(authToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-//            Authentication authentication  =
-//                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-
-//            Authentication authenticationRequest = UsernamePasswordAuthenticationToken.unauthenticated(username, password);
-//            Authentication authentication = this.authenticationManager.authenticate(authenticationRequest);
-
             // Log successful authentication
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             log.debug("Successfully authenticated. User: {}", userDetails.getUsername());
-
-//            // Check roles
-//            boolean isAdmin = userService.isAdmin(authentication);
-//            boolean isUser = userService.isUser(authentication);
-//            log.debug("Role isAdmin = {}, is User = {}", isAdmin, isUser);
-
-//            model.addAttribute("isAdmin", isAdmin);
-//            model.addAttribute("isUser", isUser);
-
-//            // Set authentication to session manually
-//            log.debug("before SecurityContextHolder.getContext().getAuthentication() = {}", SecurityContextHolder.getContext().getAuthentication());
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("after SecurityContextHolder.getContext().getAuthentication() = {}", SecurityContextHolder.getContext().getAuthentication());
 
             // Redirect to the home page
             return "redirect:/public/index";

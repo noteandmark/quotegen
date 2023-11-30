@@ -2,20 +2,25 @@ Quote Generator REST API and Client Telegram Bot
 
 version 1.3.7 (24.10.2023)
 author: andmark
-email to contact: noteandmark@gmail.com
+email: noteandmark@gmail.com
+linkedIn: linkedin.com/in/noteandmark/
+telegram: t.me/note_and_mark
 
 "Книголюб" - часть автоматизированной системы по генерации цитат из книг:
 1. QuoteGen - приложение, которое генерирует случайные цитаты из случайно выбранной книги в электронной библиотеке пользователя.
 Приложение сканирует предложенный каталог и все подпапки, находит книги в форматах EPUB, FB2, DOC, DOCX, PDF и сохраняет информацию о них в базу данных.
 2. QuoteBot - телеграм-бот, предоставляет доступ ко всем точкам REST API приложения.
+3. QuotegenWeb - веб-приложение для доступа ко всем возможностям программы через браузер
 
-Использованные технологии:
-Java, Spring Boot, Spring Data JPA, PostgreSQL, Telegram API, Google Custom Search API
+Использованные технологии и библиотеки:
+Java20, Spring Boot 3.1.2, Maven, Spring Security 6, Spring Data JPA, Spring Validation, PostgreSQL, H2 database,
+SLF4J logging, Telegram API, Google Custom Search API, Thymeleaf, Bootstrap5, Lombok, ModelMapper, org.jsoup,
+org.apache.pdfbox, com.kursx.parser.fb2, org.apache.poi, nl.siegmann.epublib
 
 Пользователю доступны возможности:
 - получить статистику
 - получить ответ в виде gif изображения "да" или "нет"
-- погадать на книге: назвать страницу и строку, и бот, случайно выбрав книгу, вернет указанное место
+- погадать на книге: назвать страницу и строку, и приложение, случайно выбрав книгу, вернет указанное место
 - получить случайную цитату из опубликованных ранее
 - получить все цитаты за текущую неделю
 - прочитать о версии и списке изменений
@@ -26,7 +31,7 @@ Java, Spring Boot, Spring Data JPA, PostgreSQL, Telegram API, Google Custom Sear
 - делать запрос о генерации случайной цитаты
 - получать по расписанию случайную цитату
 
-Также по расписанию бот проверяет отложенные к публикации цитаты по заданному интервалу времени.
+Также через заданные интервалы времени приложение проверяет отложенные к публикации цитаты.
 
  При запросе о генерации цитаты приложение после сканирования и обновления данных:
  - выбирает случайный список книг,

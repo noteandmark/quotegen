@@ -3,6 +3,7 @@ package com.andmark.quotegen.service.impl;
 import com.andmark.quotegen.domain.User;
 import com.andmark.quotegen.domain.enums.UserRole;
 import com.andmark.quotegen.dto.UserDTO;
+import com.andmark.quotegen.exception.UsernameAlreadyExistsException;
 import com.andmark.quotegen.repository.UsersRepository;
 import com.andmark.quotegen.service.RegistrationService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.debug("starting registration new user");
         // Checking for the existence of a user with this name
         if (usersRepository.findByUsername(userDTO.getUsername()).isPresent()) {
-            throw new RuntimeException("Пользователь с таким логином уже существует");
+            log.warn("A user with this login = {} already exists", userDTO.getUsername());
+            throw new UsernameAlreadyExistsException("A user with this login already exists");
         }
 
         String encode = passwordEncoder.encode(userDTO.getPassword());

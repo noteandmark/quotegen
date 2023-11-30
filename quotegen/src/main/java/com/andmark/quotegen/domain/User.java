@@ -2,6 +2,7 @@ package com.andmark.quotegen.domain;
 
 import com.andmark.quotegen.domain.enums.UserRole;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Entity
@@ -19,9 +20,12 @@ public class User {
     @Column(name = "usertg_id", unique = true)
     private Long usertgId;
 
+    @NotBlank(message = "Name may not be empty")
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
+    @Setter
+    @NotBlank(message = "Name may not be empty")
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -29,8 +33,5 @@ public class User {
     @Column(name = "role", nullable = false)
     private UserRole role;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
 

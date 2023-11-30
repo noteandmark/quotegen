@@ -2,7 +2,6 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<!--      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -22,10 +21,11 @@
 </nav>
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-sm-8">
             <section class="header">
                 <h1 class="display-4">Quotegen Application</h1>
 
+                <!-- Buttons for ALL users -->
                 <div class="btn-group mt-3" role="group">
                     <button type="button" class="btn btn-info" onclick="window.location.href='public/help'">Помощь
                     </button>
@@ -41,68 +41,94 @@
                         Репорт[TODO]
                     </button>
 
-                    <!-- Кнопки для роли USER -->
-                    <th:block th:if="${isUser}">
+                    <!-- Buttons for role USER -->
+                    <div sec:authorize="hasRole('ROLE_USER')">
                         <button type="button" class="btn btn-primary"
-                                onclick="window.location.href='/public/divination'">Гадание
+                                onclick="window.location.href='/web/divination'">Гадание
                         </button>
-                    </th:block>
+                    </div>
 
-                    <!-- Кнопки для роли ADMIN -->
-                    <th:block th:if="${isAdmin}">
+                    <!-- Buttons for role ADMIN -->
+                    <div sec:authorize="hasRole('ROLE_ADMIN')">
                         <button type="button" class="btn btn-primary"
-                                onclick="window.location.href='/public/divination'">Гадание
+                                onclick="window.location.href='/web/divination'">Гадание
                         </button>
                         <button type="button" class="btn btn-primary"
-                                onclick="window.location.href='/public/requestquote'">Запрос цитаты
+                                onclick="window.location.href='/admin/requestquote'">Запрос цитаты
                         </button>
-                    </th:block>
+                    </div>
                 </div>
             </section>
+
+            <br>
+            <!--        work with xmlns:sec= etc.-->
+            <div sec:authorize="isAuthenticated()">
+                <h5 class="card-title" th:text="'Добро пожаловать, ' + ${#authentication.name}"></h5>
+                <div class="p-3 border bg-light">Вам доступны новые возможности в системе</div>
+            </div>
+            <div sec:authorize="hasRole('ROLE_USER')">
+                <span>Приятного пользования, дорогой друг</span>
+                <br>
+            </div>
+            <div sec:authorize="hasRole('ROLE_ADMIN')">
+                <span>Для админа открыты все двери</span>
+                <br>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Книголюб</h5>
+                    <p class="card-text">
+                        Автоматизированная система по генерации цитат из книг:
+                        <br>
+                    <ul>
+                        <li>QuoteGen - приложение, которое генерирует случайные цитаты из случайно выбранной книги в
+                            электронной библиотеке пользователя. Приложение сканирует предложенный каталог и все
+                            подпапки, находит книги в форматах EPUB, FB2, DOC, DOCX, PDF и сохраняет информацию о них в
+                            базу данных.
+                        </li>
+                        <li>QuoteBot - телеграм-бот, предоставляет доступ ко всем точкам REST API приложения.</li>
+                        <li>QuotegenWeb - веб-приложение для доступа ко всем возможностям программы через браузер.</li>
+                    </ul>
+                    Использованные технологии и библиотеки:
+                    <br>
+                    Java20, Spring Boot 3.1.2, Maven, Spring Security 6, Spring Data JPA, Spring Validation, PostgreSQL,
+                    H2 database, SLF4J logging, Telegram API, Google Custom Search API, Thymeleaf, Bootstrap5, Lombok,
+                    ModelMapper, org.jsoup, org.apache.pdfbox, com.kursx.parser.fb2, org.apache.poi, nl.siegmann.epublib
+                    <br><br>
+                    Пользователю доступны возможности:
+                    <ul>
+                        <li>получить статистику</li>
+                        <li>получить ответ в виде gif изображения "да" или "нет"</li>
+                        <li>погадать на книге: назвать страницу и строку, и приложение, случайно выбрав книгу, вернет
+                            указанное место
+                        </li>
+                        <li>получить случайную цитату из опубликованных ранее</li>
+                        <li>получить все цитаты за текущую неделю</li>
+                        <li>прочитать о версии и списке изменений</li>
+                        <li>отправить сообщение админу: баг, отзыв, предложения</li>
+                    </ul>
+                    <br>
+                    Админ может:
+                    <ul>
+                        <li>сканировать директорию на наличие электронных книг и сохранять их в БД</li>
+                        <li>делать запрос о генерации случайной цитаты</li>
+                        <li>получать по расписанию случайную цитату</li>
+                    </ul>
+                    </p>
+                </div>
+            </div>
+
         </div>
-
-        ---*1*---
-<!--        work with xmlns:sec= etc.-->
-        <div sec:authorize="isAuthenticated()">
-            <p th:text="${#authentication.name}"></p>
-            <h5 class="card-title" th:text="'Здравствуй, ' + ${#authentication.name}"></h5>
-        </div>
-
-        ---*2*---
-
-        <div sec:authorize="hasRole('ROLE_USER')">
-            <span>Role USER is authorize</span>
-        </div>
-
-        ---*3*---
-
-        <div sec:authorize="isAuthenticated()">
-            This content is only shown to authenticated users.
-        </div>
-        <div sec:authorize="hasRole('ROLE_ADMIN')">
-            This content is only shown to administrators.
-        </div>
-        <div sec:authorize="hasRole('ROLE_USER')">
-            This content is only shown to users.
-        </div>
-
-        ---*4*---
-
-        <div sec:authorize="isAuthenticated()">
-
-            Authenticated as <span sec:authentication="name"></span></div>
-
-        ---*5*---
 
         <!--        // Authorisation and registration-->
-        <div class="col-md-4 mt-5">
+        <div class="col-sm-4 mt-5">
             <div class="card">
                 <div class="card-body">
 
                     <!-- Condition for displaying the login and registration -->
                     <div th:if="${#authentication.name == 'anonymousUser'}">
                         <h5 class="card-title">Вход для расширенных возможностей</h5>
-                        <p th:text="${#authentication.name}"></p>
+                        <p th:text="${#authentication.name}" style="display:none;"></p>
                         <form th:action="@{/auth/process_login}" method="post">
                             <!-- Fields for entering login and password -->
                             <div class="mb-3">
@@ -124,18 +150,20 @@
                     <!-- Condition of profile display and exit button -->
                     <div th:if="${#authentication.name != 'anonymousUser'}">
                         <h5 class="card-title">Профиль пользователя</h5>
-                        <p th:text="${#authentication.name}"></p>
-                        <a th:href="@{/web/profile}" class="btn btn-primary">Профиль</a>
+                        Authenticated as <span sec:authentication="name"></span>
+                        <a th:href="@{'/web/profile/' + ${#authentication.principal.username}}" class="btn btn-primary">Профиль</a>
+                        <br>
                         <form th:action="@{/signout}" method="post">
+                            <span>Выйти</span>
                             <button type="submit" class="btn btn-danger">Signout</button>
                         </form>
                     </div>
-
                 </div>
+
             </div>
         </div>
-
     </div>
+
 </div>
 </body>
 </html>
