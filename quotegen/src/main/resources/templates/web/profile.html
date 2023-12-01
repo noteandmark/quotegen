@@ -12,28 +12,28 @@
             crossorigin="anonymous"></script>
 </head>
 <body>
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-        <a class="navbar-brand" href="#">linkedin.com/in/noteandmark/</a>
+        <a class="navbar-brand" href="/">На главную</a>
     </div>
 </nav>
 
 <br>
 <div class="container mt-5">
     <div class="col-md-6 offset-md-3">
-        <h2 class="mb-3">User Profile</h2>
+        <h2 class="mb-3">Профиль пользователя</h2>
         <div class="mb-3">
-            <label class="form-label">Username:</label>
-            <p class="form-control-plaintext" th:text="${user.username}"></p>
+            <label class="form-label">Имя пользователя:</label>
+            <p class="form-control-plaintext text-primary" th:text="${user.username}"></p>
         </div>
         <div class="mb-3">
-            <label class="form-label">Role:</label>
-            <p class="form-control-plaintext" th:text="${user.role}"></p>
+            <label class="form-label">Роль:</label>
+            <p class="form-control-plaintext font-weight-bold" th:text="${user.role}"></p>
         </div>
         <div class="mb-3">
-            <label class="form-label">Password:</label>
-            <p class="form-control-plaintext">****** <a th:href="@{'/web/profile/change-password/' + user.username}"
-                                                        class="btn btn-primary">Change Password</a></p>
+            <label class="form-label">Пароль:</label>
+            <p class="form-control-plaintext">****** <a th:href="@{'/web/change-password/' + ${#authentication.principal.username}}"
+                                                        class="btn btn-primary btn-sm">Изменить пароль</a></p>
         </div>
     </div>
 </div>

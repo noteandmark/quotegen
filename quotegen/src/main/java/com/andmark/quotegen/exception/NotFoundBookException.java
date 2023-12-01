@@ -1,6 +1,7 @@
 package com.andmark.quotegen.exception;
 
 public class NotFoundBookException extends RuntimeException{
+
     public NotFoundBookException() {
     }
 

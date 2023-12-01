@@ -54,13 +54,6 @@ public class DivinationCommand extends QuoteCommand {
             }
 
             if (!hasUserUsedCommandToday(user.getId())) {
-                // Prompt the user to enter a page number
-//                message.setText("Добро пожаловать в \"Гадание по книге\":\n" +
-//                        "Загадали вопрос?\n" +
-//                        "Я выберу наугад книгу и верну вам отрывок по заданным странице и строке.\n" +
-//                        "Правда, без редактирования там может быть всё, что угодно... Попробуем?\n" +
-//                        "Один раз в день можем сыграть в такую игру ;)\n" +
-//                        "Напишите номер страницы:");
                 message.setText(messageText);
                 // Set the next step for the user's input
                 BotAttributes.setUserCurrentBotState(user.getId(), BotState.AWAITING_PAGE_NUMBER);

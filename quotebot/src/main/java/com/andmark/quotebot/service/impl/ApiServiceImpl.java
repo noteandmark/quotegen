@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.util.Arrays;
@@ -46,6 +47,7 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public QuoteDTO getNextQuote() {
         log.debug("api service request: getting next quote");
+
         String quoteUrlGetNext = BotConfig.API_BASE_URL + "/quotes/get-next";
         ResponseEntity<QuoteDTO> response = restTemplate.getForEntity(quoteUrlGetNext, QuoteDTO.class);
         log.debug("response.getStatusCode() = " + response.getStatusCode());

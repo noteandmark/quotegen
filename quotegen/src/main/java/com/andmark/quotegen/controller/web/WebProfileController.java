@@ -2,6 +2,7 @@ package com.andmark.quotegen.controller.web;
 
 import com.andmark.quotegen.dto.UserDTO;
 import com.andmark.quotegen.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/web")
+@Slf4j
 public class WebProfileController {
 
     private final UserService userService;
@@ -28,6 +30,7 @@ public class WebProfileController {
     @GetMapping("/change-password/{username}")
     public String changePasswordForm(@PathVariable String username, Model model) {
         // Передаем имя пользователя в модель для отображения на странице
+        log.debug("webProfileController changePasswordForm with username = {}", username);
         model.addAttribute("username", username);
         return "web/change-password";
     }
@@ -41,10 +44,11 @@ public class WebProfileController {
             userService.changePassword(username, currentPassword, newPassword);
             redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully");
         } catch (IllegalArgumentException e) {
+            log.warn("IllegalArgumentException in changePassword");
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
-        return "redirect:/web/change-password";
+        return "redirect:/web/change-password/" + username;
     }
 
 }
