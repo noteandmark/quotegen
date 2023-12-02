@@ -53,6 +53,7 @@ public class ApiServiceImpl implements ApiService {
         log.debug("response.getStatusCode() = " + response.getStatusCode());
 
         QuoteDTO quoteDTO = response.getBody();
+
         if (quoteDTO.getContent() != null && quoteDTO.getContent().equals("No books available. Please scan the catalogue first.")) {
             log.debug("No books available. Please scan the catalogue first.");
             String errorMessage = quoteDTO.getContent();

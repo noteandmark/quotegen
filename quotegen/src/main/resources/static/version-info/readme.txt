@@ -14,8 +14,8 @@ telegram: t.me/note_and_mark
 
 Использованные технологии и библиотеки:
 Java20, Spring Boot 3.1.2, Maven, Spring Security 6, Spring Data JPA, Spring Validation, PostgreSQL, H2 database,
-SLF4J logging, Telegram API, Google Custom Search API, Thymeleaf, Bootstrap5, Lombok, ModelMapper, org.jsoup,
-org.apache.pdfbox, com.kursx.parser.fb2, org.apache.poi, nl.siegmann.epublib
+SLF4J logging, JUnit testing, Mockito, Git, Telegram API, Google Custom Search API, Thymeleaf, Bootstrap5, Lombok, ModelMapper,
+org.jsoup, org.apache.pdfbox, com.kursx.parser.fb2, org.apache.poi, nl.siegmann.epublib
 
 Пользователю доступны возможности:
 - получить статистику

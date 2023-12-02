@@ -27,7 +27,7 @@
 
                 <!-- Buttons for ALL users -->
                 <div class="btn-group mt-3" role="group">
-                    <button type="button" class="btn btn-info" onclick="window.location.href='public/help'">Помощь
+                    <button type="button" class="btn btn-info" onclick="window.location.href='public/help'">Помощь[TODO]
                     </button>
                     <button type="button" class="btn btn-primary" onclick="window.location.href='public/stats'">
                         Статистика
@@ -40,24 +40,41 @@
                     <button type="button" class="btn btn-primary" onclick="window.location.href='public/report'">
                         Репорт[TODO]
                     </button>
+                </div>
 
                     <!-- Buttons for role USER -->
+                <div class="btn-group mt-3" role="group">
                     <div sec:authorize="hasRole('ROLE_USER')">
                         <button type="button" class="btn btn-primary"
                                 onclick="window.location.href='/web/divination'">Гадание
                         </button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='/web/getquote'">Случайная цитата
+                        </button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='/web/quotes-for-week'">Цитаты за неделю
+                        </button>
                     </div>
+                </div>
 
                     <!-- Buttons for role ADMIN -->
+                <div class="btn-group mt-3" role="group">
                     <div sec:authorize="hasRole('ROLE_ADMIN')">
                         <button type="button" class="btn btn-primary"
                                 onclick="window.location.href='/web/divination'">Гадание
+                        </button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='/web/getquote'">Случайная цитата
+                        </button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='/web/quotes-for-week'">Цитаты за неделю
                         </button>
                         <button type="button" class="btn btn-primary"
                                 onclick="window.location.href='/admin/requestquote'">Запрос цитаты
                         </button>
                     </div>
                 </div>
+
             </section>
 
             <br>

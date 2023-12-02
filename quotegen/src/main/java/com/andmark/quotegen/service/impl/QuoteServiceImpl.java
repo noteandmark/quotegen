@@ -14,6 +14,7 @@ import com.andmark.quotegen.service.QuoteService;
 import com.andmark.quotegen.util.BookFormatParser;
 import com.andmark.quotegen.util.BookFormatParserFactory;
 import com.andmark.quotegen.util.impl.MapperConvert;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,8 +35,10 @@ import static com.andmark.quotegen.config.AppConfig.*;
 @Transactional(readOnly = true)
 @Slf4j
 public class QuoteServiceImpl implements QuoteService {
+    @Setter
     @Value("${quote.cache.size:30}")
     private int cacheSize;
+
     private final Queue<Quote> quoteCache;
 
     private final QuotesRepository quotesRepository;
@@ -50,10 +53,6 @@ public class QuoteServiceImpl implements QuoteService {
         this.bookFormatParserFactory = bookFormatParserFactory;
         this.mapper = mapper;
         this.quoteCache = new LinkedList<>();
-    }
-
-    public void setCacheSize(int cacheSize) {
-        this.cacheSize = cacheSize;
     }
 
     @Override
