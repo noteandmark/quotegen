@@ -44,7 +44,7 @@ public class QuoteServiceImpl implements QuoteService {
     private final QuoteKeyboardService quoteKeyboardService;
     private final UserRegistrationService userRegistrationService;
 
-    private Stack<String> quoteText;
+    private final Stack<String> quoteText;
 
     public QuoteServiceImpl(@Lazy Bot telegramBot, BotAttributes botAttributes, ApiService apiService, UserService userService, GoogleCustomSearchService googleCustomSearchService, QuoteKeyboardService quoteKeyboardService, UserRegistrationService userRegistrationService) {
         this.telegramBot = telegramBot;

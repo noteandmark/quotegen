@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class QuoteDTO {
     private Long id;
     private String content;

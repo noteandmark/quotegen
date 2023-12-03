@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -14,30 +15,86 @@
     </div>
 </nav>
 
-<div class="container mt-5">
-    <h2>Запрос цитаты</h2>
+<div class="container mt-1">
+    <h6>Запрос цитаты</h6>
 
-    <div class="card mb-3">
+    <div class="card mb-2">
         <div class="card-body">
-            <h5 class="card-title">Сгенерирована следующая:</h5>
-            <p class="card-text" th:text="${quote.content}"></p>
-            <br>
-            <footer class="blockquote-footer" th:text="${quote.bookTitle}"></footer>
-            <footer class="blockquote-footer" th:text="${quote.bookAuthor}"></footer>
+            <h6 class="card-title">Редактирование цитаты:</h6>
+
+            <!-- Форма для редактирования цитаты -->
+            <form th:action="@{/admin/acceptquote}" method="post" class="mb-2">
+                <!-- Используйте textarea для многострочного ввода цитаты -->
+                <textarea class="form-control mb-2" name="quoteContent" th:text="${quote.content}" maxlength="4096" style="height: auto; min-height: 400px;"></textarea>
+                <!-- Ввод для названия книги -->
+                <input type="text" class="form-control mb-2" name="bookTitle" placeholder="Название книги" th:value="${quote.bookTitle}">
+
+                <!-- Ввод для автора книги -->
+                <input type="text" class="form-control mb-2" name="bookAuthor" placeholder="Автор книги" th:value="${quote.bookAuthor}">
+
+                <!-- Передача идентификатора цитаты -->
+                <input type="hidden" name="quoteId" th:value="${quote.id}">
+
+                <label for="randomDate">Случайный выбор:</label>
+                <input type="radio" id="randomDate" name="publishOption" value="random" checked onchange="toggleDatePicker()">
+                <br>
+
+                <label for="publishNow">Опубликовать сейчас:</label>
+                <input type="radio" id="publishNow" name="publishOption" value="now" onchange="hideDatePicker()">
+                <br>
+
+                <label for="publishDate">Опубликовать с выбором даты:</label>
+                <input type="radio" id="publishDate" name="publishOption" value="chosen" onchange="toggleDatePicker()">
+                <br>
+
+<!--                <div id="datePickerContainer" style="display: none;">-->
+<!--                    <label for="datepicker">Дата публикации:</label>-->
+<!--                    <input type="datetime-local" id="datepicker" name="publishDate"-->
+<!--                    min="${#dates.format(#temporals.min(#temporals.createNow(), #temporals.createNow().plusDays(1)), 'yyyy-MM-ddTHH:mm')}" required>-->
+<!--&lt;!&ndash;                           min="' + new Date().toISOString().split('Z')[0] + '" required>&ndash;&gt;-->
+<!--                </div>-->
+
+<!--                <div id="datePickerContainer" style="display: none;">-->
+<!--                    <label for="datepicker">Дата публикации:</label>-->
+<!--                    <input type="datetime-local" id="datepicker" name="publishDate"-->
+<!--                           th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-ddTHH:mm')}" required>-->
+<!--                </div>-->
+
+                <div id="datePickerContainer" style="display: none;">
+                    <label for="datepicker">Дата публикации:</label>
+                    <input type="datetime-local" id="datepicker" name="publishDate" required>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var datePicker = document.getElementById('datepicker');
+                        var now = new Date();
+                        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                        datePicker.min = now.toISOString().slice(0, 16);
+                    });
+                </script>
+
+
+                <!-- Кнопка "Принять" для отправки формы -->
+                <button type="submit" class="btn btn-success">Принять</button>
+            </form>
+
+            <script>
+                function toggleDatePicker() {
+                    var datePickerContainer = document.getElementById("datePickerContainer");
+                    datePickerContainer.style.display = document.getElementById("publishDate").checked ? "block" : "none";
+                }
+
+                function hideDatePicker() {
+                    document.getElementById("datePickerContainer").style.display = "none";
+                }
+            </script>
+
+            <form th:action="@{/admin/rejectquote}" method="post">
+                <input type="hidden" name="quoteId" th:value="${quote.id}">
+                <button type="submit" class="btn btn-danger">Отклонить</button>
+            </form>
         </div>
-    </div>
-
-    <!-- Add buttons for accept and reject actions -->
-    <form th:action="@{/admin/acceptquote}" method="post" class="mb-2">
-        <input type="hidden" name="quoteId" th:value="${quote.id}">
-        <button type="submit" class="btn btn-success">Accept</button>
-    </form>
-
-    <form th:action="@{/admin/rejectquote}" method="post">
-        <input type="hidden" name="quoteId" th:value="${quote.id}">
-        <button type="submit" class="btn btn-danger">Reject</button>
-    </form>
-</div>
 
 </body>
 </html>

@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/api/**"),
                                 new AntPathRequestMatcher("/auth/**")).permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/web/**").hasAuthority("ROLE_USER")
+                        .requestMatchers("/web/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
 
