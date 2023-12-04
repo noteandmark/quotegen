@@ -4,4 +4,6 @@ import com.andmark.quotegen.dto.QuoteDTO;
 
 public interface WebAdminService {
     void randomPublish(QuoteDTO pendingQuote);
+
+    void chosenPublish(QuoteDTO pendingQuote);
 }

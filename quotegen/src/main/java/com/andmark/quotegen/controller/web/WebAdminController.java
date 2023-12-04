@@ -1,5 +1,6 @@
 package com.andmark.quotegen.controller.web;
 
+import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.dto.AvailableDayResponseDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.service.QuoteService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 
@@ -43,12 +45,13 @@ public class WebAdminController {
                               @RequestParam String quoteContent,
                               @RequestParam String bookAuthor,
                               @RequestParam String bookTitle,
-                              Model model) {
+                              RedirectAttributes redirectAttributes) {
         log.debug("web admin controller acceptQuote");
 
         QuoteDTO pendingQuote = QuoteDTO.builder()
                 .id(quoteId)
                 .content(quoteContent)
+                .status(QuoteStatus.PENDING)
                 .imageUrl(null) //TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 .bookAuthor(bookAuthor)
                 .bookTitle(bookTitle)
@@ -60,13 +63,11 @@ public class WebAdminController {
                 log.debug("case random");
                 webAdminService.randomPublish(pendingQuote);
                 break;
-            case "now":
-                // Publish the quote immediately
-//                quoteService.publishNow(quoteId);
-                break;
             case "chosen":
                 // Publish the quote on the selected date
-//                quoteService.publishOnDate(quoteId, publishDate);
+                log.debug("case chosen with publishDate = {}", publishDate);
+                pendingQuote.setPendingTime(LocalDateTime.parse(publishDate));
+                webAdminService.chosenPublish(pendingQuote);
                 break;
             default:
                 log.warn("Unsupported publish option: {}", publishOption);
@@ -74,7 +75,11 @@ public class WebAdminController {
                 break;
         }
 
+        // Add the quote as a flash attribute (saved between requests) to RedirectAttributes
+        redirectAttributes.addFlashAttribute("quote", pendingQuote);
+
         // Redirect to success page
+        log.debug("redirect to success html");
         return "redirect:/admin/success";
     }
 

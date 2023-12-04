@@ -3,6 +3,7 @@ package com.andmark.quotegen.domain;
 import com.andmark.quotegen.domain.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Entity
@@ -22,11 +23,13 @@ public class User {
 
     @NotBlank(message = "Name may not be empty")
     @Column(name = "username", nullable = false, unique = true)
+    @Size(min = 3, max = 20)
     private String username;
 
     @Setter
-    @NotBlank(message = "Name may not be empty")
+    @NotBlank(message = "Password may not be empty")
     @Column(name = "password", nullable = false)
+    @Size(min = 3, max = 20)
     private String password;
 
     @Enumerated(EnumType.STRING)

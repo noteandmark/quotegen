@@ -25,6 +25,16 @@ public class WebAdminServiceImpl implements WebAdminService {
         // Set the pending time for the quote
         pendingQuote.setPendingTime(availableDayResponseDTO.getAvailableDay());
 
+        log.debug("try to save pendingQuote: {}", pendingQuote);
         quoteService.pendingQuote(pendingQuote);
+        log.debug("success saved in randomPublish web admin service");
     }
+
+    @Override
+    public void chosenPublish(QuoteDTO pendingQuote) {
+        log.debug("web admin service chosenPublish");
+        quoteService.pendingQuote(pendingQuote);
+        log.debug("success saved in chosenPublish web admin service");
+    }
+
 }

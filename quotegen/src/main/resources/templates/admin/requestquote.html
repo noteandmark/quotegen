@@ -39,41 +39,15 @@
                 <input type="radio" id="randomDate" name="publishOption" value="random" checked onchange="toggleDatePicker()">
                 <br>
 
-                <label for="publishNow">Опубликовать сейчас:</label>
-                <input type="radio" id="publishNow" name="publishOption" value="now" onchange="hideDatePicker()">
-                <br>
-
                 <label for="publishDate">Опубликовать с выбором даты:</label>
                 <input type="radio" id="publishDate" name="publishOption" value="chosen" onchange="toggleDatePicker()">
                 <br>
 
-<!--                <div id="datePickerContainer" style="display: none;">-->
-<!--                    <label for="datepicker">Дата публикации:</label>-->
-<!--                    <input type="datetime-local" id="datepicker" name="publishDate"-->
-<!--                    min="${#dates.format(#temporals.min(#temporals.createNow(), #temporals.createNow().plusDays(1)), 'yyyy-MM-ddTHH:mm')}" required>-->
-<!--&lt;!&ndash;                           min="' + new Date().toISOString().split('Z')[0] + '" required>&ndash;&gt;-->
-<!--                </div>-->
-
-<!--                <div id="datePickerContainer" style="display: none;">-->
-<!--                    <label for="datepicker">Дата публикации:</label>-->
-<!--                    <input type="datetime-local" id="datepicker" name="publishDate"-->
-<!--                           th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-ddTHH:mm')}" required>-->
-<!--                </div>-->
-
                 <div id="datePickerContainer" style="display: none;">
                     <label for="datepicker">Дата публикации:</label>
-                    <input type="datetime-local" id="datepicker" name="publishDate" required>
+                    <input type="datetime-local" id="datepicker" name="publishDate"
+                    min="${#dates.format(#temporals.min(#temporals.createNow(), #temporals.createNow().plusDays(1)), 'yyyy-MM-ddTHH:mm')}">
                 </div>
-
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        var datePicker = document.getElementById('datepicker');
-                        var now = new Date();
-                        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                        datePicker.min = now.toISOString().slice(0, 16);
-                    });
-                </script>
-
 
                 <!-- Кнопка "Принять" для отправки формы -->
                 <button type="submit" class="btn btn-success">Принять</button>
@@ -82,11 +56,15 @@
             <script>
                 function toggleDatePicker() {
                     var datePickerContainer = document.getElementById("datePickerContainer");
-                    datePickerContainer.style.display = document.getElementById("publishDate").checked ? "block" : "none";
-                }
+                    var publishDateInput = document.getElementById("datepicker");
 
-                function hideDatePicker() {
-                    document.getElementById("datePickerContainer").style.display = "none";
+                    if (document.getElementById("publishDate").checked) {
+                        datePickerContainer.style.display = "block";
+                        publishDateInput.required = true;
+                    } else {
+                        datePickerContainer.style.display = "none";
+                        publishDateInput.required = false;
+                    }
                 }
             </script>
 

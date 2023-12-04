@@ -1,6 +1,7 @@
 package com.andmark.quotegen.dto;
 
 import com.andmark.quotegen.domain.enums.UserRole;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @RequiredArgsConstructor
