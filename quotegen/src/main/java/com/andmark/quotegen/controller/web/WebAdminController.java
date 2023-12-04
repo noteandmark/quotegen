@@ -1,8 +1,8 @@
 package com.andmark.quotegen.controller.web;
 
 import com.andmark.quotegen.domain.enums.QuoteStatus;
-import com.andmark.quotegen.dto.AvailableDayResponseDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
+import com.andmark.quotegen.service.GoogleCustomSearchService;
 import com.andmark.quotegen.service.QuoteService;
 import com.andmark.quotegen.service.WebAdminService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,18 +24,24 @@ import java.time.LocalDateTime;
 public class WebAdminController {
     private final QuoteService quoteService;
     private final WebAdminService webAdminService;
+    private final GoogleCustomSearchService googleCustomSearchService;
 
     @Autowired
-    public WebAdminController(QuoteService quoteService, WebAdminService webAdminService) {
+    public WebAdminController(QuoteService quoteService, WebAdminService webAdminService, GoogleCustomSearchService googleCustomSearchService) {
         this.quoteService = quoteService;
         this.webAdminService = webAdminService;
+        this.googleCustomSearchService = googleCustomSearchService;
     }
 
     @GetMapping("/requestquote")
     public String requestQuote(Model model) {
         log.debug("admin controller requestquote");
         QuoteDTO quoteDTO = quoteService.provideQuoteToClient();
+        List<String> imageUrls = googleCustomSearchService.searchImagesByKeywords(quoteDTO.getContent());
+        log.debug("count images found: {}", imageUrls.size());
         model.addAttribute("quote", quoteDTO);
+        model.addAttribute("imageUrls", imageUrls);
+        model.addAttribute("selectedImageNumber", 0);
         return "admin/requestquote";
     }
 

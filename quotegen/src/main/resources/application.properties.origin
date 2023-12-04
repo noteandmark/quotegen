@@ -22,3 +22,7 @@ quote.countLinesAtPage=43
 quote.maxCharactersInline=65
 # number of returned strings
 quote.numberNextLines=7
+
+# Google API Search
+google.api.key=YOUR_API_KEY
+google.search.engine.id=YOUR_ENGINE

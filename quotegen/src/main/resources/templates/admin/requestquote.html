@@ -25,28 +25,78 @@
             <!-- Форма для редактирования цитаты -->
             <form th:action="@{/admin/acceptquote}" method="post" class="mb-2">
                 <!-- Используйте textarea для многострочного ввода цитаты -->
-                <textarea class="form-control mb-2" name="quoteContent" th:text="${quote.content}" maxlength="4096" style="height: auto; min-height: 400px;"></textarea>
+                <textarea class="form-control mb-2" name="quoteContent" th:text="${quote.content}" maxlength="4096"
+                          style="height: auto; min-height: 400px;"></textarea>
                 <!-- Ввод для названия книги -->
-                <input type="text" class="form-control mb-2" name="bookTitle" placeholder="Название книги" th:value="${quote.bookTitle}">
+                <input type="text" class="form-control mb-2" name="bookTitle" placeholder="Название книги"
+                       th:value="${quote.bookTitle}">
 
                 <!-- Ввод для автора книги -->
-                <input type="text" class="form-control mb-2" name="bookAuthor" placeholder="Автор книги" th:value="${quote.bookAuthor}">
+                <input type="text" class="form-control mb-2" name="bookAuthor" placeholder="Автор книги"
+                       th:value="${quote.bookAuthor}">
+
+                <!-- Отображение выбранного изображения -->
+                <label for="selectedImage">Выбранное изображение:</label>
+                <img id="selectedImage" class="img-thumbnail" th:if="${quote.imageUrl}" th:src="${quote.imageUrl}"
+                     alt="Selected Image">
+
+                <!-- Отображение всех найденных изображений с номерами -->
+                <div class="mt-3">
+                    <label>Доступные изображения:</label>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Изображение</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Используем Thymeleaf для отрисовки таблицы изображений с номерами -->
+                        <th:block th:each="image, iterStat : ${imageUrls}">
+                            <tr>
+                                <th scope="row" th:text="${iterStat.count}"></th>
+                                <td>
+                                    <img class="img-thumbnail" th:src="${image}" alt="Image"
+                                         style="max-width: 100px; max-height: 100px;">
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Поле ввода для выбора номера изображения или 0 (если 0 - тогда не будет выбранного изображения) -->
+                <div class="mt-3">
+                    <label for="selectedImageNumber">Выберите номер изображения (или 0 для отсутствия
+                        изображения):</label>
+                    <input type="number" id="selectedImageNumber" name="selectedImageNumber"
+                           class="form-control" min="0" max="${imageUrls.size()}">
+                </div>
+
+                <!-- Скрытое поле для передачи выбранного изображения -->
+                <input type="hidden" name="selectedImageUrl"
+                       th:value="${imageUrls[__${selectedImageNumber}__]}"/>
+
 
                 <!-- Передача идентификатора цитаты -->
                 <input type="hidden" name="quoteId" th:value="${quote.id}">
 
+                <!--                Выбор даты публикации-->
+                <br>
                 <label for="randomDate">Случайный выбор:</label>
-                <input type="radio" id="randomDate" name="publishOption" value="random" checked onchange="toggleDatePicker()">
+                <input type="radio" id="randomDate" name="publishOption" value="random" checked
+                       onchange="toggleDatePicker()">
                 <br>
 
                 <label for="publishDate">Опубликовать с выбором даты:</label>
-                <input type="radio" id="publishDate" name="publishOption" value="chosen" onchange="toggleDatePicker()">
+                <input type="radio" id="publishDate" name="publishOption" value="chosen"
+                       onchange="toggleDatePicker()">
                 <br>
 
                 <div id="datePickerContainer" style="display: none;">
                     <label for="datepicker">Дата публикации:</label>
                     <input type="datetime-local" id="datepicker" name="publishDate"
-                    min="${#dates.format(#temporals.min(#temporals.createNow(), #temporals.createNow().plusDays(1)), 'yyyy-MM-ddTHH:mm')}">
+                           min="${#dates.format(#temporals.min(#temporals.createNow(), #temporals.createNow().plusDays(1)), 'yyyy-MM-ddTHH:mm')}">
                 </div>
 
                 <!-- Кнопка "Принять" для отправки формы -->
