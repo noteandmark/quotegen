@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
@@ -33,36 +30,57 @@ public class WebAdminController {
         this.googleCustomSearchService = googleCustomSearchService;
     }
 
+//    public String acceptQuote(@RequestParam Long quoteId,
+//                              @RequestParam String publishOption,
+//                              @RequestParam(required = false) String publishDate,
+//                              @RequestParam String quoteContent,
+//                              @RequestParam String bookAuthor,
+//                              @RequestParam String bookTitle,
+//                              RedirectAttributes redirectAttributes) {
+
+//        QuoteDTO pendingQuote = QuoteDTO.builder()
+//                .id(quoteId)
+//                .content(quoteContent)
+//                .status(QuoteStatus.PENDING)
+//                .imageUrl(null) //TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//                .bookAuthor(bookAuthor)
+//                .bookTitle(bookTitle)
+//                .build();
+
     @GetMapping("/requestquote")
     public String requestQuote(Model model) {
-        log.debug("admin controller requestquote");
+        log.debug("Admin Controller: Request Quote");
+
         QuoteDTO quoteDTO = quoteService.provideQuoteToClient();
-        List<String> imageUrls = googleCustomSearchService.searchImagesByKeywords(quoteDTO.getContent());
-        log.debug("count images found: {}", imageUrls.size());
+        String content = quoteDTO.getContent();
+        String truncatedContent = content.substring(0, Math.min(content.length(), 1024));
+
+        List<String> imageUrls = googleCustomSearchService.searchImagesByKeywords(truncatedContent);
+
+        log.debug("Found {} images", imageUrls.size());
+        log.debug("imageUrls = {}", imageUrls);
+        log.debug("---");
+
         model.addAttribute("quote", quoteDTO);
         model.addAttribute("imageUrls", imageUrls);
         model.addAttribute("selectedImageNumber", 0);
+
         return "admin/requestquote";
     }
 
     @PostMapping("/acceptquote")
-    public String acceptQuote(@RequestParam Long quoteId,
+    public String acceptQuote(@ModelAttribute("quote") QuoteDTO pendingQuote,
                               @RequestParam String publishOption,
                               @RequestParam(required = false) String publishDate,
-                              @RequestParam String quoteContent,
-                              @RequestParam String bookAuthor,
-                              @RequestParam String bookTitle,
+                              @RequestParam(required = false) String selectedImageUrl,
                               RedirectAttributes redirectAttributes) {
         log.debug("web admin controller acceptQuote");
 
-        QuoteDTO pendingQuote = QuoteDTO.builder()
-                .id(quoteId)
-                .content(quoteContent)
-                .status(QuoteStatus.PENDING)
-                .imageUrl(null) //TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                .bookAuthor(bookAuthor)
-                .bookTitle(bookTitle)
-                .build();
+        pendingQuote.setStatus(QuoteStatus.PENDING);
+
+        // Set the imageUrl in quoteDTO based on selectedImageUrl
+        log.debug("selectedImageUrl " + (selectedImageUrl != null ? "=" + selectedImageUrl : "is null"));
+        pendingQuote.setImageUrl("0".equals(selectedImageUrl) ? null : selectedImageUrl);
 
         // Process accept action based on the selected publish option
         switch (publishOption) {

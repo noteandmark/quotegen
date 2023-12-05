@@ -4,6 +4,7 @@ import com.andmark.quotegen.dto.GoogleCustomSearchResponse;
 import com.andmark.quotegen.service.GoogleCustomSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -47,6 +48,10 @@ public class GoogleCustomSearchServiceImpl implements GoogleCustomSearchService 
         String apiUrl = "https://www.googleapis.com/customsearch/v1";
         String requestUrl = apiUrl + "?key=" + apiKey + "&cx=" + searchEngineId + "&searchType=image&q=" + keywords;
         ResponseEntity<GoogleCustomSearchResponse> responseEntity = restTemplate.getForEntity(requestUrl, GoogleCustomSearchResponse.class);
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            log.warn("Request to Google API failed with status code: {}", responseEntity.getStatusCode());
+            return null;
+        }
         return responseEntity.getBody();
     }
 

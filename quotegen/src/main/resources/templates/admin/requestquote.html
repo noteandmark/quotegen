@@ -24,26 +24,32 @@
 
             <!-- Форма для редактирования цитаты -->
             <form th:action="@{/admin/acceptquote}" method="post" class="mb-2">
+                <!-- Передача идентификатора цитаты -->
+                <input type="hidden" name="id" th:value="${quote.id}">
                 <!-- Используйте textarea для многострочного ввода цитаты -->
-                <textarea class="form-control mb-2" name="quoteContent" th:text="${quote.content}" maxlength="4096"
+                <textarea class="form-control mb-2" name="content" th:text="${quote.content}" maxlength="4096"
                           style="height: auto; min-height: 400px;"></textarea>
                 <!-- Ввод для названия книги -->
+                <label>Название:</label>
                 <input type="text" class="form-control mb-2" name="bookTitle" placeholder="Название книги"
                        th:value="${quote.bookTitle}">
 
                 <!-- Ввод для автора книги -->
+                <label>Автор:</label>
                 <input type="text" class="form-control mb-2" name="bookAuthor" placeholder="Автор книги"
                        th:value="${quote.bookAuthor}">
 
                 <!-- Отображение выбранного изображения -->
-                <label for="selectedImage">Выбранное изображение:</label>
+                <label for="selectedImage" th:if="${quote.imageUrl}">Выбранное изображение:</label>
                 <img id="selectedImage" class="img-thumbnail" th:if="${quote.imageUrl}" th:src="${quote.imageUrl}"
                      alt="Selected Image">
 
+                <!--                <div class="mt-3" th:if="${not #lists.isEmpty(imageUrls)}">-->
+
                 <!-- Отображение всех найденных изображений с номерами -->
-                <div class="mt-3">
+                <div class="mt-3" th:unless="${#lists.isEmpty(imageUrls)}">
                     <label>Доступные изображения:</label>
-                    <table class="table">
+                    <table class="table">-->
                         <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -54,7 +60,7 @@
                         <!-- Используем Thymeleaf для отрисовки таблицы изображений с номерами -->
                         <th:block th:each="image, iterStat : ${imageUrls}">
                             <tr>
-                                <th scope="row" th:text="${iterStat.count}"></th>
+                                <th scope="row" th:text="${iterStat.index + 1}"></th>
                                 <td>
                                     <img class="img-thumbnail" th:src="${image}" alt="Image"
                                          style="max-width: 100px; max-height: 100px;">
@@ -63,23 +69,67 @@
                         </th:block>
                         </tbody>
                     </table>
+                    <!-- Поле ввода для выбора номера изображения или 0 (если 0 - тогда не будет выбранного изображения) -->
+                    <div class="mt-3">
+                        <label for="selectedImageNumber">Выберите номер изображения (или 0 для отсутствия
+                            изображения):</label>
+                        <input type="number" id="selectedImageNumber" name="selectedImageNumber"
+                               class="form-control" min="0" th:max="${imageUrls.size()}">
+                    </div>
+                    <!-- Скрытое поле для передачи выбранного изображения -->
+                    <input type="hidden" name="selectedImageUrl"
+                           th:value="${imageUrls[__${selectedImageNumber}__]}"/>
                 </div>
 
-                <!-- Поле ввода для выбора номера изображения или 0 (если 0 - тогда не будет выбранного изображения) -->
-                <div class="mt-3">
-                    <label for="selectedImageNumber">Выберите номер изображения (или 0 для отсутствия
-                        изображения):</label>
-                    <input type="number" id="selectedImageNumber" name="selectedImageNumber"
-                           class="form-control" min="0" max="${imageUrls.size()}">
-                </div>
+                <!--                <div class="mt-3" th:unless="${#lists.isEmpty(imageUrls)}">-->
+                <!--                    <label>Доступные изображения:</label>-->
+                <!--                    <table class="table">-->
+                <!--                        <thead>-->
+                <!--                        <tr>-->
+                <!--                            <th scope="col">#</th>-->
+                <!--                            <th scope="col">Изображение</th>-->
+                <!--                        </tr>-->
+                <!--                        </thead>-->
+                <!--                        <tbody>-->
+                <!--                        &lt;!&ndash; Используем Thymeleaf для отрисовки таблицы изображений с номерами &ndash;&gt;-->
+                <!--                        <th:block th:each="image, iterStat : ${imageUrls}">-->
+                <!--                            <tr>-->
+                <!--                                <th scope="row" th:text="${iterStat.index + 1}"></th>-->
+                <!--                                <td>-->
+                <!--                                    <img class="img-thumbnail" th:src="${image}" alt="Image"-->
+                <!--                                         style="max-width: 100px; max-height: 100px;">-->
+                <!--                                </td>-->
+                <!--                            </tr>-->
+                <!--                        </th:block>-->
+                <!--                        </tbody>-->
+                <!--                    </table>-->
+                <!--                </div>-->
 
-                <!-- Скрытое поле для передачи выбранного изображения -->
-                <input type="hidden" name="selectedImageUrl"
-                       th:value="${imageUrls[__${selectedImageNumber}__]}"/>
 
-
-                <!-- Передача идентификатора цитаты -->
-                <input type="hidden" name="quoteId" th:value="${quote.id}">
+                <!-- Отображение всех найденных изображений с номерами -->
+                <!--                <div class="mt-3">-->
+                <!--                    <label>Доступные изображения:</label>-->
+                <!--                    <table class="table">-->
+                <!--                        <thead>-->
+                <!--                        <tr>-->
+                <!--                            <th scope="col">#</th>-->
+                <!--                            <th scope="col">Изображение</th>-->
+                <!--                        </tr>-->
+                <!--                        </thead>-->
+                <!--                        <tbody>-->
+                <!--                        &lt;!&ndash; Используем Thymeleaf для отрисовки таблицы изображений с номерами &ndash;&gt;-->
+                <!--                        <th:block th:if="${not #lists.isEmpty(imageUrls)}" th:each="image, iterStat : ${imageUrls}">-->
+                <!--                            <tr>-->
+                <!--                                <th scope="row" th:text="${iterStat.index + 1}"></th>-->
+                <!--                                <td>-->
+                <!--                                    <img class="img-thumbnail" th:src="${image}" alt="Image"-->
+                <!--                                         style="max-width: 100px; max-height: 100px;">-->
+                <!--                                </td>-->
+                <!--                            </tr>-->
+                <!--                        </th:block>-->
+                <!--                        </tbody>-->
+                <!--                    </table>-->
+                <!--                </div>-->
 
                 <!--                Выбор даты публикации-->
                 <br>
