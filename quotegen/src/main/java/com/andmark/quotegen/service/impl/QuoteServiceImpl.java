@@ -18,6 +18,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -177,6 +178,20 @@ public class QuoteServiceImpl implements QuoteService {
         log.info("setUsedAt date: " + quote.getUsedAt());
         quotesRepository.save(quote);
         log.info("quote with id = {} saved in database", quote.getId());
+    }
+
+    @Override
+    @Transactional
+    public void rejectQuote(Long id) {
+        QuoteDTO existingQuote = findOne(id);
+
+        if (existingQuote != null) {
+            log.debug("service rejected quote id = {}", id);
+            delete(id);
+            log.info("service deleted quote id = {}", id);
+        } else {
+            log.warn("service couldn't find the quote with id = {}", id);
+        }
     }
 
     @Override

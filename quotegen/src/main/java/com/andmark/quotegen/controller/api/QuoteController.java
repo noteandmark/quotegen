@@ -97,17 +97,8 @@ public class QuoteController {
     @DeleteMapping("/reject")
     public ResponseEntity<Void> rejectQuote(@RequestParam Long id) {
         log.debug("controller rejectQuote id = {}", id);
-        QuoteDTO existingQuote = quoteService.findOne(id);
-
-        if (existingQuote != null) {
-            log.debug("controller reject quote id = {}", id);
-            quoteService.delete(id);
-            log.info("controller delete quote id = {}", id);
-            return ResponseEntity.ok().build();
-        } else {
-            log.warn("controller not find quote with id = {}", id);
-            return ResponseEntity.notFound().build();
-        }
+        quoteService.rejectQuote(id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/generate")

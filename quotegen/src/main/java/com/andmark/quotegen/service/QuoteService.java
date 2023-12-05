@@ -10,6 +10,7 @@ public interface QuoteService extends AbstractService<QuoteDTO>{
     void checkAndPopulateCache();
     QuoteDTO provideQuoteToClient();
     void confirmQuote(QuoteDTO quoteDTO);
+    void rejectQuote(Long id);
     void populateCache(Integer cacheSize);
     List<QuoteDTO> getPendingQuotes();
     void pendingQuote(QuoteDTO quoteDTO);

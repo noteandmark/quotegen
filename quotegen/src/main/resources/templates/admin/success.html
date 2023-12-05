@@ -16,18 +16,24 @@
 
 <div class="container mt-5">
     <h2>Success</h2>
-    <p class="text-success">Operation completed successfully</p>
 
-    <div>
-        <p th:text="'Quote: ' + ${quote.content}"></p>
-        <p th:text="'Author: ' + ${quote.bookAuthor}"></p>
-        <p th:text="'Book Title: ' + ${quote.bookTitle}"></p>
+    <!-- Block for displaying confirmation message -->
+    <div th:if="${confirmation}">
+        <p class="text-success">Operation completed successfully</p>
+        <div>
+            <p th:text="'Quote: ' + ${quote.content}"></p>
+            <p th:text="'Author: ' + ${quote.bookAuthor}"></p>
+            <p th:text="'Book Title: ' + ${quote.bookTitle}"></p>
 
-        <ul>
-            <li>Publication Time: <span th:text="${#temporals.format(quote.pendingTime, 'yyyy-MM-dd HH:mm')}"></span>
-            </li>
-        </ul>
+            <ul>
+                <li>Publication Time: <span th:text="${#temporals.format(quote.pendingTime, 'yyyy-MM-dd HH:mm')}"></span></li>
+            </ul>
+        </div>
+    </div>
 
+    <!-- Block for displaying deletion message -->
+    <div th:if="${deletion}">
+        <p class="text-danger" th:text="'Quote with id ' + ${deletedQuoteId} + ' deleted'"></p>
     </div>
 </div>
 
