@@ -35,6 +35,10 @@
     <div th:if="${deletion}">
         <p class="text-danger" th:text="'Quote with id ' + ${deletedQuoteId} + ' deleted'"></p>
     </div>
+
+    <button type="button" class="btn btn-primary"
+            onclick="window.location.href='/admin/requestquote'">Запросить ещё
+    </button>
 </div>
 
 </body>

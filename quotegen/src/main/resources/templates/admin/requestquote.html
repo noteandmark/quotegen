@@ -23,7 +23,8 @@
             <h6 class="card-title">Редактирование цитаты:</h6>
 
             <!-- Форма для редактирования цитаты -->
-            <form th:action="@{/admin/acceptquote}" method="post" class="mb-2">
+            <form th:method="POST" th:action="@{/admin/acceptquote}" class="mb-2">
+                <!--            <form th:action="@{/admin/acceptquote}" method="post" class="mb-2">-->
                 <!-- Передача идентификатора цитаты -->
                 <input type="hidden" name="id" th:value="${quote.id}">
                 <!-- Используйте textarea для многострочного ввода цитаты -->
@@ -56,15 +57,24 @@
                         </thead>
                         <tbody>
                         <!-- Используем Thymeleaf для отрисовки таблицы изображений с номерами -->
-                        <th:block th:each="image, iterStat : ${imageUrls}">
-                            <tr>
-                                <th scope="row" th:text="${iterStat.index + 1}"></th>
-                                <td>
-                                    <img class="img-thumbnail" th:src="${image}" alt="Image"
-                                         style="max-width: 100px; max-height: 100px;">
-                                </td>
-                            </tr>
-                        </th:block>
+                        <tr th:each="image, iterStat : ${imageUrls}">
+                            <th scope="row" th:text="${iterStat.index + 1}"></th>
+                            <td>
+                                <img class="img-thumbnail"
+                                     th:src="${image}" alt="Image"
+                                     style="max-width: 100px; max-height: 100px;">
+                            </td>
+                        </tr>
+
+                        <!--                        <th:block th:each="image, iterStat : ${imageUrls}">-->
+                        <!--                            <tr>-->
+                        <!--                                <th scope="row" th:text="${iterStat.index + 1}"></th>-->
+                        <!--                                <td>-->
+                        <!--                                    <img class="img-thumbnail" th:src="${image}" alt="Image"-->
+                        <!--                                         style="max-width: 100px; max-height: 100px;">-->
+                        <!--                                </td>-->
+                        <!--                            </tr>-->
+                        <!--                        </th:block>-->
                         </tbody>
                     </table>
 
@@ -74,13 +84,19 @@
                         <select id="selectedImageNumber" name="selectedImageNumber" class="form-control">
                             <option th:each="image, iterStat : ${imageUrls}"
                                     th:value="${iterStat.index}"
-                                    th:text="${'Image ' + (iterStat.index)}">
+                                    th:text="${'Image ' + (iterStat.index + 1)}">
                             </option>
                         </select>
                     </div>
                     <!-- Скрытое поле для передачи выбранного изображения -->
-                    <input type="hidden" id="selectedImageUrl" th:name="'selectedImageUrl'"
-                           th:value="${imageUrls[__${selectedImageNumber}__]}"/>
+<!--                    <input type="hidden" id="selectedImageUrl" name="selectedImageUrl"/>-->
+
+                    <!--                    <input type="hidden" id="selectedImageUrl" name="selectedImageUrl"-->
+                    <!--                           th:value="${imageUrls[__${selectedImageNumber}__]}"/>-->
+
+                                        <input type="hidden" id="selectedImageUrl" th:name="'selectedImageUrl'"
+                                               th:value="${imageUrls[__${selectedImageNumber}__]}"/>
+
 
                 </div>
 
@@ -106,27 +122,6 @@
                 <button type="submit" class="btn btn-success">Принять</button>
             </form>
 
-            <script>
-                function toggleDatePicker() {
-                    var datePickerContainer = document.getElementById("datePickerContainer");
-                    var publishDateInput = document.getElementById("datepicker");
-
-                    // проверка отображения выбора изображения
-                    var selectedImageNumber = document.getElementById("selectedImageNumber").value;
-                    console.log("Selected Image Number: ", selectedImageNumber);
-                    var selectedImageUrl = document.getElementById("selectedImageUrl").value;
-                    console.log("Selected Image URL: ", selectedImageUrl);
-
-                    if (document.getElementById("publishDate").checked) {
-                        datePickerContainer.style.display = "block";
-                        publishDateInput.required = true;
-                    } else {
-                        datePickerContainer.style.display = "none";
-                        publishDateInput.required = false;
-                    }
-                }
-            </script>
-
             <form th:action="@{/admin/rejectquote}" method="post">
                 <input type="hidden" name="quoteId" th:value="${quote.id}">
                 <button type="submit" class="btn btn-danger">Отклонить</button>
@@ -134,5 +129,48 @@
         </div>
     </div>
 </div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var imageUrls = /*[[${imageUrls}]]*/ [];
+    /*]]>*/
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // вызываем toggleDatePicker при загрузке страницы для установки начального значения
+        toggleDatePicker();
+
+        // добавляем слушатель событий для изменения selectedImageNumber
+        document.getElementById('selectedImageNumber').addEventListener('change', toggleDatePicker);
+    });
+
+    function toggleDatePicker() {
+        // проверка отображения выбора изображения
+        var selectedImageNumber = document.getElementById("selectedImageNumber").value;
+        console.log("Selected Image Number: ", selectedImageNumber);
+
+        // Отображение значений imageUrls в консоли
+        console.log("Image URLs: ", imageUrls);
+
+        // Установка значения selectedImageUrl в зависимости от выбранного номера изображения
+        var selectedImageUrlInput = document.getElementById("selectedImageUrl");
+        console.log("Selected Image URL Input: ", selectedImageUrlInput);
+        selectedImageUrlInput.value = imageUrls[selectedImageNumber];
+        console.log("New Selected Image URL Input: ", selectedImageUrlInput);
+        var selectedImageUrl = selectedImageUrlInput.value;
+        console.log("Selected Image URL: ", selectedImageUrl);
+
+        var datePickerContainer = document.getElementById("datePickerContainer");
+        var publishDateInput = document.getElementById("datepicker");
+
+        if (document.getElementById("publishDate").checked) {
+            datePickerContainer.style.display = "block";
+            publishDateInput.required = true;
+        } else {
+            datePickerContainer.style.display = "none";
+            publishDateInput.required = false;
+        }
+    }
+</script>
+
 </body>
 </html>
