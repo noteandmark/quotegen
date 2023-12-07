@@ -1,4 +1,4 @@
-package com.andmark.quotegen.service;
+package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.enums.BookFormat;
@@ -32,11 +32,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ScanServiceTest {
+public class ScanServiceImplTest {
 
     @InjectMocks
     @Spy
-    private ScanService scanService;
+    private ScanServiceImpl scanService;
 
     @Mock
     private BooksRepository booksRepository;

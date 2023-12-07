@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <title>Scan Books</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="/">На главную</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-sm-8">
+            <h4 class="display-4">Сканирование книг</h4>
+
+            <!-- Форма для выбора каталога -->
+            <form th:method="POST" th:action="@{/admin/scanbooks}" enctype="multipart/form-data" class="mb-2">
+                <div class="mb-3">
+                    <label for="directoryPath" class="form-label">Выберите каталог для сканирования:</label>
+                    <input type="file" class="form-control" id="directoryPath" name="directoryPath" webkitdirectory="" directory="" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Сканировать каталог</button>
+            </form>
+
+            <!-- Отображение результатов сканирования -->
+            <div th:if="${scannedBooks}">
+                <h4 class="mt-4">Результаты сканирования:</h4>
+                <ul th:each="book : ${scannedBooks}" class="list-group">
+                    <li class="list-group-item">
+                        <span th:text="${book.title}"></span>
+                        <span th:text="${' - ' + book.author}"></span>
+                        <span th:text="${' (' + book.format + ')'}"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
