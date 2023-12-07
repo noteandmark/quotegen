@@ -1,11 +1,10 @@
 package com.andmark.quotegen.controller.api;
 
-import com.andmark.quotegen.controller.api.ScanController;
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.StatsDTO;
 import com.andmark.quotegen.service.BookService;
-import com.andmark.quotegen.service.ScanService;
+import com.andmark.quotegen.service.impl.ScanServiceImpl;
 import com.andmark.quotegen.util.impl.Fb2BookFormatParser;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -30,7 +29,7 @@ class ScanControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
-    private ScanService scanService;
+    private ScanServiceImpl scanServiceImpl;
     @MockBean
     private BookService bookService;
     @MockBean
@@ -65,7 +64,7 @@ class ScanControllerTest {
         // Mocking
         String directoryPath = "path/to/directory";
         List<BookDTO> mockScannedBooks = new ArrayList<>();
-        when(scanService.scanBooks(directoryPath)).thenReturn(mockScannedBooks);
+        when(scanServiceImpl.scanBooks(directoryPath)).thenReturn(mockScannedBooks);
 
         // Testing
         mockMvc.perform(get("/api/scan-books")
@@ -78,7 +77,7 @@ class ScanControllerTest {
     public void testGetStatistics() throws Exception {
         // Mocking
         StatsDTO mockStats = new StatsDTO(10L, 5L, 3L);
-        when(scanService.getStatistics()).thenReturn(mockStats);
+        when(scanServiceImpl.getStatistics()).thenReturn(mockStats);
 
         // Testing
         mockMvc.perform(get("/api/stats"))

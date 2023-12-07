@@ -38,7 +38,7 @@ public class ScanController {
     public List<BookDTO> scanBooks(@RequestParam String directoryPath) {
         log.debug("log.debug start scan-books");
         List<BookDTO> scannedBooks = scanService.scanBooks(directoryPath);
-        log.debug("scannedBooks = " + scannedBooks);
+        log.debug("scannedBooks count = " + scannedBooks.size());
         log.info("finished scannedBooks from scanService.scanBooks({})", directoryPath);
         return scannedBooks;
     }
