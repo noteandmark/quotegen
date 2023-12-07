@@ -8,14 +8,12 @@ import com.andmark.quotegen.service.QuoteService;
 import com.andmark.quotegen.service.WebAdminService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -44,22 +42,7 @@ public class WebAdminController {
             String truncatedContent = content.substring(0, Math.min(content.length(), 1024));
 
             List<String> imageUrls = googleCustomSearchService.searchImagesByKeywords(truncatedContent);
-//            List<String> imageUrls = List.of(
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRq3Qu9hdaxRk66j5he0jMCm0Iqz-3lvEryFO8Yxr91dNDroTjC9B0cYw&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgsEduSV5RgaT36tDc-Pb_h-voTsNexfFPT35nX2Keu2b8bIwZZtbMDRw&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGiENqPYh_elPDhTS58Y9YwN95pS9F_akwCDEmiTSlMKnV2O0wG7mQlg&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_yqyadOdnemlLb6am3sDcoGCIoKxgNsF9Oc8DDFxndafReIlG4YJwdg&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzQLu_AJ9zY_V9hEuo2XA27Vtvbyi67ud1yF95i-dgqoUUROO65kyBjQE&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSt8RRuulTm1e3YiAV3ixW3I0zW12DKIlVvlQQQHDasH7dtl-jTKKYtsg&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVvHAL0rwhCmtiQZJIuft7jr3AcvziPw4sLGqsJ12BmOk2NVx_U8n6lQ&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqeZxq9aC2qwo2yv9NatbHgL0dku2p-vT0ERctmeNL_fGfArysneQnQA&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWrRr8OlLORes8-pwE0s41w7Kc2iWZcfzQsqLK_R10pQaTpytb90QYWA&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbCPGafo5vo51hqNq-iOsF5gm5H4-Cxry4gJiAatl19H9rLO1eQPMrCQo&"
-//            );
-
-
             log.debug("Found {} images", imageUrls.size());
-            log.debug("imageUrls = {}", imageUrls);
 
             model.addAttribute("quote", quoteDTO);
             model.addAttribute("imageUrls", imageUrls);
@@ -87,8 +70,7 @@ public class WebAdminController {
         pendingQuote.setStatus(QuoteStatus.PENDING);
 
         // Set the imageUrl in quoteDTO based on selectedImageUrl
-        log.debug("selectedImageUrl " + (selectedImageUrl != null ? "=" + selectedImageUrl : "is null"));
-        System.out.println("selectedImageUrl " + (selectedImageUrl != null ? "=" + selectedImageUrl : "is null"));
+        log.debug("selectedImageUrl " + (selectedImageUrl != "-1" ? "=" + selectedImageUrl : "is null"));
         pendingQuote.setImageUrl("-1".equals(selectedImageUrl) ? null : selectedImageUrl);
 
         // Process accept action based on the selected publish option
@@ -138,3 +120,16 @@ public class WebAdminController {
     }
 
 }
+
+//            List<String> imageUrls = List.of(
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRq3Qu9hdaxRk66j5he0jMCm0Iqz-3lvEryFO8Yxr91dNDroTjC9B0cYw&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgsEduSV5RgaT36tDc-Pb_h-voTsNexfFPT35nX2Keu2b8bIwZZtbMDRw&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGiENqPYh_elPDhTS58Y9YwN95pS9F_akwCDEmiTSlMKnV2O0wG7mQlg&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_yqyadOdnemlLb6am3sDcoGCIoKxgNsF9Oc8DDFxndafReIlG4YJwdg&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzQLu_AJ9zY_V9hEuo2XA27Vtvbyi67ud1yF95i-dgqoUUROO65kyBjQE&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSt8RRuulTm1e3YiAV3ixW3I0zW12DKIlVvlQQQHDasH7dtl-jTKKYtsg&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVvHAL0rwhCmtiQZJIuft7jr3AcvziPw4sLGqsJ12BmOk2NVx_U8n6lQ&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqeZxq9aC2qwo2yv9NatbHgL0dku2p-vT0ERctmeNL_fGfArysneQnQA&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWrRr8OlLORes8-pwE0s41w7Kc2iWZcfzQsqLK_R10pQaTpytb90QYWA&s",
+//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbCPGafo5vo51hqNq-iOsF5gm5H4-Cxry4gJiAatl19H9rLO1eQPMrCQo&"
+//            );

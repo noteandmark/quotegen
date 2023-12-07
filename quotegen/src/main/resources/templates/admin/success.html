@@ -24,10 +24,12 @@
             <p th:text="'Quote: ' + ${quote.content}"></p>
             <p th:text="'Author: ' + ${quote.bookAuthor}"></p>
             <p th:text="'Book Title: ' + ${quote.bookTitle}"></p>
-
             <ul>
                 <li>Publication Time: <span th:text="${#temporals.format(quote.pendingTime, 'yyyy-MM-dd HH:mm')}"></span></li>
             </ul>
+            <label for="selectedImage" th:if="${quote.imageUrl}">Выбранное изображение:</label>
+            <img id="selectedImage" class="img-thumbnail" th:if="${quote.imageUrl}" th:src="${quote.imageUrl}"
+                 alt="Selected Image">
         </div>
     </div>
 

@@ -24,7 +24,6 @@
 
             <!-- Форма для редактирования цитаты -->
             <form th:method="POST" th:action="@{/admin/acceptquote}" class="mb-2">
-                <!--            <form th:action="@{/admin/acceptquote}" method="post" class="mb-2">-->
                 <!-- Передача идентификатора цитаты -->
                 <input type="hidden" name="id" th:value="${quote.id}">
                 <!-- Используйте textarea для многострочного ввода цитаты -->
@@ -65,16 +64,6 @@
                                      style="max-width: 100px; max-height: 100px;">
                             </td>
                         </tr>
-
-                        <!--                        <th:block th:each="image, iterStat : ${imageUrls}">-->
-                        <!--                            <tr>-->
-                        <!--                                <th scope="row" th:text="${iterStat.index + 1}"></th>-->
-                        <!--                                <td>-->
-                        <!--                                    <img class="img-thumbnail" th:src="${image}" alt="Image"-->
-                        <!--                                         style="max-width: 100px; max-height: 100px;">-->
-                        <!--                                </td>-->
-                        <!--                            </tr>-->
-                        <!--                        </th:block>-->
                         </tbody>
                     </table>
 
@@ -86,17 +75,12 @@
                                     th:value="${iterStat.index}"
                                     th:text="${'Image ' + (iterStat.index + 1)}">
                             </option>
+                            <option value="-1">Без изображений</option>
                         </select>
                     </div>
                     <!-- Скрытое поле для передачи выбранного изображения -->
-<!--                    <input type="hidden" id="selectedImageUrl" name="selectedImageUrl"/>-->
-
-                    <!--                    <input type="hidden" id="selectedImageUrl" name="selectedImageUrl"-->
-                    <!--                           th:value="${imageUrls[__${selectedImageNumber}__]}"/>-->
-
-                                        <input type="hidden" id="selectedImageUrl" th:name="'selectedImageUrl'"
-                                               th:value="${imageUrls[__${selectedImageNumber}__]}"/>
-
+                    <input type="hidden" id="selectedImageUrl" th:name="'selectedImageUrl'"
+                           th:value="${imageUrls[__${selectedImageNumber}__]}"/>
 
                 </div>
 
@@ -144,25 +128,33 @@
     });
 
     function toggleDatePicker() {
+        // Отображение значений imageUrls в консоли
+        console.log("Image URLs: ", imageUrls);
+
         // проверка отображения выбора изображения
         var selectedImageNumber = document.getElementById("selectedImageNumber").value;
         console.log("Selected Image Number: ", selectedImageNumber);
 
-        // Отображение значений imageUrls в консоли
-        console.log("Image URLs: ", imageUrls);
+        // Явно устанавливаем значение null, если выбрана опция "Без изображений"
+        var selectedImageUrl;
+        if (selectedImageNumber === "-1") {
+            selectedImageUrl = -1;
+            console.log("Selected Image URL is: ", selectedImageUrl);
+        } else {
+            console.log("in else block, selectedImageNumber: ", selectedImageNumber);
+            // Установка значения selectedImageUrl в зависимости от выбранного номера изображения
+            selectedImageUrl = imageUrls[selectedImageNumber];
+            console.log("Selected Image URL: ", selectedImageUrl);
+        }
 
-        // Установка значения selectedImageUrl в зависимости от выбранного номера изображения
-        var selectedImageUrlInput = document.getElementById("selectedImageUrl");
-        console.log("Selected Image URL Input: ", selectedImageUrlInput);
-        selectedImageUrlInput.value = imageUrls[selectedImageNumber];
-        console.log("New Selected Image URL Input: ", selectedImageUrlInput);
-        var selectedImageUrl = selectedImageUrlInput.value;
-        console.log("Selected Image URL: ", selectedImageUrl);
+        // Просто установите значение в скрытом поле для передачи на сервер
+        document.getElementById("selectedImageUrl").value = selectedImageUrl;
 
         var datePickerContainer = document.getElementById("datePickerContainer");
         var publishDateInput = document.getElementById("datepicker");
+        var publishDateOption = document.getElementById("publishDate");
 
-        if (document.getElementById("publishDate").checked) {
+        if (publishDateOption.checked) {
             datePickerContainer.style.display = "block";
             publishDateInput.required = true;
         } else {
