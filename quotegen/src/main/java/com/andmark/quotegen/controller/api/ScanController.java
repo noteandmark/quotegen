@@ -53,8 +53,8 @@ public class ScanController {
 
     @GetMapping("/test-parse-fb2")
     public String parseBook(@RequestParam Long id) {
-        BookDTO bookDTO = new BookDTO();
-        bookDTO = bookService.findOne(id);
+        log.debug("scan controller: test parseBook");
+        BookDTO bookDTO = bookService.findOne(id);
         Book book = mapper.map(bookDTO, Book.class);
         String parsedText = parser.parse(book);
         return parsedText;
@@ -62,7 +62,6 @@ public class ScanController {
 
     @GetMapping("/test-connection")
     public ResponseEntity<String> testConnection() {
-        log.debug("log.debug test-connection");
         log.info("log.info test-connection");
         return ResponseEntity.ok("Connection is ok");
     }

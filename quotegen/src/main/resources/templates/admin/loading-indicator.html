@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="loadingIndicator">
+<div id="loadingIndicator" class="overlay" th:if="${loading}">
+    <!-- You can customize the loading spinner or visual indication here -->
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+</div>
+</body>
+</html>

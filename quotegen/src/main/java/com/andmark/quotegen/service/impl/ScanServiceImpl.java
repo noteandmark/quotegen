@@ -43,6 +43,7 @@ public class ScanServiceImpl implements ScanService {
         this.mapper = mapper;
     }
 
+    @Override
     @Transactional
     public List<BookDTO> scanBooks(String directoryPath) {
         log.debug("in scanBooks with directoryPath = " + directoryPath);
