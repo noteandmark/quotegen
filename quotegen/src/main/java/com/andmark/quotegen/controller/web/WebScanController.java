@@ -24,54 +24,30 @@ public class WebScanController {
     }
 
     @GetMapping("/scanbooks")
-    public String showScanBooksPage(Model model) {
-        try {
+    public String showScanBooksPage() {
             log.debug("WebScanController get showScanBooksPage");
-            model.addAttribute("loading", false);
             return "admin/scanbooks";
-        } catch (Exception e) {
-            log.error("An error occurred while processing the GET request for /admin/scanbooks", e);
-            model.addAttribute("error", "An error occurred while processing the request");
-            return "public/error";
-        }
     }
 
     @PostMapping("/scanbooks")
+//    public String scanBooks(@RequestParam(name = "directoryPath") String directoryPath,
+//                            RedirectAttributes redirectAttributes,
+//                            Model model) {
     public String scanBooks(@RequestParam(name = "directoryPath") String directoryPath,
-                            RedirectAttributes redirectAttributes,
                             Model model) {
         log.debug("WebScanController POST scanBooks");
         log.debug("directoryPath = {}", directoryPath);
 
-        // Set loading to true before scanning
-        model.addAttribute("loading", true);
+        List<BookDTO> scannedBooks = scanService.scanBooks(directoryPath);
+        log.debug("scannedBooks count = " + scannedBooks.size());
 
-        // Use CompletableFuture to perform scanning asynchronously
-        CompletableFuture.supplyAsync(() -> {
-            List<BookDTO> scannedBooks = scanService.scanBooks(directoryPath);
-            log.debug("scannedBooks count = " + scannedBooks.size());
+//        redirectAttributes.addFlashAttribute("scannedBooks", scannedBooks);
+//        return "redirect:/admin/scanbooks";
 
-            return scannedBooks;
-        }).thenAccept(scannedBooks -> {
-            // After scanning is complete, set loading back to false
-            model.addAttribute("loading", false);
+        model.addAttribute("scannedBooks", scannedBooks);
 
-            // Add the scanned books to the model
-            model.addAttribute("scannedBooks", scannedBooks);
-        });
-
-        return "admin/scanbooks";
+        return "admin/scanbooks :: #result-container";
     }
 
 }
-//        List<BookDTO> scannedBooks = scanService.scanBooks(directoryPath);
-//        log.debug("scannedBooks count = " + scannedBooks.size());
-//
-//        redirectAttributes.addFlashAttribute("scannedBooks", scannedBooks);
-//
-//        // After scanning is complete, set loading back to false
-//        model.addAttribute("loading", false);
-//
-//        return "redirect:/admin/scanbooks";
-//    }
 

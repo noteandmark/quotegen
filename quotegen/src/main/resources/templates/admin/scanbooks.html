@@ -6,8 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+    <!-- Добавление стилей для loader-spinner'а -->
+    <style>
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -25px;
+            margin-left: -25px;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
     <title>Scan Books</title>
-    <link rel="stylesheet" th:href="@{/css/scanbooks.css}"/>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -16,28 +39,28 @@
     </div>
 </nav>
 
-<!-- Включение фрагмента индикатора загрузки -->
-<div th:replace="admin/loading-indicator :: loadingIndicator"></div>
-
 <div class="container mt-5">
     <div class="row">
         <div class="col-sm-8">
             <h4 class="display-4">Сканирование книг</h4>
 
             <!-- Форма для ввода адреса каталога -->
-            <form th:method="POST" th:action="@{/admin/scanbooks}" class="mb-2">
+            <form id="scanForm" th:method="POST" th:action="@{/admin/scanbooks}" class="mb-2">
                 <div class="mb-3">
                     <label for="directoryPath" class="form-label">Введите адрес каталога вручную:</label>
                     <input type="text" class="form-control" id="directoryPath" name="directoryPath" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Сканировать каталог</button>
+<!--                <button type="button" class="btn btn-primary" onclick="scanBooks()">Сканировать каталог</button>-->
+                <button id="scanButton" type="button" class="btn btn-primary" onclick="scanBooks()">Сканировать каталог</button>
+                <!-- Добавление loader-spinner'а -->
+                <div class="loader" id="loader"></div>
             </form>
 
             <!-- Отображение результатов сканирования -->
-            <div th:if="${scannedBooks}">
-                <h4 class="mt-4">Результаты сканирования:</h4>
-                <ul th:each="book : ${scannedBooks}" class="list-group">
-                    <li class="list-group-item">
+            <div id="result-container">
+                <h4 class="mt-4" th:if="${scannedBooks}">Результаты сканирования:</h4>
+                <ul th:if="${scannedBooks}" class="list-group">
+                    <li th:each="book : ${scannedBooks}" class="list-group-item">
                         <span th:text="${book.title}"></span>
                         <span th:text="${' - ' + book.author}"></span>
                         <span th:text="${' (' + book.format + ')'}"></span>
@@ -48,13 +71,43 @@
     </div>
 </div>
 
-<script th:src="@{/js/loading-indicator.js}"></script>
+<!-- Добавление скрипта для AJAX-запроса и обработки loader-spinner'а -->
+<script>
+    function scanBooks() {
+        // Отображаем loader-spinner перед отправкой запроса
+        document.getElementById("loader").style.display = "block";
 
+        // Отключаем кнопку "Сканировать каталог"
+        document.getElementById("scanButton").disabled = true;
+
+        // Отправка формы с использованием Fetch API
+        var form = document.getElementById('scanForm');
+        var formData = new FormData(form);
+
+        fetch(form.action, {
+            method: form.method,
+            body: formData
+        })
+            .then(response => response.text())
+            .then(data => {
+                // Скрываем loader-spinner после получения ответа
+                document.getElementById("loader").style.display = "none";
+
+                // Вставляем ответ от сервера внутрь элемента с id "result-container"
+                document.getElementById("result-container").innerHTML = data;
+
+                // Включаем кнопку "Сканировать каталог" после завершения сканирования
+                document.getElementById("scanButton").disabled = false;
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                // Скрываем loader-spinner в случае ошибки
+                document.getElementById("loader").style.display = "none";
+
+                // Включаем кнопку "Сканировать каталог" в случае ошибки
+                document.getElementById("scanButton").disabled = false;
+            });
+    }
+</script>
 </body>
 </html>
-
-<!--<div th:if="${loading}" class="overlay">-->
-<!--    <div class="spinner-border text-primary" role="status">-->
-<!--        <span class="visually-hidden">Loading...</span>-->
-<!--    </div>-->
-<!--</div>-->
