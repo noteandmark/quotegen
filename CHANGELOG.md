@@ -1,13 +1,12 @@
 # Changelog
 ## [Unreleased] - yyyy-mm-dd
 ### Added
-- [QUOTEGEN](http://)
-  MAJOR HTTP access.
-- [QUOTEBOT](http://t.me/rimay_bot)
-  MINOR add random publishing pending quotes.
 ### Changed
 ### Fixed
 
+## [1.4.0] - 2023-12-10
+### Added
+- implemented the core functionality of the web access application
 ## [1.3.7] - 2023-10-24
 ### Added
 ### Fixed
