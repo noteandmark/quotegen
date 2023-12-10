@@ -142,6 +142,7 @@ public class ScanServiceImpl implements ScanService {
                 log.warn("unknown format file for application");
                 return null;
             }
+        } else {
             if (book.getBookStatus().equals(DELETED)) book.setBookStatus(ACTIVE);
         }
         return book;

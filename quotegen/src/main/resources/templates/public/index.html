@@ -19,6 +19,7 @@
         <a class="navbar-brand" href="#">linkedin.com/in/noteandmark/</a>
     </div>
 </nav>
+
 <div class="container mt-5">
     <div class="row">
         <div class="col-sm-8">
@@ -42,7 +43,7 @@
                     </button>
                 </div>
 
-                    <!-- Buttons for role USER -->
+                <!-- Buttons for role USER -->
                 <div class="btn-group mt-3" role="group">
                     <div sec:authorize="hasRole('ROLE_USER')">
                         <button type="button" class="btn btn-primary"
@@ -57,24 +58,64 @@
                     </div>
                 </div>
 
-                    <!-- Buttons for role ADMIN -->
+                <!-- Buttons for role ADMIN -->
                 <div class="btn-group mt-3" role="group">
                     <div sec:authorize="hasRole('ROLE_ADMIN')">
-                        <button type="button" class="btn btn-primary"
-                                onclick="window.location.href='/web/divination'">Гадание
-                        </button>
-                        <button type="button" class="btn btn-primary"
-                                onclick="window.location.href='/web/getquote'">Случайная цитата
-                        </button>
-                        <button type="button" class="btn btn-primary"
-                                onclick="window.location.href='/web/quotes-for-week'">Цитаты за неделю
-                        </button>
-                        <button type="button" class="btn btn-primary"
-                                onclick="window.location.href='/admin/scanbooks'">Поиск книг
-                        </button>
-                        <button type="button" class="btn btn-primary"
-                                onclick="window.location.href='/admin/requestquote'">Запрос цитаты
-                        </button>
+
+                        <!-- Первая панель с кнопками для админа -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h6 class="panel-title">Раздел пользователя</h6>
+                            </div>
+                            <div class="panel-body">
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/web/divination'">Гадание
+                                </button>
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/web/getquote'">Случайная цитата
+                                </button>
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/web/quotes-for-week'">Цитаты за неделю
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Вторая панель с кнопками для админа -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h6 class="panel-title">Раздел админа</h6>
+                            </div>
+                            <div class="panel-body">
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/admin/scanbooks'">Сканировать папку
+                                </button>
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/admin/requestquote'">Запрос цитаты
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Третья панель с кнопками для админа -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h6 class="panel-title">Раздел CRUD "Все..."</h6>
+                            </div>
+                            <div class="panel-body">
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/admin/quote'">Цитаты
+                                </button>
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/admin/book'">Книги
+                                </button>
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/admin/greeting'">Приветствия
+                                </button>
+                                <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/admin/users'">Пользователи
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -94,49 +135,7 @@
                 <span>Для админа открыты все двери</span>
                 <br>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Книголюб</h5>
-                    <p class="card-text">
-                        Автоматизированная система по генерации цитат из книг:
-                        <br>
-                    <ul>
-                        <li>QuoteGen - приложение, которое генерирует случайные цитаты из случайно выбранной книги в
-                            электронной библиотеке пользователя. Приложение сканирует предложенный каталог и все
-                            подпапки, находит книги в форматах EPUB, FB2, DOC, DOCX, PDF и сохраняет информацию о них в
-                            базу данных.
-                        </li>
-                        <li>QuoteBot - телеграм-бот, предоставляет доступ ко всем точкам REST API приложения.</li>
-                        <li>QuotegenWeb - веб-приложение для доступа ко всем возможностям программы через браузер.</li>
-                    </ul>
-                    Использованные технологии и библиотеки:
-                    <br>
-                    Java20, Spring Boot 3.1.2, Maven, Spring Security 6, Spring Data JPA, Spring Validation, PostgreSQL,
-                    H2 database, SLF4J logging, Telegram API, Google Custom Search API, Thymeleaf, Bootstrap5, Lombok,
-                    ModelMapper, org.jsoup, org.apache.pdfbox, com.kursx.parser.fb2, org.apache.poi, nl.siegmann.epublib
-                    <br><br>
-                    Пользователю доступны возможности:
-                    <ul>
-                        <li>получить статистику</li>
-                        <li>получить ответ в виде gif изображения "да" или "нет"</li>
-                        <li>погадать на книге: назвать страницу и строку, и приложение, случайно выбрав книгу, вернет
-                            указанное место
-                        </li>
-                        <li>получить случайную цитату из опубликованных ранее</li>
-                        <li>получить все цитаты за текущую неделю</li>
-                        <li>прочитать о версии и списке изменений</li>
-                        <li>отправить сообщение админу: баг, отзыв, предложения</li>
-                    </ul>
-                    <br>
-                    Админ может:
-                    <ul>
-                        <li>сканировать директорию на наличие электронных книг и сохранять их в БД</li>
-                        <li>делать запрос о генерации случайной цитаты</li>
-                        <li>получать по расписанию случайную цитату</li>
-                    </ul>
-                    </p>
-                </div>
-            </div>
+            <div th:replace="~{fragments/description-fragment :: description}"></div>
 
         </div>
 
@@ -183,7 +182,8 @@
             </div>
         </div>
     </div>
-
 </div>
+
+<div th:replace="~{fragments/footer-fragment :: footer}"></div>
 </body>
 </html>
