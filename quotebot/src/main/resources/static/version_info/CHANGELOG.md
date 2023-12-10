@@ -1,15 +1,12 @@
 # Changelog
 ## [Unreleased] - yyyy-mm-dd
 ### Added
-- [QUOTEGEN](http://)
-  MAJOR HTTP access.
-- [QUOTEBOT](http://t.me/rimay_bot)
-  MINOR add ... :
-- submit a quote for publication
-- view the dates of pending publications
 ### Changed
 ### Fixed
 
+## [1.4.0] - 2023-12-10
+### Added
+- implemented the core functionality of the web access application
 ## [1.3.7] - 2023-10-24
 ### Added
 ### Fixed
@@ -67,7 +64,7 @@ Release version. The main features are realized
 - implemented gif retrieval on request to the site api, which answers the question with a dynamic image "yes" or "no"
 - added possibility to get statistics on quotes and books
 ### Fixed
-- immediate and delayed posting 
+- immediate and delayed posting
 ## [0.8.0] - 2023-08-15
 The bot already knows how to pick a random quote, edit it, and post it to the group immediately.
 ### Added
