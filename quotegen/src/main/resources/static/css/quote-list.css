@@ -1,0 +1,38 @@
+
+body {
+    padding-top: 60px; /* Поднимаем контент на высоту фиксированного navbar, чтобы он не перекрывался */
+}
+
+thead {
+    position: sticky;
+    top: 0px;
+    z-index: 1;
+}
+
+th, td {
+    text-align: center;
+    vertical-align: middle !important;
+    font-size: 14px;
+}
+
+tr.sticky-header {
+    position: sticky;
+    top: 0px;
+    background-color: #676262;
+    color: #fff;
+    z-index: 1;
+}
+
+.table th, .table td {
+    border: 1px solid #5e97d2;
+}
+
+.max-width {
+    max-width: 150px;
+    overflow-wrap: break-word;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: auto;
+}

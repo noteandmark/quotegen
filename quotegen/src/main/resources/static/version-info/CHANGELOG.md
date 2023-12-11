@@ -1,15 +1,21 @@
 # Changelog
 ## [Unreleased] - yyyy-mm-dd
 ### Added
-- [QUOTEGEN](http://)
-  MAJOR HTTP access.
-- [QUOTEBOT](http://t.me/rimay_bot)
-  MINOR add ... :
-- submit a quote for publication
-- view the dates of pending publications
+- CRUD страницы для всех моделей
+- получить даты всех ожидаемых цитат
+- для веб: реализовать страницы помощи, репорта
+- добавить возможность пользователю предлагать цитату к публикации
+- в профиле добавить ник пользователю, можно его менять
+- в профиле добавить возможность удалить его
+- протестировать все новые методы
+- запуск веб-версии скрипт
+- команда веб-версии удалить DELETED книги, очистка БД
 ### Changed
 ### Fixed
 
+## [1.4.0] - 2023-12-10
+### Added
+- implemented the core functionality of the web access application
 ## [1.3.7] - 2023-10-24
 ### Added
 ### Fixed

@@ -1,0 +1,7 @@
+
+<div th:fragment="image-cell" xmlns:th="http://www.thymeleaf.org">
+    <div th:if="${imageUrl}">
+        <img th:src="${imageUrl}" alt="Image" style="max-width: 100px; max-height: 100px;"/>
+    </div>
+    <div th:unless="${imageUrl}" style="color: blue;">No Image</div>
+</div>
