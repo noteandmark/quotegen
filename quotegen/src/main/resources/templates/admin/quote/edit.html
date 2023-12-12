@@ -19,15 +19,15 @@
     <form th:action="@{/admin/quote/edit/{id}(id=${quoteDTO.id})}" th:object="${quoteDTO}" method="post">
         <input type="hidden" id="id" name="id" th:field="*{id}"/>
 
-        <blockquote class="blockquote mb-3">
-<!--        <div class="form-group mb-3">-->
-            <label for="content" class="form-label">Content:</label>
-            <textarea class="form-control" id="content" name="content" th:field="*{content}"></textarea>
-            <br>
-<!--        </div>-->
-        </blockquote>
-            ---
-            <p class="mb-0 text-muted" th:text="*{content}"></p>
+<!--        <blockquote class="blockquote mb-3">-->
+<!--            <label for="content" class="form-label">Content:</label>-->
+<!--            <textarea class="form-control" id="content" name="content" th:field="*{content}"></textarea>-->
+<!--            <br>-->
+<!--        </blockquote>-->
+
+        <label for="content" class="form-label">Content:</label>
+        <textarea class="form-control mb-2" id="content" name="content" th:text="*{content}" maxlength="4096"
+                  style="height: auto; min-height: 400px;"></textarea>
 
         <div class="form-group mb-3">
             <label for="status" class="form-label">Status:</label>
@@ -39,9 +39,9 @@
         </div>
 
         <div class="form-group mb-3">
-            <label for="pendingTime" class="form-label">Pending Time:</label>
-            <input type="datetime-local" class="form-control" id="pendingTime" name="pendingTime"
-                   th:field="*{pendingTime}"/>
+            <label for="pendingTime" class="form-label">Pending At:</label>
+            <input type="datetime-local" id="pendingTime" name="pendingTime" class="form-control datepicker"
+                   th:value="${#temporals.format(quoteDTO.pendingTime, 'yyyy-MM-dd''T''HH:mm')}">
         </div>
 
         <div class="form-group mb-3">
@@ -49,21 +49,10 @@
             <input type="text" class="form-control" id="imageUrl" name="imageUrl" th:field="*{imageUrl}"/>
         </div>
 
-<!--        <div class="form-group mb-3">-->
-<!--            <label for="usedAt" class="form-label">Used At:</label>-->
-<!--            <input type="datetime-local" class="form-control" id="usedAt" name="usedAt" th:field="*{usedAt}"/>-->
-<!--        </div>-->
-
-<!--        <div class="mb-3">-->
-<!--            <label for="usedAt" class="form-label">Used At:</label>-->
-<!--            <input type="datetime-local" class="form-control" id="usedAt" name="usedAt"-->
-<!--                   th:field="*{usedAt}" th:value="${{#temporals.format(usedAt, 'yyyy-MM-ddTHH:mm:ss')}}" />-->
-<!--        </div>-->
-
-        <div class="mb-3">
+        <div class="form-group mb-3">
             <label for="usedAt" class="form-label">Used At:</label>
-            <input type="datetime-local" class="form-control" id="usedAt" name="usedAt"
-                   th:field="*{usedAt}" th:value="${#temporals.format(usedAt, 'dd/MMM/yyyy HH:mm')}" />
+            <input type="datetime-local" id="usedAt" name="usedAt" class="form-control datepicker"
+                   th:value="${#temporals.format(quoteDTO.usedAt, 'yyyy-MM-dd''T''HH:mm')}">
         </div>
 
         <div class="form-group mb-3">
