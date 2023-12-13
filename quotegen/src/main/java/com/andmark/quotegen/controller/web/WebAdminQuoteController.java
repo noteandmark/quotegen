@@ -1,7 +1,10 @@
 package com.andmark.quotegen.controller.web;
 
+import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
+import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.QuoteService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,9 +17,11 @@ import java.util.List;
 @Slf4j
 public class WebAdminQuoteController {
     private final QuoteService quoteService;
+    private final BookService bookService;
 
-    public WebAdminQuoteController(QuoteService quoteService) {
+    public WebAdminQuoteController(QuoteService quoteService, BookService bookService) {
         this.quoteService = quoteService;
+        this.bookService = bookService;
     }
 
     @GetMapping
@@ -47,13 +52,21 @@ public class WebAdminQuoteController {
         log.debug("web quote controller showEditForm");
         QuoteDTO quoteDTO = quoteService.findOne(id);
         model.addAttribute("quoteDTO", quoteDTO);
+
+        // add the book data
+        if (quoteDTO != null && quoteDTO.getBookId() != null) {
+            BookDTO bookDTO = bookService.findOne(quoteDTO.getBookId());
+            model.addAttribute("bookDTO", bookDTO);
+        }
+
         return "admin/quote/edit";
     }
 
     @PostMapping("/edit/{id}")
     public String editQuote(@PathVariable("id") Long id, @ModelAttribute("quoteDTO") QuoteDTO quoteDTO) {
-        log.debug("web quote controller editQuote");
+        log.debug("web admin quote controller editQuote");
         quoteService.update(id, quoteDTO);
+        log.debug("web admin quote controller: updated, go to redirect");
         return "redirect:/admin/quote";
     }
 

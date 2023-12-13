@@ -14,6 +14,7 @@ import com.andmark.quotegen.service.QuoteService;
 import com.andmark.quotegen.util.BookFormatParser;
 import com.andmark.quotegen.util.BookFormatParserFactory;
 import com.andmark.quotegen.util.impl.MapperConvert;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,7 @@ public class QuoteServiceImpl implements QuoteService {
     public List<QuoteDTO> findAll() {
         log.debug("find all quotes");
         List<Quote> quoteList = quotesRepository.findAll();
-        log.info("founded quoteList = {}", quoteList);
+        log.info("founded quoteList.size = {}", quoteList.size());
         return convertToDtoList(quoteList);
     }
 
@@ -84,8 +85,16 @@ public class QuoteServiceImpl implements QuoteService {
     @Transactional
     public void update(Long id, QuoteDTO updatedQuoteDTO) {
         log.debug("update quote by id {}", id);
+        log.debug("updatedQuoteDTO = {}", updatedQuoteDTO);
         Quote updatedQuote = convertToEntity(updatedQuoteDTO);
-        updatedQuote.setId(id);
+        Long bookId = updatedQuoteDTO.getBookId();
+        log.debug("updatedQuote = {}", updatedQuote);
+        log.debug("bookId in updatedQuoteDTO= {}", bookId);
+        Book book = booksRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+        log.debug("book = {}", book);
+        updatedQuote.setBookSource(book);
+
         quotesRepository.save(updatedQuote);
         log.info("update quote {}", updatedQuote);
     }

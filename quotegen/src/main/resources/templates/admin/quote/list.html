@@ -36,7 +36,7 @@
             <td th:text="${quote.status}"></td>
             <td th:text="${quote.pendingTime}"></td>
             <td>
-                <div th:include="~{fragments/image-cell :: image-cell}" th:with="imageUrl=${quote.imageUrl}"></div>
+                <div th:insert="~{fragments/image-cell :: image-cell}" th:with="imageUrl=${quote.imageUrl}"></div>
             </td>
             <td th:text="${quote.usedAt}"></td>
             <td th:text="${quote.bookAuthor}"></td>
