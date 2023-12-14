@@ -4,7 +4,6 @@ import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.QuoteService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +29,23 @@ public class WebAdminQuoteController {
         List<QuoteDTO> quotes = quoteService.findAll();
         model.addAttribute("quotes", quotes);
         return "admin/quote/list";
+    }
+
+    @GetMapping("/view/{id}")
+    public String viewQuote(@PathVariable("id") Long id, Model model) {
+        log.debug("web quote controller viewQuote with id = {}", id);
+        QuoteDTO quoteDTO = quoteService.findOne(id);
+        if (quoteDTO != null) {
+            model.addAttribute("quoteDTO", quoteDTO);
+            if (quoteDTO.getBookId() != null) {
+                BookDTO bookDTO = bookService.findOne(quoteDTO.getBookId());
+                model.addAttribute("bookDTO", bookDTO);
+            }
+            return "admin/quote/view";
+        } else {
+            log.warn("quote with id = {} not found", id);
+            return "redirect:/admin/quote";
+        }
     }
 
     @GetMapping("/create")

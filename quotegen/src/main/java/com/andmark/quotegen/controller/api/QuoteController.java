@@ -4,6 +4,7 @@ import com.andmark.quotegen.dto.AvailableDayResponseDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.service.QuoteService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -96,9 +97,15 @@ public class QuoteController {
 
     @DeleteMapping("/reject")
     public ResponseEntity<Void> rejectQuote(@RequestParam Long id) {
-        log.debug("controller rejectQuote id = {}", id);
-        quoteService.rejectQuote(id);
-        return ResponseEntity.ok().build();
+        try {
+            log.debug("controller rejectQuote id = {}", id);
+            quoteService.rejectQuote(id);
+            log.debug("controller rejected");
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            log.warn("controller couldn't find the quote with id = {}", id);
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/generate")

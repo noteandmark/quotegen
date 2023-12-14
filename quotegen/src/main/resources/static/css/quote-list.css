@@ -15,6 +15,12 @@ th, td {
     font-size: 14px;
 }
 
+td span{
+    height: 150px;
+    display: inline-block;
+    overflow-y: scroll;
+}
+
 tr.sticky-header {
     position: sticky;
     top: 0px;

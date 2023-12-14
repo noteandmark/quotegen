@@ -85,14 +85,11 @@ public class QuoteServiceImpl implements QuoteService {
     @Transactional
     public void update(Long id, QuoteDTO updatedQuoteDTO) {
         log.debug("update quote by id {}", id);
-        log.debug("updatedQuoteDTO = {}", updatedQuoteDTO);
         Quote updatedQuote = convertToEntity(updatedQuoteDTO);
         Long bookId = updatedQuoteDTO.getBookId();
-        log.debug("updatedQuote = {}", updatedQuote);
         log.debug("bookId in updatedQuoteDTO= {}", bookId);
         Book book = booksRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        log.debug("book = {}", book);
         updatedQuote.setBookSource(book);
 
         quotesRepository.save(updatedQuote);
@@ -192,7 +189,9 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public void rejectQuote(Long id) {
+        log.debug("quote service rejectquote with id = {}", id);
         QuoteDTO existingQuote = findOne(id);
+        log.debug("existingQuote = {}", existingQuote);
 
         if (existingQuote != null) {
             log.debug("service rejected quote id = {}", id);
@@ -200,6 +199,7 @@ public class QuoteServiceImpl implements QuoteService {
             log.info("service deleted quote id = {}", id);
         } else {
             log.warn("service couldn't find the quote with id = {}", id);
+            throw new EntityNotFoundException("Quote with id " + id + " not found");
         }
     }
 

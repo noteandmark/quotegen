@@ -1,9 +1,9 @@
 package com.andmark.quotegen.controller.api;
 
-import com.andmark.quotegen.controller.api.QuoteController;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.service.QuoteService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -136,14 +136,14 @@ class QuoteControllerTest {
 
         ResponseEntity<Void> responseEntity = quoteController.rejectQuote(quoteId);
 
-        verify(quoteService, times(1)).delete(quoteId);
+        verify(quoteService, times(1)).rejectQuote(quoteId);
         assertEquals(ResponseEntity.ok().build(), responseEntity);
     }
 
     @Test
     void testRejectQuoteNonExisting() {
         Long quoteId = 1L;
-        when(quoteService.findOne(quoteId)).thenReturn(null);
+        doThrow(EntityNotFoundException.class).when(quoteService).rejectQuote(quoteId);
 
         ResponseEntity<Void> responseEntity = quoteController.rejectQuote(quoteId);
 

@@ -110,6 +110,8 @@
     </div>
 </div>
 
+<div th:replace="~{fragments/footer-fragment :: footer}"></div>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
     var imageUrls = /*[[${imageUrls}]]*/ [];
@@ -159,7 +161,5 @@
         }
     }
 </script>
-
-<div th:replace="~{fragments/footer-fragment :: footer}"></div>
 </body>
 </html>
