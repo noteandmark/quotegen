@@ -19,11 +19,12 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -79,6 +80,19 @@ public class QuoteServiceImpl implements QuoteService {
         List<Quote> quoteList = quotesRepository.findAll();
         log.info("founded quoteList.size = {}", quoteList.size());
         return convertToDtoList(quoteList);
+    }
+
+    @Override
+    public Page<QuoteDTO> findAll(Pageable pageable) {
+        log.debug("find all quotes with pageable");
+        Page<Quote> quotePage = quotesRepository.findAll(pageable);
+        log.info("founded quotePage.size = {}", quotePage.getTotalElements());
+
+        List<QuoteDTO> quoteDTOList = quotePage.getContent().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(quoteDTOList, pageable, quotePage.getTotalElements());
     }
 
     @Override

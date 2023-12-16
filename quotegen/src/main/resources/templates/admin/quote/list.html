@@ -48,28 +48,71 @@
                 <a class="btn btn-danger btn-sm" onclick="showModal()">Delete</a>
 
                 <!-- Confirm Delete Modal -->
-                <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog"
+                     aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 Are you sure you want to delete this quote?
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <a class="btn btn-danger" th:href="@{/admin/quote/delete/{id}(id=${quote.id})}">Delete</a>
+                                <a class="btn btn-danger"
+                                   th:href="@{/admin/quote/delete/{id}(id=${quote.id})}">Delete</a>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </td>
         </tr>
         </tbody>
     </table>
+
+    <!-- Page Numbers -->
+    <div class="pagination">
+        <p>Page:
+            <span th:text="${page.getNumber() + 1}"></span> of <span th:text="${page.getTotalPages()}"></span>
+        </p>
+        <ul class="pagination-list">
+            <li th:class="${page.first ? 'disabled' : ''}" class="page-item" style="display: inline-block;">
+                <a class="page-link" th:href="@{${page.first ? '#'
+                                               : '/admin/quote?page=' + (page.number - 1)}}">Previous</a>
+            </li>
+            <!-- Page Numbers -->
+            <li th:each="i : ${page.getNumber() > 2 ? (page.getNumber() < page.getTotalPages() - 2 ? #numbers.sequence(page.getNumber() - 2, page.getNumber() + 2) : #numbers.sequence(page.getTotalPages() - 4, page.getTotalPages() - 1)) : #numbers.sequence(0, 4)}"
+                th:class="${page.number == i ? 'active' : ''}" class="page-item" style="display: inline-block;">
+                <a class="page-link" th:href="@{'/admin/quote?page=' + ${i} + '&size=' + ${page.size}}">[[${i + 1}]]</a>
+            </li>
+            <li th:class="${page.last ? 'disabled' : ''}" class="page-item" style="display: inline-block;">
+                <a class="page-link" th:href="@{${page.last ? '#'
+                                                              : '/admin/quote?page=' + (page.number + 1)}}">Next</a>
+            </li>
+            <!-- Additional field for direct page input -->
+            <li class="page-item">
+                <form class="form-inline">
+                    <input class="form-control form-control-sm" type="number" placeholder="Page" id="pageInput" th:min="1" th:max="${page.getTotalPages()}"/>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="goToPage()">Go</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Добавлен селектор для выбора размера страницы -->
+    <div class="mb-3">
+        <label for="pageSizeSelect" class="form-label">Items per page:</label>
+        <select id="pageSizeSelect" class="form-select" onchange="changePageSize(this)">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+        </select>
+    </div>
 
     <a class="btn btn-success mt-3" th:href="@{/admin/quote/create}">Create New Quote</a>
 </div>
@@ -77,11 +120,50 @@
 <div th:replace="~{fragments/footer-fragment :: footer}"></div>
 
 <script>
+    //for modal window with js
     let modal =
         new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+
     function showModal() {
         modal.show();
     }
+
+    //for pagination
+    function changePageSize(select) {
+        var selectedPageSize = select.value;
+        window.location.href = '/admin/quote?page=0&size=' + selectedPageSize;
+    }
 </script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function () {
+        var pageSizeSelect = document.getElementById("pageSizeSelect");
+        var currentPageSize = /*[[${page.size}]]*/ 20; // Значение по умолчанию
+
+        for (var i = 0; i < pageSizeSelect.options.length; i++) {
+            var option = pageSizeSelect.options[i];
+            if (parseInt(option.value) === currentPageSize) {
+                option.selected = true;
+                break;
+            }
+        }
+    });
+    /*]]>*/
+
+    function goToPage() {
+        var pageInput = document.getElementById("pageInput").value;
+        console.log("pageInput = ", pageInput);
+        var maxPage = /*[[${page.getTotalPages()}]]*/ 1; // Значение по умолчанию
+        // Проверка, чтобы номер страницы был в допустимых пределах
+        if (pageInput > 0 && pageInput <= maxPage) {
+            window.location.href = '/admin/quote?page=' + (pageInput - 1);
+        } else {
+            // Вывести сообщение об ошибке или принять другие меры
+            console.error("Invalid page number");
+        }
+    }
+</script>
+
 </body>
 </html>

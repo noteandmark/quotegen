@@ -40,6 +40,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         String encode = passwordEncoder.encode(userDTO.getPassword());
 
         userDTO.setPassword(encode);
+        userDTO.setNickname(userDTO.getUsername());
         userDTO.setRole(UserRole.ROLE_USER);
 
         log.debug("userDTO = {}", userDTO);

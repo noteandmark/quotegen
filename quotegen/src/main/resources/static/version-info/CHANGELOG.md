@@ -11,10 +11,12 @@
 - запуск веб-версии скрипт
 - команда веб-версии удалить DELETED книги, очистка БД
 - страница результаты сканирования добавить к-во книг всего в БД
-- сделать пагинацию страницы quote-list
 ### Changed
 ### Fixed
 
+## [1.4.1] - 2023-12-16
+### Added
+- quotes page for admin: view the whole list with pagination, got an individual quote, edit, delete
 ## [1.4.0] - 2023-12-10
 ### Added
 - implemented the core functionality of the web access application

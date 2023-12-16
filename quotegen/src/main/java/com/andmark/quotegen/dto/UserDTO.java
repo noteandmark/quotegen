@@ -1,7 +1,6 @@
 package com.andmark.quotegen.dto;
 
 import com.andmark.quotegen.domain.enums.UserRole;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @RequiredArgsConstructor
@@ -14,4 +13,5 @@ public class UserDTO {
     private String username;
     private String password;
     private UserRole role;
+    private String nickname;
 }

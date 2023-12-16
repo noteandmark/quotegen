@@ -56,6 +56,8 @@ public class UserRegistrationService {
             userDTO = new UserDTO();
             userDTO.setUsertgId(usertgId);
             userDTO.setUsername(username);
+            //nickname = username by default
+            userDTO.setNickname(username);
             userDTO.setPassword(password);
             userDTO.setRole(UserRole.USER);
         }
