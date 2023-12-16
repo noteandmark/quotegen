@@ -61,7 +61,7 @@ public class BookServiceImpl implements BookService {
     public List<BookDTO> findAll() {
         log.debug("find all books");
         List<Book> bookList = booksRepository.findAll();
-        log.info("founded bookList = {}", bookList);
+        log.info("founded bookList.size = {}", bookList.size());
         return convertToDtoList(bookList);
     }
 

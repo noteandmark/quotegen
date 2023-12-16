@@ -62,8 +62,13 @@ public class QuoteServiceImpl implements QuoteService {
     @Transactional
     public void save(QuoteDTO quoteDTO) {
         log.debug("saving quote");
-        quotesRepository.save(convertToEntity(quoteDTO));
-        log.info("save quote {}", quoteDTO);
+        Quote quote = convertToEntity(quoteDTO);
+        Optional<Book> bookSource = booksRepository.findById(quoteDTO.getBookId());
+        if (bookSource.isPresent()) {
+            quote.setBookSource(bookSource.get());
+        } else throw new NotFoundBookException("book with id = " + quoteDTO.getBookId() +"not found");
+        quotesRepository.save(quote);
+        log.info("saved quote with id = {}", quote.getId());
     }
 
     @Override

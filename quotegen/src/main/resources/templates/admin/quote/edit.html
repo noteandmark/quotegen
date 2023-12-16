@@ -19,9 +19,11 @@
     <form th:action="@{/admin/quote/edit/{id}(id=${quoteDTO.id})}" th:object="${quoteDTO}" method="post">
         <input type="hidden" id="id" name="id" th:field="*{id}"/>
 
-        <label for="content" class="form-label">Content:</label>
-        <textarea class="form-control mb-2" id="content" name="content" th:text="*{content}" maxlength="4096"
-                  style="height: auto; min-height: 400px;"></textarea>
+        <div class="form-group">
+            <label for="content" class="form-label">Content:</label>
+            <textarea class="form-control mb-2" id="content" name="content" th:text="*{content}" maxlength="4096"
+                      style="height: auto; min-height: 400px;"></textarea>
+        </div>
 
         <div class="form-group mb-3">
             <label for="status" class="form-label">Status:</label>
@@ -51,7 +53,8 @@
 
         <div class="form-group mb-3">
             <label for="bookAuthor" class="form-label">Book Author:</label>
-            <input type="text" class="form-control" id="bookAuthor" name="bookAuthor" th:field="*{bookAuthor}" readonly/>
+            <input type="text" class="form-control" id="bookAuthor" name="bookAuthor" th:field="*{bookAuthor}"
+                   readonly/>
         </div>
 
         <div class="form-group mb-3">

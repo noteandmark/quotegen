@@ -12,18 +12,29 @@
 
     <form th:action="@{/admin/quote/create}" th:object="${quoteDTO}" method="post">
         <div class="form-group">
-            <label for="content">Content:</label>
-            <textarea class="form-control" id="content" name="content" th:field="*{content}"></textarea>
+            <label for="content" class="form-label">Content:</label>
+            <textarea class="form-control mb-2" id="content" name="content" th:field="*{content}" maxlength="4096"
+                      style="height: auto; min-height: 400px;"></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="pendingTime" class="form-label">Pending At:</label>
+            <input type="datetime-local" id="pendingTime" name="pendingTime" class="form-control datepicker"
+                   th:value="${#temporals.format(quoteDTO.pendingTime, 'yyyy-MM-dd''T''HH:mm')}">
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="imageUrl" class="form-label">Image URL:</label>
+            <input type="text" class="form-control" id="imageUrl" name="imageUrl" th:field="*{imageUrl}"/>
         </div>
 
         <div class="form-group">
-            <label for="status">Status:</label>
-            <select class="form-control" id="status" name="status" th:field="*{status}">
-                <option value="FREE">FREE</option>
-                <option value="PENDING">PENDING</option>
-                <option value="PUBLISHED">PUBLISHED</option>
+            <label for="bookId">Book:</label>
+            <select class="form-control" id="bookId" name="bookId">
+                <option th:each="book : ${bookList}" th:value="${book.id}" th:text="${book.title + '-' + book.author}"></option>
             </select>
         </div>
+
 
         <button type="submit" class="btn btn-primary">Create Quote</button>
     </form>

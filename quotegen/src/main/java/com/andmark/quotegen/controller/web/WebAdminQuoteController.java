@@ -1,5 +1,6 @@
 package com.andmark.quotegen.controller.web;
 
+import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.service.BookService;
@@ -35,11 +36,6 @@ public class WebAdminQuoteController {
         model.addAttribute("quotes", quotesPage.getContent());
         model.addAttribute("page", quotesPage);
 
-        // Add page size to the model
-//        int pageSize = pageable.getPageSize();
-//        log.debug("web admin quote controller showQuotes with page size = {}", pageSize);
-//        model.addAttribute("pageSize", pageSize);
-
         return "admin/quote/list";
     }
 
@@ -64,13 +60,23 @@ public class WebAdminQuoteController {
     public String showCreateForm(Model model) {
         log.debug("web admin quote controller showCreateForm");
         QuoteDTO quoteDTO = new QuoteDTO();
+        List<BookDTO> bookList = bookService.findAll();
         model.addAttribute("quoteDTO", quoteDTO);
+        model.addAttribute("bookList", bookList);
+        log.debug("Book List Size: {}", bookList.size());
         return "admin/quote/create";
     }
 
     @PostMapping("/create")
     public String createQuote(@ModelAttribute("quoteDTO") QuoteDTO quoteDTO) {
         log.debug("web admin quote controller createQuote");
+
+        // check whether the pendingTime and imageUrl fields are empty or not
+        quoteDTO.setStatus(quoteDTO.getPendingTime() == null ? QuoteStatus.FREE : QuoteStatus.PENDING);
+        if (quoteDTO.getImageUrl() != null && quoteDTO.getImageUrl().trim().isEmpty()) {
+            quoteDTO.setImageUrl(null);
+        }
+
         quoteService.save(quoteDTO);
         return "redirect:/admin/quote";
     }
