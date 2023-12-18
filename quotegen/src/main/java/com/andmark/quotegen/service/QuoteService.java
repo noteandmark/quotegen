@@ -26,4 +26,6 @@ public interface QuoteService extends AbstractService<QuoteDTO>{
     String getBookText(Book book);
 
     AvailableDayResponseDTO getAvailableDays();
+
+    Page<QuoteDTO> findAllSorted(Pageable pageable, String sortField, String sortDirection);
 }

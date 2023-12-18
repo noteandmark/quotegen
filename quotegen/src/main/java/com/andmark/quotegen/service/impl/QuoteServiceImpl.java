@@ -19,9 +19,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,6 +96,26 @@ public class QuoteServiceImpl implements QuoteService {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(quoteDTOList, pageable, quotePage.getTotalElements());
+    }
+
+    @Override
+    public Page<QuoteDTO> findAllSorted(Pageable pageable, String sortField, String sortDirection) {
+        log.debug("quote service: find all quotes");
+
+        // check if sorting parameters are available
+        if (sortField != null && sortDirection != null) {
+            Sort sort = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        }
+
+        Page<Quote> quotePage = quotesRepository.findAll(pageable);
+
+        List<QuoteDTO> quoteList = quotePage.getContent().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        log.info("founded quoteList.size = {}", quoteList.size());
+
+        return new PageImpl<>(quoteList, pageable, quotePage.getTotalElements());
     }
 
     @Override

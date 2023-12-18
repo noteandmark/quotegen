@@ -84,9 +84,21 @@
                                                : '/admin/quote?page=' + (page.number - 1)}}">Previous</a>
             </li>
             <!-- Page Numbers -->
-            <li th:each="i : ${page.getNumber() > 2 ? (page.getNumber() < page.getTotalPages() - 2 ? #numbers.sequence(page.getNumber() - 2, page.getNumber() + 2) : #numbers.sequence(page.getTotalPages() - 4, page.getTotalPages() - 1)) : #numbers.sequence(0, 4)}"
-                th:class="${page.number == i ? 'active' : ''}" class="page-item" style="display: inline-block;">
-                <a class="page-link" th:href="@{'/admin/quote?page=' + ${i} + '&size=' + ${page.size}}">[[${i + 1}]]</a>
+                <li th:each="i : ${page.getNumber() > 2 ?
+                 (page.getNumber() < page.getTotalPages() - 2 ?
+                #numbers.sequence(page.getNumber() - 2, page.getNumber() + 2) :
+                 #numbers.sequence(page.getTotalPages() - 4, page.getTotalPages() - 1)) :
+                  #numbers.sequence(0, (page.getTotalPages() - 1) >= 4 ? 4 : (page.getTotalPages() - 1))}"
+
+                    th:class="${page.number == i ? 'active' : ''}"
+                    class="page-item" style="display: inline-block;">
+                    <a th:if="${sortField == null}" th:attr="href=@{/admin/quote (page=${i}, size=${page.size})}"
+                       class="page-link" th:text="${i + 1}"></a>
+                    <a th:if="${sortField != null}"
+                       th:attr="href=@{/admin/quote (page=${i}, size=${page.size}, sortField=${sortField}, sortDirection=${sortDirection})}"
+                       class="page-link" th:text="${i + 1}"></a>
+                </li>
+
             </li>
             <li th:class="${page.last ? 'disabled' : ''}" class="page-item" style="display: inline-block;">
                 <a class="page-link" th:href="@{${page.last ? '#'
@@ -95,11 +107,34 @@
             <!-- Additional field for direct page input -->
             <li class="page-item">
                 <form class="form-inline">
-                    <input class="form-control form-control-sm" type="number" placeholder="Page" id="pageInput" th:min="1" th:max="${page.getTotalPages()}"/>
+                    <input class="form-control form-control-sm" type="number" placeholder="Page" id="pageInput"
+                           th:min="1" th:max="${page.getTotalPages()}"/>
                     <button type="button" class="btn btn-primary btn-sm" onclick="goToPage()">Go</button>
                 </form>
             </li>
         </ul>
+        <!--        Сортировка-->
+        <div class="sort-controls">
+            <label for="sortField">Sort by:</label>
+            <select id="sortField" class="form-select">
+                <option value="">-- No Sorting --</option>
+                <option value="id">ID</option>
+                <option value="status">Status</option>
+                <option value="pendingTime">Pending Time</option>
+                <option value="usedAt">Used At</option>
+                <option value="bookAuthor"> Book Author</option>
+                <option value="bookTitle"> Book Title</option>
+            </select>
+
+            <label for="sortDirection">Sort order:</label>
+            <select id="sortDirection" class="form-select">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+
+            <button class="btn btn-primary btn-sm" onclick="applySort()">Apply Sort</button>
+        </div>
+
     </div>
 
     <!-- Добавлен селектор для выбора размера страницы -->
@@ -131,8 +166,45 @@
     //for pagination
     function changePageSize(select) {
         var selectedPageSize = select.value;
-        window.location.href = '/admin/quote?page=0&size=' + selectedPageSize;
+        var sortField = document.getElementById("sortField").value;
+        var sortDirection = document.getElementById("sortDirection").value;
+
+        // Обновление URL с параметрами сортировки и размера страницы
+        var currentUrl = window.location.href;
+        var updatedUrl = updateQueryStringParameter(currentUrl, "size", selectedPageSize);
+
+        if (sortField.trim() !== "" && sortDirection.trim() !== "") {
+            updatedUrl = updateQueryStringParameter(updatedUrl, "sortField", sortField);
+            updatedUrl = updateQueryStringParameter(updatedUrl, "sortDirection", sortDirection);
+        }
+
+        window.location.href = updatedUrl;
     }
+
+    //for sorting
+    function applySort() {
+        var sortField = document.getElementById("sortField").value;
+        var sortDirection = document.getElementById("sortDirection").value;
+
+        // Обновление URL с параметрами сортировки
+        var currentUrl = window.location.href;
+        var updatedUrl = updateQueryStringParameter(currentUrl, "sortField", sortField);
+        updatedUrl = updateQueryStringParameter(updatedUrl, "sortDirection", sortDirection);
+
+        window.location.href = updatedUrl;
+    }
+
+    // Вспомогательная функция для обновления параметров в URL
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+        var separator = uri.indexOf("?") !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, "$1" + key + "=" + value + "$2");
+        } else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+
 </script>
 
 <script th:inline="javascript">
@@ -149,6 +221,7 @@
             }
         }
     });
+
     /*]]>*/
 
     function goToPage() {
@@ -167,3 +240,13 @@
 
 </body>
 </html>
+
+<!--рабочий вариант!!!-->
+<!--<li th:each="i : ${page.getNumber() > 2 ? (page.getNumber() < page.getTotalPages() - 2 ? #numbers.sequence(page.getNumber() - 2, page.getNumber() + 2) : #numbers.sequence(page.getTotalPages() - 4, page.getTotalPages() - 1)) : #numbers.sequence(0, 4)}"-->
+<!--    th:class="${page.number == i ? 'active' : ''}" class="page-item" style="display: inline-block;">-->
+<!--    <a th:if="${sortField == null}" th:attr="href=@{/admin/quote (page=${i}, size=${page.size})}" class="page-link"-->
+<!--       th:text="${i + 1}"></a>-->
+<!--    <a th:if="${sortField != null}"-->
+<!--       th:attr="href=@{/admin/quote (page=${i}, size=${page.size}, sortField=${sortField}, sortDirection=${sortDirection})}"-->
+<!--       class="page-link" th:text="${i + 1}"></a>-->
+<!--</li>-->

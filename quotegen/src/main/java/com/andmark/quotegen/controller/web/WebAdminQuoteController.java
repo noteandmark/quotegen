@@ -28,13 +28,18 @@ public class WebAdminQuoteController {
     }
 
     @GetMapping
-    public String showQuotes(Model model, @PageableDefault(size = 20) Pageable pageable) {
+    public String showQuotes(Model model, @PageableDefault(size = 20) Pageable pageable,
+                             @RequestParam(name = "sortField", required = false) String sortField,
+                             @RequestParam(name = "sortDirection", required = false) String sortDirection) {
         log.debug("web admin quote controller showQuotes");
-        Page<QuoteDTO> quotesPage = quoteService.findAll(pageable);
+
+        Page<QuoteDTO> quotesPage = quoteService.findAllSorted(pageable, sortField, sortDirection);
 
         // use getContent to get the list of elements on the current page
         model.addAttribute("quotes", quotesPage.getContent());
         model.addAttribute("page", quotesPage);
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDirection", sortDirection);
 
         return "admin/quote/list";
     }
