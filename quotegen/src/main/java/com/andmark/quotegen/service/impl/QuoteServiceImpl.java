@@ -85,30 +85,41 @@ public class QuoteServiceImpl implements QuoteService {
         return convertToDtoList(quoteList);
     }
 
-    @Override
-    public Page<QuoteDTO> findAll(Pageable pageable) {
-        log.debug("find all quotes with pageable");
-        Page<Quote> quotePage = quotesRepository.findAll(pageable);
-        log.info("founded quotePage.size = {}", quotePage.getTotalElements());
-
-        List<QuoteDTO> quoteDTOList = quotePage.getContent().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(quoteDTOList, pageable, quotePage.getTotalElements());
-    }
-
+        // check if sorting parameters are available
+//        if (sortField != null && sortDirection != null) {
+//            log.debug("get sorting by field = {}", sortField);
+//            Sort sort = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
+//            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+//            log.debug("get pageable = {}", pageable);
+//        }
     @Override
     public Page<QuoteDTO> findAllSorted(Pageable pageable, String sortField, String sortDirection) {
         log.debug("quote service: find all quotes");
+        Page<Quote> quotePage;
 
-        // check if sorting parameters are available
-        if (sortField != null && sortDirection != null) {
-            Sort sort = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
-            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        if ("bookAuthor".equals(sortField) && sortDirection != null) {
+            // Use the custom query for sorting by bookAuthor
+            log.debug("get sorting by field bookAuthor");
+            if ("asc".equalsIgnoreCase(sortDirection)) {
+                quotePage = quotesRepository.findAllSortedByBookAuthorByASC(pageable);
+            } else if ("desc".equalsIgnoreCase(sortDirection)) {
+                quotePage = quotesRepository.findAllSortedByBookAuthorByDESC(pageable);
+            } else {
+                // Handle invalid sort direction, or throw an exception
+                throw new IllegalArgumentException("Invalid sort direction: " + sortDirection);
+            }
+        } else {
+            // Use the default query for other cases
+            if (sortField != null && sortDirection != null) {
+                log.debug("get sorting by field = {}", sortField);
+                Sort sort = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+                log.debug("get pageable = {}", pageable);
+            }
+            quotePage = quotesRepository.findAll(pageable);
         }
 
-        Page<Quote> quotePage = quotesRepository.findAll(pageable);
+        log.debug("get quotePage.count = {}", quotePage.stream().count());
 
         List<QuoteDTO> quoteList = quotePage.getContent().stream()
                 .map(this::convertToDTO)

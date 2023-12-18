@@ -175,17 +175,51 @@
     });
     /*]]>*/
 
+    // function goToPage() {
+    //     var pageInput = document.getElementById("pageInput").value;
+    //     console.log("pageInput = ", pageInput);
+    //     var maxPage = /*[[${page.getTotalPages()}]]*/ 1; // Значение по умолчанию
+    //     // Проверка, чтобы номер страницы был в допустимых пределах
+    //     if (pageInput > 0 && pageInput <= maxPage) {
+    //         window.location.href = '/admin/quote?page=' + (pageInput - 1);
+    //     } else {
+    //         // Вывести сообщение об ошибке или принять другие меры
+    //         console.error("Invalid page number");
+    //     }
+    // }
+
     function goToPage() {
         var pageInput = document.getElementById("pageInput").value;
         console.log("pageInput = ", pageInput);
-        var maxPage = /*[[${page.getTotalPages()}]]*/ 1; // Значение по умолчанию
-        // Проверка, чтобы номер страницы был в допустимых пределах
-        if (pageInput > 0 && pageInput <= maxPage) {
-            window.location.href = '/admin/quote?page=' + (pageInput - 1);
-        } else {
-            // Вывести сообщение об ошибке или принять другие меры
-            console.error("Invalid page number");
+        var maxPage = /*[[${page.getTotalPages()}]]*/ 1; // Default value
+
+        // Extract current parameters from the URL
+        var currentUrl = window.location.href;
+        var pageSizeParam = getParameterByName("size", currentUrl);
+        var sortFieldParam = getParameterByName("sortField", currentUrl);
+        var sortDirectionParam = getParameterByName("sortDirection", currentUrl);
+
+        // Build the new URL with current parameters
+        var newUrl = '/admin/quote?page=' + (pageInput - 1);
+        if (pageSizeParam !== null) {
+            newUrl += '&size=' + pageSizeParam;
         }
+        if (sortFieldParam !== null && sortDirectionParam !== null) {
+            newUrl += '&sortField=' + sortFieldParam + '&sortDirection=' + sortDirectionParam;
+        }
+
+        // Perform the navigation
+        window.location.href = newUrl;
+    }
+
+    // Helper function to get parameter value from URL
+    function getParameterByName(name, url) {
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
 
     //for modal window with js

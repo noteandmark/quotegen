@@ -1,6 +1,5 @@
 package com.andmark.quotegen.util.impl;
 
-import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.dto.QuoteDTO;
 import org.modelmapper.ModelMapper;
