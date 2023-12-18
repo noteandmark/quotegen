@@ -41,6 +41,26 @@ public class WebAdminQuoteController {
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDirection", sortDirection);
 
+        // if the page number is greater than the maximum number of pages, redirect to the last page
+        if (pageable.getPageNumber() >= quotesPage.getTotalPages()) {
+            log.debug("page number is greater than the maximum number of pages");
+            StringBuilder redirectUrl = new StringBuilder("/admin/quote?page=")
+                    .append(quotesPage.getTotalPages() - 1)
+                    .append("&size=")
+                    .append(pageable.getPageSize());
+            log.debug("redirectUrl = {}", redirectUrl);
+
+            // add sorting parameters, if present
+            if (sortField != null && !sortField.isEmpty()) {
+                log.debug("add sorting parameters");
+                redirectUrl.append("&sortField=").append(sortField).append("&sortDirection=").append(sortDirection);
+            }
+
+            log.debug("redirect with sorting url = {}", redirectUrl);
+            return "redirect:" + redirectUrl.toString();
+        }
+
+        log.debug("return page without sorting");
         return "admin/quote/list";
     }
 
