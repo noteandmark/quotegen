@@ -85,13 +85,6 @@ public class QuoteServiceImpl implements QuoteService {
         return convertToDtoList(quoteList);
     }
 
-        // check if sorting parameters are available
-//        if (sortField != null && sortDirection != null) {
-//            log.debug("get sorting by field = {}", sortField);
-//            Sort sort = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
-//            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-//            log.debug("get pageable = {}", pageable);
-//        }
     @Override
     public Page<QuoteDTO> findAllSorted(Pageable pageable, String sortField, String sortDirection) {
         log.debug("quote service: find all quotes");
@@ -100,33 +93,18 @@ public class QuoteServiceImpl implements QuoteService {
         if ("bookAuthor".equals(sortField) && sortDirection != null) {
             // Use the custom query for sorting by bookAuthor
             log.debug("get sorting by field bookAuthor");
-            if ("asc".equalsIgnoreCase(sortDirection)) {
-                quotePage = quotesRepository.findAllSortedByBookAuthorByASC(pageable);
-            } else if ("desc".equalsIgnoreCase(sortDirection)) {
-                quotePage = quotesRepository.findAllSortedByBookAuthorByDESC(pageable);
-            } else {
-                // Handle invalid sort direction, or throw an exception
-                throw new IllegalArgumentException("Invalid sort direction: " + sortDirection);
-            }
+            quotePage = sortBookAuthorQuotes(pageable, sortDirection);
         } else {
             // Use the default query for other cases
-            if (sortField != null && sortDirection != null) {
-                log.debug("get sorting by field = {}", sortField);
-                Sort sort = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
-                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-                log.debug("get pageable = {}", pageable);
-            }
+            configureDefaultSorting(pageable, sortField, sortDirection);
             quotePage = quotesRepository.findAll(pageable);
         }
 
         log.debug("get quotePage.count = {}", quotePage.stream().count());
+        Page<QuoteDTO> quoteDTOPage = convertToQuoteDTOPage(quotePage, pageable);
+        log.debug("founded quoteDTOPage.count = {}", quoteDTOPage.stream().count());
 
-        List<QuoteDTO> quoteList = quotePage.getContent().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-        log.info("founded quoteList.size = {}", quoteList.size());
-
-        return new PageImpl<>(quoteList, pageable, quotePage.getTotalElements());
+        return quoteDTOPage;
     }
 
     @Override
@@ -518,9 +496,36 @@ public class QuoteServiceImpl implements QuoteService {
         } while (occurrences > 0);
     }
 
+    private Page<Quote> sortBookAuthorQuotes(Pageable pageable, String sortDirection) {
+        if ("asc".equalsIgnoreCase(sortDirection)) {
+            return quotesRepository.findAllSortedByBookAuthorByASC(pageable);
+        } else if ("desc".equalsIgnoreCase(sortDirection)) {
+            return quotesRepository.findAllSortedByBookAuthorByDESC(pageable);
+        } else {
+            throw new IllegalArgumentException("Invalid sort direction: " + sortDirection);
+        }
+    }
+
+    private void configureDefaultSorting(Pageable pageable, String sortField, String sortDirection) {
+        if (sortField != null && sortDirection != null) {
+            log.debug("get sorting by field = {}", sortField);
+            Sort sort = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+            log.debug("get pageable = {}", pageable);
+        }
+    }
+
     private <T> T getRandomElement(List<T> list) {
         int randomIndex = new Random().nextInt(list.size());
         return list.get(randomIndex);
+    }
+
+    private Page<QuoteDTO> convertToQuoteDTOPage(Page<Quote> quotePage, Pageable pageable) {
+        List<QuoteDTO> quoteList = quotePage.getContent().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(quoteList, pageable, quotePage.getTotalElements());
     }
 
     private QuoteDTO convertToDTO(Quote quote) {

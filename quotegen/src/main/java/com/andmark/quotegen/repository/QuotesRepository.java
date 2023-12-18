@@ -32,9 +32,6 @@ public interface QuotesRepository extends JpaRepository<Quote, Long> {
     List<LocalDateTime> findPendingTimesBetween(@Param("startTime") LocalDateTime startTime,
                                                 @Param("endTime") LocalDateTime endTime);
 
-//    @Query("SELECT q FROM Quote q JOIN FETCH q.bookSource b ORDER BY b.author ASC")
-//    Page<Quote> findAllSortedByBookAuthor(Pageable pageable);
-
     @Query("SELECT q FROM Quote q JOIN FETCH q.bookSource b ORDER BY b.author ASC")
     Page<Quote> findAllSortedByBookAuthorByASC(Pageable pageable);
 
