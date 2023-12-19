@@ -51,6 +51,13 @@
                    th:value="${#temporals.format(quoteDTO.usedAt, 'yyyy-MM-dd''T''HH:mm')}">
         </div>
 
+        <div class="mb-3">
+            <label>Book Details:</label>
+            <input type="hidden" id="bookId" name="bookId" th:field="*{bookId}"/>
+            <a th:href="@{/admin/book/edit/{bookId}(bookId=${bookDTO.id},quoteId=${quoteDTO.id})}"
+               class="btn btn-link">Edit Book Details</a>
+        </div>
+
         <div class="form-group mb-3">
             <label for="bookAuthor" class="form-label">Book Author:</label>
             <input type="text" class="form-control" id="bookAuthor" name="bookAuthor" th:field="*{bookAuthor}"
@@ -60,13 +67,6 @@
         <div class="form-group mb-3">
             <label for="bookTitle" class="form-label">Book Title:</label>
             <input type="text" class="form-control" id="bookTitle" name="bookTitle" th:field="*{bookTitle}" readonly/>
-        </div>
-
-        <!-- Добавим ссылку для перехода на страницу редактирования книги -->
-        <input type="hidden" id="bookId" name="bookId" th:field="*{bookId}"/>
-        <div class="mb-3">
-            <label>Book Details:</label>
-            <a th:href="@{/admin/book/edit/{bookId}(bookId=${bookDTO.id})}" class="btn btn-link">Edit Book Details</a>
         </div>
 
         <button type="submit" class="btn btn-primary">Save Changes</button>

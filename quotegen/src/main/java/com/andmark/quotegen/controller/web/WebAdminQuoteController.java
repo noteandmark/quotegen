@@ -6,6 +6,7 @@ import com.andmark.quotegen.dto.QuoteDTO;
 import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.QuoteService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,6 +23,7 @@ public class WebAdminQuoteController {
     private final QuoteService quoteService;
     private final BookService bookService;
 
+    @Autowired
     public WebAdminQuoteController(QuoteService quoteService, BookService bookService) {
         this.quoteService = quoteService;
         this.bookService = bookService;
@@ -60,7 +62,7 @@ public class WebAdminQuoteController {
             return "redirect:" + redirectUrl;
         }
 
-        log.debug("return page without sorting");
+        log.debug("return page");
         return "admin/quote/list";
     }
 
@@ -118,12 +120,14 @@ public class WebAdminQuoteController {
             model.addAttribute("bookDTO", bookDTO);
         }
 
+        log.debug("show quote-edit page");
         return "admin/quote/edit";
     }
 
     @PostMapping("/edit/{id}")
     public String editQuote(@PathVariable("id") Long id, @ModelAttribute("quoteDTO") QuoteDTO quoteDTO) {
         log.debug("web admin quote controller editQuote");
+        log.debug("editQuote: {}", quoteDTO);
         quoteService.update(id, quoteDTO);
         log.debug("web admin quote controller: updated, go to redirect");
         return "redirect:/admin/quote";

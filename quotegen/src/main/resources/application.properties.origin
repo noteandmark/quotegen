@@ -27,4 +27,5 @@ quote.numberNextLines=7
 google.api.key=YOUR_API_KEY
 google.search.engine.id=YOUR_ENGINE
 
+# pageable starts from 1 page
 spring.data.web.pageable.one-indexed-parameters=true
