@@ -10,7 +10,7 @@ function goToPage() {
     var sortDirectionParam = getParameterByName("sortDirection", currentUrl);
 
     // Build the new URL with current parameters
-    var newUrl = '/admin/quote?page=' + (pageInput - 1);
+    var newUrl = '/admin/quote?page=' + pageInput;
     if (pageSizeParam !== null) {
         newUrl += '&size=' + pageSizeParam;
     }

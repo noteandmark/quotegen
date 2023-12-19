@@ -79,7 +79,7 @@
         </p>
         <ul class="pagination-list">
             <li th:class="${page.first ? 'disabled' : ''}" class="page-item" style="display: inline-block;">
-                <a class="page-link" th:href="@{${page.first ? '#' : '/admin/quote?page=' + (page.number - 1) +
+                <a class="page-link" th:href="@{${page.first ? '#' : '/admin/quote?page=' + page.number +
                 '&size=' + page.size + (sortField != null and sortField != '' ? '&sortField=' + sortField +
                 '&sortDirection=' + sortDirection : '')}}">Previous</a>
             </li>
@@ -94,19 +94,19 @@
                 class="page-item" style="display: inline-block;">
 
                 <a th:if="${sortField == null or sortField == ''}"
-                   th:href="@{/admin/quote (page=${i}, size=${page.size})}"
+                   th:href="@{/admin/quote (page=${i + 1}, size=${page.size})}"
                    class="page-link"
                    th:text="${i + 1}">
                 </a>
 
                 <a th:if="${sortField != null and sortField != ''}"
-                   th:attr="href=@{/admin/quote (page=${i}, size=${page.size}, sortField=${sortField}, sortDirection=${sortDirection})}"
+                   th:attr="href=@{/admin/quote (page=${i + 1}, size=${page.size}, sortField=${sortField}, sortDirection=${sortDirection})}"
                    class="page-link" th:text="${i + 1}"></a>
             </li>
 
             </li>
             <li th:class="${page.last ? 'disabled' : ''}" class="page-item" style="display: inline-block;">
-                <a class="page-link" th:href="@{${page.last ? '#' : '/admin/quote?page=' + (page.number + 1) +
+                <a class="page-link" th:href="@{${page.last ? '#' : '/admin/quote?page=' + (page.number + 2) +
                 '&size=' + page.size + (sortField != null and sortField != '' ? '&sortField=' + sortField +
                 '&sortDirection=' + sortDirection : '')}}">Next</a>
             </li>
