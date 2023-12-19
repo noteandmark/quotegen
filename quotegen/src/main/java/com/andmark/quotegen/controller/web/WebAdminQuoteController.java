@@ -57,7 +57,7 @@ public class WebAdminQuoteController {
             }
 
             log.debug("redirect with sorting url = {}", redirectUrl);
-            return "redirect:" + redirectUrl.toString();
+            return "redirect:" + redirectUrl;
         }
 
         log.debug("return page without sorting");

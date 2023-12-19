@@ -8,8 +8,7 @@ import com.andmark.quotegen.dto.ExtractedLinesDTO;
 import com.andmark.quotegen.dto.PageLineRequestDTO;
 import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.repository.BooksRepository;
-import com.andmark.quotegen.service.QuoteService;
-import com.andmark.quotegen.util.impl.MapperConvert;
+import com.andmark.quotegen.util.MapperConvert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +21,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.*;
 

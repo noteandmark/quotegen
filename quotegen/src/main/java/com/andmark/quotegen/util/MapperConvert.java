@@ -1,4 +1,4 @@
-package com.andmark.quotegen.util.impl;
+package com.andmark.quotegen.util;
 
 import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.dto.QuoteDTO;

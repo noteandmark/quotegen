@@ -5,7 +5,7 @@ import com.andmark.quotegen.domain.enums.UserRole;
 import com.andmark.quotegen.dto.UserDTO;
 import com.andmark.quotegen.repository.UsersRepository;
 import com.andmark.quotegen.service.UserService;
-import com.andmark.quotegen.util.impl.MapperConvert;
+import com.andmark.quotegen.util.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

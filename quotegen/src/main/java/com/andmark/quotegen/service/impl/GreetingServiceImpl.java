@@ -4,7 +4,7 @@ import com.andmark.quotegen.domain.Greeting;
 import com.andmark.quotegen.dto.GreetingDTO;
 import com.andmark.quotegen.repository.GreetingRepository;
 import com.andmark.quotegen.service.GreetingService;
-import com.andmark.quotegen.util.impl.MapperConvert;
+import com.andmark.quotegen.util.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

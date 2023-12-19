@@ -1,16 +1,13 @@
 package com.andmark.quotegen.service;
 
 import com.andmark.quotegen.domain.ScheduledActionStatus;
-import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.ScheduledActionStatusDTO;
 import com.andmark.quotegen.repository.ScheduledActionStatusRepository;
-import com.andmark.quotegen.util.impl.MapperConvert;
-import org.junit.jupiter.api.BeforeEach;
+import com.andmark.quotegen.util.MapperConvert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;

@@ -26,3 +26,5 @@ quote.numberNextLines=7
 # Google API Search
 google.api.key=YOUR_API_KEY
 google.search.engine.id=YOUR_ENGINE
+
+spring.data.web.pageable.one-indexed-parameters=true

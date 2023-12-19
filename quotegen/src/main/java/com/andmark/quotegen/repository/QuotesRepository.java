@@ -38,5 +38,10 @@ public interface QuotesRepository extends JpaRepository<Quote, Long> {
     @Query("SELECT q FROM Quote q JOIN FETCH q.bookSource b ORDER BY b.author DESC")
     Page<Quote> findAllSortedByBookAuthorByDESC(Pageable pageable);
 
+    @Query("SELECT q FROM Quote q JOIN FETCH q.bookSource b ORDER BY b.title ASC")
+    Page<Quote> findAllSortedByBookTitleByASC(Pageable pageable);
+
+    @Query("SELECT q FROM Quote q JOIN FETCH q.bookSource b ORDER BY b.title DESC")
+    Page<Quote> findAllSortedByBookTitleByDESC(Pageable pageable);
 
 }

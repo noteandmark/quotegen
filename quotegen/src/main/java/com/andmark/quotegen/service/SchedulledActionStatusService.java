@@ -3,7 +3,7 @@ package com.andmark.quotegen.service;
 import com.andmark.quotegen.domain.ScheduledActionStatus;
 import com.andmark.quotegen.dto.ScheduledActionStatusDTO;
 import com.andmark.quotegen.repository.ScheduledActionStatusRepository;
-import com.andmark.quotegen.util.impl.MapperConvert;
+import com.andmark.quotegen.util.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -6,7 +6,6 @@
     <link rel="stylesheet" th:href="@{/css/quote-list.css}"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
-
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
@@ -80,34 +79,36 @@
         </p>
         <ul class="pagination-list">
             <li th:class="${page.first ? 'disabled' : ''}" class="page-item" style="display: inline-block;">
-                <a class="page-link" th:href="@{${page.first ? '#'
-                                               : '/admin/quote?page=' + (page.number - 1)}}">Previous</a>
+                <a class="page-link" th:href="@{${page.first ? '#' : '/admin/quote?page=' + (page.number - 1) +
+                '&size=' + page.size + (sortField != null and sortField != '' ? '&sortField=' + sortField +
+                '&sortDirection=' + sortDirection : '')}}">Previous</a>
             </li>
             <!-- Page Numbers -->
-                <li th:each="i : ${page.getNumber() > 2 ?
+            <li th:each="i : ${page.getNumber() > 2 ?
                  (page.getNumber() < page.getTotalPages() - 2 ?
                 #numbers.sequence(page.getNumber() - 2, page.getNumber() + 2) :
                  #numbers.sequence(page.getTotalPages() - 4, page.getTotalPages() - 1)) :
                   #numbers.sequence(0, (page.getTotalPages() - 1) >= 4 ? 4 : (page.getTotalPages() - 1))}"
 
-                    th:class="${page.number == i ? 'active' : ''}"
-                    class="page-item" style="display: inline-block;">
+                th:class="${page.number == i ? 'active' : ''}"
+                class="page-item" style="display: inline-block;">
 
-                    <a th:if="${sortField == null or sortField == ''}"
-                       th:href="@{/admin/quote (page=${i}, size=${page.size})}"
-                       class="page-link"
-                       th:text="${i + 1}">
-                    </a>
+                <a th:if="${sortField == null or sortField == ''}"
+                   th:href="@{/admin/quote (page=${i}, size=${page.size})}"
+                   class="page-link"
+                   th:text="${i + 1}">
+                </a>
 
-                    <a th:if="${sortField != null and sortField != ''}"
-                       th:attr="href=@{/admin/quote (page=${i}, size=${page.size}, sortField=${sortField}, sortDirection=${sortDirection})}"
-                       class="page-link" th:text="${i + 1}"></a>
-                </li>
+                <a th:if="${sortField != null and sortField != ''}"
+                   th:attr="href=@{/admin/quote (page=${i}, size=${page.size}, sortField=${sortField}, sortDirection=${sortDirection})}"
+                   class="page-link" th:text="${i + 1}"></a>
+            </li>
 
             </li>
             <li th:class="${page.last ? 'disabled' : ''}" class="page-item" style="display: inline-block;">
-                <a class="page-link" th:href="@{${page.last ? '#'
-                                                              : '/admin/quote?page=' + (page.number + 1)}}">Next</a>
+                <a class="page-link" th:href="@{${page.last ? '#' : '/admin/quote?page=' + (page.number + 1) +
+                '&size=' + page.size + (sortField != null and sortField != '' ? '&sortField=' + sortField +
+                '&sortDirection=' + sortDirection : '')}}">Next</a>
             </li>
             <!-- Additional field for direct page input -->
             <li class="page-item">
@@ -160,7 +161,6 @@
 <div th:replace="~{fragments/footer-fragment :: footer}"></div>
 
 <script th:inline="javascript">
-    /*<![CDATA[*/
     document.addEventListener("DOMContentLoaded", function () {
         var pageSizeSelect = document.getElementById("pageSizeSelect");
         var currentPageSize = /*[[${page.size}]]*/ 20; // Значение по умолчанию
@@ -173,128 +173,8 @@
             }
         }
     });
-    /*]]>*/
-
-    // function goToPage() {
-    //     var pageInput = document.getElementById("pageInput").value;
-    //     console.log("pageInput = ", pageInput);
-    //     var maxPage = /*[[${page.getTotalPages()}]]*/ 1; // Значение по умолчанию
-    //     // Проверка, чтобы номер страницы был в допустимых пределах
-    //     if (pageInput > 0 && pageInput <= maxPage) {
-    //         window.location.href = '/admin/quote?page=' + (pageInput - 1);
-    //     } else {
-    //         // Вывести сообщение об ошибке или принять другие меры
-    //         console.error("Invalid page number");
-    //     }
-    // }
-
-    function goToPage() {
-        var pageInput = document.getElementById("pageInput").value;
-        console.log("pageInput = ", pageInput);
-        var maxPage = /*[[${page.getTotalPages()}]]*/ 1; // Default value
-
-        // Extract current parameters from the URL
-        var currentUrl = window.location.href;
-        var pageSizeParam = getParameterByName("size", currentUrl);
-        var sortFieldParam = getParameterByName("sortField", currentUrl);
-        var sortDirectionParam = getParameterByName("sortDirection", currentUrl);
-
-        // Build the new URL with current parameters
-        var newUrl = '/admin/quote?page=' + (pageInput - 1);
-        if (pageSizeParam !== null) {
-            newUrl += '&size=' + pageSizeParam;
-        }
-        if (sortFieldParam !== null && sortDirectionParam !== null) {
-            newUrl += '&sortField=' + sortFieldParam + '&sortDirection=' + sortDirectionParam;
-        }
-
-        // Perform the navigation
-        window.location.href = newUrl;
-    }
-
-    // Helper function to get parameter value from URL
-    function getParameterByName(name, url) {
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
-    }
-
-    //for modal window with js
-    let modal =
-        new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-
-    function showModal() {
-        modal.show();
-    }
-
-    //for pagination
-    function changePageSize(select) {
-        var selectedPageSize = select.value;
-        var sortField = document.getElementById("sortField").value;
-        var sortDirection = document.getElementById("sortDirection").value;
-
-        // Обновление URL с параметрами сортировки и размера страницы
-        var currentUrl = window.location.href;
-        var updatedUrl = updateQueryStringParameter(currentUrl, "size", selectedPageSize);
-
-        if (sortField.trim() !== "" && sortDirection.trim() !== "") {
-            updatedUrl = updateQueryStringParameter(updatedUrl, "sortField", sortField);
-            updatedUrl = updateQueryStringParameter(updatedUrl, "sortDirection", sortDirection);
-        }
-
-        window.location.href = updatedUrl;
-    }
-
-    //for sorting
-    function applySort() {
-        var sortField = document.getElementById("sortField").value;
-        var sortDirection = document.getElementById("sortDirection").value;
-
-        // Обновление URL с параметрами сортировки
-        var currentUrl = window.location.href;
-
-        // Проверка, является ли sortField пустой строкой
-        if (sortField.trim() !== "") {
-            currentUrl = updateQueryStringParameter(currentUrl, "sortField", sortField);
-            currentUrl = updateQueryStringParameter(currentUrl, "sortDirection", sortDirection);
-        } else {
-            // Если sortField пуст, удаляем параметры sortField и sortDirection из URL
-            currentUrl = removeQueryStringParameter(currentUrl, "sortField");
-            currentUrl = removeQueryStringParameter(currentUrl, "sortDirection");
-        }
-
-        // Удаление последнего символа & в конце URL (если есть)
-        currentUrl = currentUrl.replace(/&$/, '');
-
-        window.location.href = currentUrl;
-    }
-
-    // Вспомогательная функция для обновления параметров в URL
-    function updateQueryStringParameter(uri, key, value) {
-        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-        var separator = uri.indexOf("?") !== -1 ? "&" : "?";
-        if (uri.match(re)) {
-            return uri.replace(re, "$1" + key + "=" + value + "$2");
-        } else {
-            return uri + separator + key + "=" + value;
-        }
-    }
-
-    // Вспомогательная функция для удаления параметра из URL
-    function removeQueryStringParameter(uri, key) {
-        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-
-        if (uri.match(re)) {
-            return uri.replace(re, "$1$2").replace(/&$/, '');
-        } else {
-            return uri;
-        }
-    }
-
 </script>
 
+<script th:src="@{/js/quote-list.js}" defer="true"></script>
 </body>
 </html>

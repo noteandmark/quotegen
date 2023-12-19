@@ -9,7 +9,7 @@ import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.QuoteService;
-import com.andmark.quotegen.util.impl.MapperConvert;
+import com.andmark.quotegen.util.MapperConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

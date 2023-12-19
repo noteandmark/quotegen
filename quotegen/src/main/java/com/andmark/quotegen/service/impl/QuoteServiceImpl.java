@@ -13,7 +13,7 @@ import com.andmark.quotegen.repository.QuotesRepository;
 import com.andmark.quotegen.service.QuoteService;
 import com.andmark.quotegen.util.BookFormatParser;
 import com.andmark.quotegen.util.BookFormatParserFactory;
-import com.andmark.quotegen.util.impl.MapperConvert;
+import com.andmark.quotegen.util.MapperConvert;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -94,13 +94,19 @@ public class QuoteServiceImpl implements QuoteService {
             // Use the custom query for sorting by bookAuthor
             log.debug("get sorting by field bookAuthor");
             quotePage = sortBookAuthorQuotes(pageable, sortDirection);
-        } else {
-            // Use the default query for other cases
-            configureDefaultSorting(pageable, sortField, sortDirection);
+        }
+        else if ("bookTitle".equals(sortField) && sortDirection != null) {
+            // Use the custom query for sorting by bookTitle
+            log.debug("get sorting by field bookTitle");
+            quotePage = sortBookTitleQuotes(pageable, sortDirection);
+        }
+        else {
+            // Use the default query for other fields
+            log.debug("get sorting by field = {}", sortField);
+            pageable = configureDefaultSorting(pageable, sortField, sortDirection);
             quotePage = quotesRepository.findAll(pageable);
         }
 
-        log.debug("get quotePage.count = {}", quotePage.stream().count());
         Page<QuoteDTO> quoteDTOPage = convertToQuoteDTOPage(quotePage, pageable);
         log.debug("founded quoteDTOPage.count = {}", quoteDTOPage.stream().count());
 
@@ -506,13 +512,24 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    private void configureDefaultSorting(Pageable pageable, String sortField, String sortDirection) {
+    private Page<Quote> sortBookTitleQuotes(Pageable pageable, String sortDirection) {
+        if ("asc".equalsIgnoreCase(sortDirection)) {
+            return quotesRepository.findAllSortedByBookTitleByASC(pageable);
+        } else if ("desc".equalsIgnoreCase(sortDirection)) {
+            return quotesRepository.findAllSortedByBookTitleByDESC(pageable);
+        } else {
+            throw new IllegalArgumentException("Invalid sort direction: " + sortDirection);
+        }
+    }
+
+    private Pageable configureDefaultSorting(Pageable pageable, String sortField, String sortDirection) {
         if (sortField != null && sortDirection != null) {
             log.debug("get sorting by field = {}", sortField);
             Sort sort = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortField);
             pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
             log.debug("get pageable = {}", pageable);
         }
+        return pageable;
     }
 
     private <T> T getRandomElement(List<T> list) {

@@ -6,10 +6,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 
 @Configuration
 @Profile({"dev", "prod"}) // Both profiles will use this component
-public class AppConfig {
+public class AppConfig implements WebMvcConfigurer {
     public static Integer quotesInDay;
     public static Integer daysPublicationAhead;
     public static Integer maxPeriodDaysAhead;
@@ -38,4 +40,5 @@ public class AppConfig {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
 }
