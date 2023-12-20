@@ -1,6 +1,7 @@
 package com.andmark.quotebot.dto;
 
 import com.andmark.quotebot.domain.enums.BookFormat;
+import com.andmark.quotebot.domain.enums.BookStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -17,5 +18,6 @@ public class BookDTO {
     private String author;
     private BookFormat format;
     private String filePath;
+    private BookStatus bookStatus;
 
 }

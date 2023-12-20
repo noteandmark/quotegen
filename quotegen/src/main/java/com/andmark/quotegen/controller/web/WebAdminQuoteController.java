@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/quote")
@@ -62,18 +63,20 @@ public class WebAdminQuoteController {
             return "redirect:" + redirectUrl;
         }
 
-        log.debug("return page");
+        log.debug("return page list of quotes");
         return "admin/quote/list";
     }
 
     @GetMapping("/view/{id}")
     public String viewQuote(@PathVariable("id") Long id, Model model) {
         log.debug("web admin quote controller viewQuote with id = {}", id);
+
         QuoteDTO quoteDTO = quoteService.findOne(id);
         if (quoteDTO != null) {
             model.addAttribute("quoteDTO", quoteDTO);
-            if (quoteDTO.getBookId() != null) {
-                BookDTO bookDTO = bookService.findOne(quoteDTO.getBookId());
+            Long bookId = quoteDTO.getBookId();
+            if (bookId != null) {
+                BookDTO bookDTO = bookService.findOne(bookId);
                 model.addAttribute("bookDTO", bookDTO);
             }
             return "admin/quote/view";

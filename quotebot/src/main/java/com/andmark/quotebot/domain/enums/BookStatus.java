@@ -1,11 +1,11 @@
 package com.andmark.quotebot.domain.enums;
 
-public enum Status {
+public enum BookStatus {
     ACTIVE("active"), DELETED("deleted");
 
     private final String value;
 
-    Status(final String value) {
+    BookStatus(final String value) {
         this.value = value;
     }
 

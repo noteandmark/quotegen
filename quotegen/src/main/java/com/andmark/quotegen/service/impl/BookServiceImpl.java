@@ -1,6 +1,7 @@
 package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
+import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.ExtractedLinesDTO;
@@ -52,7 +53,7 @@ public class BookServiceImpl implements BookService {
     public BookDTO findOne(Long id) {
         log.debug("find book by id {}", id);
         Optional<Book> foundBook = booksRepository.findById(id);
-        log.info("find book {}", foundBook);
+        log.info("found book with id = {}", foundBook.map(Book::getId).orElse(null));
         return foundBook.map(this::convertToDTO)
                 .orElse(null);
     }
@@ -72,7 +73,7 @@ public class BookServiceImpl implements BookService {
         Book updatedBook = convertToEntity(updatedBookDTO);
         updatedBook.setId(id);
         booksRepository.save(updatedBook);
-        log.info("update book {}", updatedBook);
+        log.info("updated book {}", updatedBook);
     }
 
     @Override

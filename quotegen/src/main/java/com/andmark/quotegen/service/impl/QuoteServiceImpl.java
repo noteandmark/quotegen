@@ -73,8 +73,9 @@ public class QuoteServiceImpl implements QuoteService {
     public QuoteDTO findOne(Long id) {
         log.debug("findOne: quote by id {}", id);
         Optional<Quote> foundQuote = quotesRepository.findById(id);
-        log.info("find quote {}", foundQuote);
-        return foundQuote.map(this::convertToDTO).orElse(null);
+        log.info("found quote with id = {}", foundQuote.map(Quote::getId).orElse(null));
+        return foundQuote.map(this::convertToDTO)
+                .orElse(null);
     }
 
     @Override
@@ -117,7 +118,6 @@ public class QuoteServiceImpl implements QuoteService {
     @Transactional
     public void update(Long id, QuoteDTO updatedQuoteDTO) {
         log.debug("update quote by id {}", id);
-        log.debug("updatedQuoteDTO = {}", updatedQuoteDTO);
         Long bookId = updatedQuoteDTO.getBookId();
         log.debug("bookId in updatedQuoteDTO= {}", bookId);
         Quote updatedQuote = convertToEntity(updatedQuoteDTO);

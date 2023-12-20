@@ -31,6 +31,7 @@
             <p class="card-text"><strong>Book Author:</strong> <span th:text="${quoteDTO.bookAuthor}">Book Author</span></p>
             <p class="card-text"><strong>Book Title:</strong> <span th:text="${quoteDTO.bookTitle}">Book Title</span></p>
 
+            <a class="btn btn-primary" th:href="@{/admin/quote/edit/{id}(id=${quoteDTO.id})}">Edit Quote</a>
             <a class="btn btn-secondary" th:href="@{/admin/quote}">Back to List</a>
         </div>
     </div>
