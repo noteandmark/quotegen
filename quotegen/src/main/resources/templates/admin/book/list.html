@@ -3,63 +3,46 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Book Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"
-          th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}">
-
+          th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" >
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
             integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
             crossorigin="anonymous" th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.min.js}"></script>
-
-    <script src="/webjars/jquery/1.11.1/jquery.min.js"></script>
+    <script th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script>
 </head>
-<body>
+<body style="padding-top: 60px;">
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="#">Quote Management</a>
+    <a class="navbar-brand" href="#">Book Management</a>
     <div th:replace="~{fragments/navbar-fragment :: navbar}"></div>
 </nav>
 
-<div class="container-fluid" style="margin-top: 20px">
-    <div class="row">
-        <div class="col-md-6 col-md-offset-3">
-            <div class="panel panel-primary">
-
-                <div class="panel-heading">
-                    <h1 class="panel-title">Books</h1>
+<div class="container-fluid mt-3">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="card-title">Books</h1>
                 </div>
-                <div class="panel-body">
-
+                <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover ">
+                        <table class="table table-hover">
                             <thead class="thead-inverse">
                             <tr>
                                 <th>ID</th>
                                 <th>Title</th>
                                 <th>View</th>
-                                <th>Update</th>
-                                <th>Delete</th>
+                                <th>Edit</th>
                             </tr>
                             </thead>
-                            <tr th:remove="all">
-                                <td>123</td>
-                                <td>Some Book 1</td>
-                                <td><a href="#">View</a></td>
-                                <td><a href="#">Update</a></td>
-                                <td><a href="#">Delete</a></td>
-                            </tr>
-                            <tr th:remove="all">
-                                <td>12333</td>
-                                <td>Some Book 2</td>
-                                <td><a href="#">View</a></td>
-                                <td><a href="#">Update</a></td>
-                                <td><a href="#">Delete</a></td>
-                            </tr>
                             <tr th:each="book : ${books}">
                                 <td th:text="${book.id}">334</td>
-                                <td th:text="${book.title} + '.' + ${book.format} + ' - ' + ${book.author} + '/show'">Some Book 3</td>
-                                <td><a href="#" th:href="@{'/recipe/'}">View</a></td>
-                                <td><a href="#" th:href="@{'/recipe/'}">Update</a></td>
-                                <td><a href="#" th:href="@{'/recipe/'}">Delete</a></td>
+                                <td th:text="${book.title} + '.' + ${book.format} + ' - ' + ${book.author}"
+                                    style="max-width: 150px; overflow-wrap: break-word;">Some Book</td>
+                                <td><a href="#" th:href="@{'/admin/book/view/' + ${book.id}}">View</a></td>
+                                <td><a href="#" th:href="@{'/admin/book/edit/' + ${book.id}}">Edit</a></td>
                             </tr>
                         </table>
                     </div>
@@ -73,6 +56,62 @@
 </body>
 </html>
 
-<!--                                <td><a href="#" th:href="@{'/recipe/' + ${recipe.id} + '/ingredient/' + ${ingredient.id} + '/show'}">View</a></td>-->
-<!--                                <td><a href="#" th:href="@{'/recipe/' + ${recipe.id} + '/ingredient/' + ${ingredient.id} + '/update'}">Update</a></td>-->
-<!--                                <td><a href="#" th:href="@{'/recipe/' + ${recipe.id} + '/ingredient/' + ${ingredient.id} + '/delete'}">Delete</a></td>-->
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>Book Management</title>-->
+<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"-->
+<!--          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"-->
+<!--          th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" >-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"-->
+<!--            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"-->
+<!--            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"-->
+<!--            crossorigin="anonymous" th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.min.js}"></script>-->
+<!--    <script th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script>-->
+<!--</head>-->
+<!--<body style="padding-top: 60px;">-->
+<!--<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">-->
+<!--    <a class="navbar-brand" href="#">Book Management</a>-->
+<!--    <div th:replace="~{fragments/navbar-fragment :: navbar}"></div>-->
+<!--</nav>-->
+
+<!--<div class="container-fluid mt-3">-->
+<!--    <div class="row">-->
+<!--        <div class="col-md-6 col-md-offset-3">-->
+<!--            <div class="panel panel-primary">-->
+
+<!--                <div class="panel-heading">-->
+<!--                    <h1 class="panel-title">Books</h1>-->
+<!--                </div>-->
+<!--                <div class="panel-body">-->
+
+<!--                    <div class="table-responsive">-->
+<!--                        <table class="table table-hover ">-->
+<!--                            <thead class="thead-inverse">-->
+<!--                            <tr>-->
+<!--                                <th>ID</th>-->
+<!--                                <th>Title</th>-->
+<!--                                <th>View</th>-->
+<!--                                <th>Edit</th>-->
+<!--                            </tr>-->
+<!--                            </thead>-->
+<!--                            <tr th:each="book : ${books}">-->
+<!--                                <td th:text="${book.id}">334</td>-->
+<!--                                <td th:text="${book.title} + '.' + ${book.format} + ' - ' + ${book.author}"-->
+<!--                                style="max-width: 150px; overflow-wrap: break-word;">Some Book</td>-->
+<!--                                <td><a href="#" th:href="@{'/admin/book/view/' + ${book.id}}">View</a></td>-->
+<!--                                <td><a href="#" th:href="@{'/admin/book/edit/' + ${book.id}}">Edit</a></td>-->
+<!--                            </tr>-->
+<!--                        </table>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div th:replace="~{fragments/footer-fragment :: footer}"></div>-->
+<!--</body>-->
+<!--</html>-->

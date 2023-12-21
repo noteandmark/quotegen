@@ -106,6 +106,7 @@ public class ApiServiceImpl implements ApiService {
         // Hash the password before sending it to the API
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
         userDTO.setPassword(hashedPassword);
+        userDTO.setNickname(userDTO.getUsername());
         String registerUserUrl = BotConfig.API_BASE_URL + "/users/register";
 
         RequestConfiguration requestConfig = new RequestConfiguration.Builder()

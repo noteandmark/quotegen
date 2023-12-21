@@ -7,10 +7,13 @@ import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.impl.ScanServiceImpl;
 import com.andmark.quotegen.util.impl.Fb2BookFormatParser;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(ScanController.class)
+@ExtendWith(SpringExtension.class)
 class ScanControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -36,6 +40,7 @@ class ScanControllerTest {
     private Fb2BookFormatParser parser;
 
     @Test
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     public void testParseBook() throws Exception {
         // Mocking
         Long bookId = 1L;
@@ -60,6 +65,7 @@ class ScanControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     public void testScanBooks() throws Exception {
         // Mocking
         String directoryPath = "path/to/directory";
@@ -74,6 +80,7 @@ class ScanControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     public void testGetStatistics() throws Exception {
         // Mocking
         StatsDTO mockStats = new StatsDTO(10L, 5L, 3L);
@@ -88,6 +95,7 @@ class ScanControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     public void testTestConnection() throws Exception {
         // Testing
         mockMvc.perform(get("/api/test-connection"))

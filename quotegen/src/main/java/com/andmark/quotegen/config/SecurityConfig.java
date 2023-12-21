@@ -15,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
 @Configuration
 @EnableWebSecurity
 @Slf4j
