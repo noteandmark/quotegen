@@ -22,6 +22,14 @@
             <label class="form-label">Имя пользователя:</label>
             <p class="form-control-plaintext text-primary" th:text="${user.username}"></p>
         </div>
+        <form th:action="@{'/web/profile/' + ${user.username}}" method="post">
+            <div class="mb-3">
+                <label class="form-label">Ник пользователя:</label>
+                <input type="text" class="form-control" th:field="*{user.nickname}" />
+            </div>
+            <button type="submit" class="btn btn-primary">Изменить никнейм</button>
+        </form>
+
         <div class="mb-3">
             <label class="form-label">Роль:</label>
             <p class="form-control-plaintext font-weight-bold" th:text="${user.role}"></p>

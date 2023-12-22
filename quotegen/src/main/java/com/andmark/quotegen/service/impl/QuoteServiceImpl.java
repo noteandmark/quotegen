@@ -58,7 +58,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     @Transactional
-    public void save(QuoteDTO quoteDTO) {
+    public QuoteDTO save(QuoteDTO quoteDTO) {
         log.debug("saving quote");
         Quote quote = convertToEntity(quoteDTO);
         Optional<Book> bookSource = booksRepository.findById(quoteDTO.getBookId());
@@ -67,6 +67,7 @@ public class QuoteServiceImpl implements QuoteService {
         } else throw new NotFoundBookException("book with id = " + quoteDTO.getBookId() +"not found");
         quotesRepository.save(quote);
         log.info("saved quote with id = {}", quote.getId());
+        return convertToDTO(quote);
     }
 
     @Override
@@ -116,8 +117,8 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     @Transactional
-    public void update(Long id, QuoteDTO updatedQuoteDTO) {
-        log.debug("update quote by id {}", id);
+    public QuoteDTO update(QuoteDTO updatedQuoteDTO) {
+        log.debug("update quote by id {}", updatedQuoteDTO.getId());
         Long bookId = updatedQuoteDTO.getBookId();
         log.debug("bookId in updatedQuoteDTO= {}", bookId);
         Quote updatedQuote = convertToEntity(updatedQuoteDTO);
@@ -126,7 +127,8 @@ public class QuoteServiceImpl implements QuoteService {
         updatedQuote.setBookSource(book);
 
         quotesRepository.save(updatedQuote);
-        log.info("update quote {}", updatedQuote);
+        log.info("service: updated quote");
+        return updatedQuoteDTO;
     }
 
     @Override

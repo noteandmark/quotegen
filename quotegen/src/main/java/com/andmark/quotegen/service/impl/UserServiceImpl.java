@@ -3,6 +3,7 @@ package com.andmark.quotegen.service.impl;
 import com.andmark.quotegen.domain.User;
 import com.andmark.quotegen.domain.enums.UserRole;
 import com.andmark.quotegen.dto.UserDTO;
+import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.repository.UsersRepository;
 import com.andmark.quotegen.service.UserService;
 import com.andmark.quotegen.util.MapperConvert;
@@ -36,10 +37,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public void save(UserDTO userDTO) {
+    public UserDTO save(UserDTO userDTO) {
         log.debug("saving user");
         usersRepository.save(convertToEntity(userDTO));
         log.info("save user {}", userDTO);
+        return userDTO;
     }
 
     @Override
@@ -59,14 +61,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return convertToDtoList(userList);
     }
 
+    // method is used to change the user's nickname
     @Override
     @Transactional
-    public void update(Long id, UserDTO updatedUserDTO) {
-        log.debug("update user by id {}", id);
-        User updatedUser = convertToEntity(updatedUserDTO);
-        updatedUser.setId(id);
-        usersRepository.save(updatedUser);
-        log.info("update user {}", updatedUser);
+    public UserDTO update(UserDTO updatedUserDTO) {
+        String username = updatedUserDTO.getUsername();
+        log.debug("update user with username = {}", username);
+        String nickname = updatedUserDTO.getNickname();
+        log.debug("update user nickname to new : {}", nickname);
+        try {
+            usersRepository.updateNickname(username, nickname);
+        } catch (Exception e) {
+            log.error("Error updating nickname for user " + username, e);
+            throw new ServiceException("Failed to update nickname");
+        }
+        User user = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        log.info("update user {}", user);
+        return convertToDTO(user);
     }
 
     @Override

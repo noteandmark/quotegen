@@ -43,10 +43,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public void save(BookDTO bookDTO) {
+    public BookDTO save(BookDTO bookDTO) {
         log.debug("saving book");
         booksRepository.save(convertToEntity(bookDTO));
         log.info("save book {}", bookDTO);
+        return bookDTO;
     }
 
     @Override
@@ -68,12 +69,12 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public void update(Long id, BookDTO updatedBookDTO) {
-        log.debug("update book by id {}", id);
+    public BookDTO update(BookDTO updatedBookDTO) {
+        log.debug("update book by id {}", updatedBookDTO.getId());
         Book updatedBook = convertToEntity(updatedBookDTO);
-        updatedBook.setId(id);
         booksRepository.save(updatedBook);
         log.info("updated book {}", updatedBook);
+        return updatedBookDTO;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.andmark.quotegen.controller.web;
 
 import com.andmark.quotegen.dto.UserDTO;
+import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,19 @@ public class WebProfileController {
         UserDTO userDTO = userService.findByUsername(username);
         model.addAttribute("user", userDTO);
         return "web/profile";
+    }
+
+    @PostMapping("/profile/{username}")
+    public String updateNickname(@PathVariable String username, @ModelAttribute("user") UserDTO updatedUser,
+                                 Model model) {
+        try {
+            userService.update(updatedUser);
+            return "redirect:/web/profile/" + username;
+        } catch (ServiceException e) {
+            log.warn("ServiceException in updateNickname");
+            model.addAttribute("errorMessage", e.getMessage());
+            return "public/error";
+        }
     }
 
     @GetMapping("/change-password/{username}")

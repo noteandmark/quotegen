@@ -69,7 +69,7 @@ public class WebAdminBookController {
                            @ModelAttribute("bookDTO") BookDTO bookDTO,
                            @RequestParam(name = "quoteId", required = false) String quoteId) {
         log.debug("web admin book controller editBook");
-        bookService.update(id, bookDTO);
+        bookService.update(bookDTO);
 
         // redirect back to the quote view page
         if (quoteId != null && !quoteId.isEmpty()) {

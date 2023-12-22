@@ -25,10 +25,11 @@ public class GreetingServiceImpl implements GreetingService {
     }
 
     @Override
-    public void save(GreetingDTO greetingDTO) {
+    public GreetingDTO save(GreetingDTO greetingDTO) {
         log.debug("saving greeting");
         greetingRepository.save(convertToEntity(greetingDTO));
         log.info("save greeting {}", greetingDTO);
+        return greetingDTO;
     }
 
     @Override
@@ -48,12 +49,12 @@ public class GreetingServiceImpl implements GreetingService {
     }
 
     @Override
-    public void update(Long id, GreetingDTO updatedGreetingDTO) {
-        log.debug("update quote by id {}", id);
+    public GreetingDTO update(GreetingDTO updatedGreetingDTO) {
+        log.debug("update greeting");
         Greeting updatedGreeting = convertToEntity(updatedGreetingDTO);
-        updatedGreeting.setId(id);
         greetingRepository.save(updatedGreeting);
         log.info("update quote {}", updatedGreeting);
+        return updatedGreetingDTO;
     }
 
     @Override
