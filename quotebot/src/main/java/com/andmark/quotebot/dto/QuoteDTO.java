@@ -16,11 +16,12 @@ public class QuoteDTO {
     private String imageUrl;
     private LocalDateTime usedAt;
 
+    private Long bookId;
     private String bookAuthor;
     private String bookTitle;
 
     // Static factory method to create QuoteDTO instance with error message
     public static QuoteDTO createErrorMessage(String errorMessage) {
-        return new QuoteDTO(null, errorMessage, null, null, null, null, null, null);
+        return new QuoteDTO(null, errorMessage, null, null, null,null, null, null, null);
     }
 }

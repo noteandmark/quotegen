@@ -1,7 +1,6 @@
 package com.andmark.quotegen.repository;
 
 import com.andmark.quotegen.domain.User;
-import com.andmark.quotegen.domain.enums.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

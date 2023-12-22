@@ -15,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/quote")
@@ -129,8 +128,7 @@ public class WebAdminQuoteController {
 
     @PostMapping("/edit/{id}")
     public String editQuote(@PathVariable("id") Long id, @ModelAttribute("quoteDTO") QuoteDTO quoteDTO) {
-        log.debug("web admin quote controller editQuote");
-        log.debug("editQuote with id: {}", quoteDTO.getId());
+        log.debug("web admin quote controller editQuote with id: {}", quoteDTO.getId());
         quoteService.update(quoteDTO);
         log.debug("web admin quote controller: updated, go to redirect");
         return "redirect:/admin/quote";

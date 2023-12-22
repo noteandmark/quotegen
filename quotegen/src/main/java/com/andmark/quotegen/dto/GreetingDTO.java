@@ -10,5 +10,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class GreetingDTO {
+    private Long id;
     private String message;
 }

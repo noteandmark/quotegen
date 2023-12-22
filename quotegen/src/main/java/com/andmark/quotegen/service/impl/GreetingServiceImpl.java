@@ -51,9 +51,11 @@ public class GreetingServiceImpl implements GreetingService {
     @Override
     public GreetingDTO update(GreetingDTO updatedGreetingDTO) {
         log.debug("update greeting");
+        log.debug("update greeting updatedGreetingDTO: {}", updatedGreetingDTO);
         Greeting updatedGreeting = convertToEntity(updatedGreetingDTO);
+        log.debug("update greeting updatedGreeting: {}", updatedGreeting);
         greetingRepository.save(updatedGreeting);
-        log.info("update quote {}", updatedGreeting);
+        log.info("updated greeting");
         return updatedGreetingDTO;
     }
 
