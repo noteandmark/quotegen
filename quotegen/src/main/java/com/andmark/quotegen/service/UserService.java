@@ -11,4 +11,6 @@ public interface UserService extends AbstractService<UserDTO>{
     UserRole getUserRole(Long usertgId);
 
     void changePassword(String username, String currentPassword, String newPassword);
+
+    void deleteByUsername(String username);
 }

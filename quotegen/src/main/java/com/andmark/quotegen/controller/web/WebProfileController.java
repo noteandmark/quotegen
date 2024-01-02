@@ -55,6 +55,7 @@ public class WebProfileController {
                                  @RequestParam String newPassword,
                                  RedirectAttributes redirectAttributes) {
         try {
+            log.debug("webProfileController changePassword");
             userService.changePassword(username, currentPassword, newPassword);
             redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully");
         } catch (IllegalArgumentException e) {
@@ -64,5 +65,20 @@ public class WebProfileController {
 
         return "redirect:/web/change-password/" + username;
     }
+
+    @PostMapping("/profile/delete/{username}")
+    public String deleteUser(@PathVariable String username) {
+        try {
+            log.debug("webProfileController deleteUser with username = {}", username);
+            userService.deleteByUsername(username);
+            log.debug("redirect to signout");
+            return "redirect:/signout";
+        } catch (ServiceException e) {
+            log.warn("ServiceException in deleteUser");
+            return "redirect:/web/profile/" + username + "?error=" + e.getMessage();
+        }
+    }
+
+
 
 }
