@@ -62,6 +62,9 @@
 **Маппинг объектов:**
 - ModelMapper
 
+**Отправка email:**
+- Jakarta Mail API
+
 **Работа с форматами FB2, EPUB, PDF, Microsoft Office, HTML:**
 - com.kursx.parser.fb2
 - nl.siegmann.epublib

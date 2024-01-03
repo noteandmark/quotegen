@@ -25,6 +25,7 @@
         <epublib-core.version>3.1</epublib-core.version>
         <bootstrap.version>5.3.2</bootstrap.version>
         <jquery.version>3.7.1</jquery.version>
+        <jakarta.mail.version>2.0.1</jakarta.mail.version>
     </properties>
 
     <repositories>
@@ -72,16 +73,6 @@
             <artifactId>bootstrap</artifactId>
             <version>${bootstrap.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.webjars</groupId>-->
-<!--            <artifactId>jquery</artifactId>-->
-<!--            <version>${jquery.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.webjars</groupId>-->
-<!--            <artifactId>webjars-locator</artifactId>-->
-<!--            <version>0.50</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -95,6 +86,11 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>${jakarta.mail.version}</version>
         </dependency>
         <!-- Parser libraries-->
         <dependency>

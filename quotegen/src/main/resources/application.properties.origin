@@ -29,3 +29,7 @@ google.search.engine.id=YOUR_ENGINE
 
 # pageable starts from 1 page
 spring.data.web.pageable.one-indexed-parameters=true
+
+# email to send report message
+spring.mail.username=ADMIN_EMAIL
+spring.mail.password=YOUR_PASSWORD
