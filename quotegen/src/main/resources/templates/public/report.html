@@ -46,6 +46,7 @@
 <div class="container">
     <h1 class="mb-3">Форма отправки сообщения об ошибке, предложениях, пожеланиях</h1>
     <form action="/public/report" method="post">
+        <input type="hidden" id="timeStamp" name="timeStamp" value="">
         <div class="mb-3">
             <label for="email">Ваш email:</label>
             <input type="email" id="email" name="email" required>
@@ -59,5 +60,9 @@
 </div>
 
 <div th:replace="~{fragments/footer-fragment :: footer}"></div>
+
+<script>
+    document.getElementById('timeStamp').value = new Date().getTime();
+</script>
 </body>
 </html>

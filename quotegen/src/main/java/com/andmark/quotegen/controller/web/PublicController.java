@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static com.andmark.quotegen.config.AppConfig.MIN_TIME_THRESHOLD;
+
 @Controller
 @RequestMapping("/public")
 @Slf4j
@@ -71,7 +73,17 @@ public class PublicController {
     }
 
     @PostMapping("/report")
-    public String submitReportForm(String email, String subject, String message, Model model) {
+    public String submitReportForm(String email, String subject, String message, String timeStamp, Model model) {
+        long currentTime = System.currentTimeMillis();
+        long formSubmitTime = Long.parseLong(timeStamp);
+
+        // checking the time of form submission
+        if (currentTime - formSubmitTime < MIN_TIME_THRESHOLD) {
+            // reject form submission because too little time has passed
+            model.addAttribute("errorMessage", "Форма отправлена слишком быстро. Возможна активность бота.");
+            return "public/report-error";
+        }
+
         try {
             log.debug("public controller try to send email");
             emailService.sendEmail(email, subject, message);

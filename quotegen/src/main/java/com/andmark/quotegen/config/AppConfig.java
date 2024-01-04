@@ -10,13 +10,14 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @Profile({"dev", "prod"}) // Both profiles will use this component
 public class AppConfig {
-    public static Integer quotesInDay;
+    public static Integer QUOTES_IN_DAY;
     public static Integer daysPublicationAhead;
     public static Integer maxPeriodDaysAhead;
+    public static long MIN_TIME_THRESHOLD;
 
     @Value("${telegram.bot.quotes-in-day}")
     public void setQuotesInDay(Integer quotesInDay) {
-        AppConfig.quotesInDay = quotesInDay;
+        AppConfig.QUOTES_IN_DAY = quotesInDay;
     }
 
     @Value("${telegram.bot.days-publication-ahead}")
@@ -27,6 +28,11 @@ public class AppConfig {
     @Value("${telegram.bot.max-period-days-ahead}")
     public void setMaxPeriodDaysAhead(Integer maxPeriodDaysAhead) {
         AppConfig.maxPeriodDaysAhead = maxPeriodDaysAhead;
+    }
+
+    @Value("${app.minTimeThreshold}")
+    public void setMinTimeThreshold(long minTimeThreshold) {
+        AppConfig.MIN_TIME_THRESHOLD = minTimeThreshold;
     }
 
     @Bean

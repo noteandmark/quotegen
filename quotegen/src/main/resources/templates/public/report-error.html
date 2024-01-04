@@ -9,11 +9,15 @@
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
+<div th:replace="~{fragments/navbar-fragment :: navbar}"></div>
+
 <div class="container">
     <h1 class="mb-3">Error Sending Report</h1>
     <p>There was an error sending your report:</p>
     <p th:text="${errorMessage}"></p>
     <p>Please try again later.</p>
 </div>
+
+<div th:replace="~{fragments/footer-fragment :: footer}"></div>
 </body>
 </html>

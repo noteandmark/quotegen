@@ -362,7 +362,7 @@ public class QuoteServiceImpl implements QuoteService {
 
             // Filter days with no more than 2 occurrences of pending times
             List<LocalDate> availableDays = dayToCountMap.entrySet().stream()
-                    .filter(entry -> entry.getValue() < quotesInDay)
+                    .filter(entry -> entry.getValue() < QUOTES_IN_DAY)
                     .map(Map.Entry::getKey)
                     .toList();
             log.debug("availableDays in size: {}", availableDays.size());
