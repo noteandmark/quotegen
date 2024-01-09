@@ -65,6 +65,9 @@
 **Отправка email:**
 - Jakarta Mail API
 
+**Доступ через интернет:**
+- Ngrok API
+
 **Работа с форматами FB2, EPUB, PDF, Microsoft Office, HTML:**
 - com.kursx.parser.fb2
 - nl.siegmann.epublib

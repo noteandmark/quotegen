@@ -10,6 +10,9 @@
 ### Changed
 ### Fixed
 
+## [1.4.5] - 2024-01-09
+### Added
+- added ngrok tunnel plugin
 ## [1.4.5] - 2024-01-04
 ### Added
 - added the report web page and bot check option 

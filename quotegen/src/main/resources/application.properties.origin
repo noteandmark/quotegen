@@ -33,3 +33,10 @@ spring.data.web.pageable.one-indexed-parameters=true
 # email to send report message
 spring.mail.username=ADMIN_EMAIL
 spring.mail.password=YOUR_PASSWORD
+
+# minimum allowed time between page load and form submission in milliseconds
+app.minTimeThreshold=10000
+
+# settings for ngrok
+ngrok.enabled=true
+NGROK_AUTHTOKEN=YOUR_AUTTOKEN

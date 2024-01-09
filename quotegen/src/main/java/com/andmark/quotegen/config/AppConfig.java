@@ -14,6 +14,8 @@ public class AppConfig {
     public static Integer daysPublicationAhead;
     public static Integer maxPeriodDaysAhead;
     public static long MIN_TIME_THRESHOLD;
+    public static String ngrokAuthToken;
+
 
     @Value("${telegram.bot.quotes-in-day}")
     public void setQuotesInDay(Integer quotesInDay) {
@@ -34,6 +36,9 @@ public class AppConfig {
     public void setMinTimeThreshold(long minTimeThreshold) {
         AppConfig.MIN_TIME_THRESHOLD = minTimeThreshold;
     }
+
+    @Value("${NGROK_AUTHTOKEN}")
+    public void setNgrokAuthToken(String ngrokAuthToken) {AppConfig.ngrokAuthToken = ngrokAuthToken;}
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {

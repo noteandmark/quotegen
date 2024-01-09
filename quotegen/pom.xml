@@ -26,6 +26,7 @@
         <bootstrap.version>5.3.2</bootstrap.version>
         <jquery.version>3.7.1</jquery.version>
         <jakarta.mail.version>2.0.1</jakarta.mail.version>
+        <java-ngrok.version>2.2.7</java-ngrok.version>
     </properties>
 
     <repositories>
@@ -92,6 +93,12 @@
             <artifactId>jakarta.mail</artifactId>
             <version>${jakarta.mail.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.alexdlaird</groupId>
+            <artifactId>java-ngrok</artifactId>
+            <version>${java-ngrok.version}</version>
+        </dependency>
+
         <!-- Parser libraries-->
         <dependency>
             <groupId>org.jsoup</groupId>
