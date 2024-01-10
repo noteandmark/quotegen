@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -41,13 +42,16 @@ public class WebAdminController {
             String content = quoteDTO.getContent();
             String truncatedContent = content.substring(0, Math.min(content.length(), 1024));
 
-            List<String> imageUrls = googleCustomSearchService.searchImagesByKeywords(truncatedContent);
-            log.debug("Found {} images", imageUrls.size());
+            List<String> imageUrls = new ArrayList<>();
+            if (!content.isEmpty()) {
+                imageUrls = googleCustomSearchService.searchImagesByKeywords(truncatedContent);
+                log.debug("Found {} images", imageUrls.size());
+            }
 
             model.addAttribute("quote", quoteDTO);
             model.addAttribute("imageUrls", imageUrls);
             model.addAttribute("selectedImageNumber", 0);
-            log.debug("---");
+            log.debug("return admin/requestquote");
 
             return "admin/requestquote";
         } catch (NotFoundBookException e) {

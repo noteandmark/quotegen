@@ -136,7 +136,7 @@ public class BookServiceImplTest {
         // Mocking behavior
         when(booksService.convertToEntity(updatedBookDTO)).thenReturn(updatedBook);
         // Test
-        booksService.update(bookId, updatedBookDTO);
+        booksService.update(updatedBookDTO);
         // Verification
         verify(booksRepository).save(updatedBook);
     }

@@ -191,8 +191,8 @@ public class QuoteServiceImplTest {
     @Test
     public void testSaveQuotesFromCache() {
         // Create some sample quotes to be saved
-        Quote quote1 = new Quote(1L, "Quote 1", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), new Book());
-        Quote quote2 = new Quote(2L, "Quote 2", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), new Book());
+        Quote quote1 = new Quote(1L, "Quote 1", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), new Book(), null);
+        Quote quote2 = new Quote(2L, "Quote 2", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), new Book(), null);
 
         // Create a queue with sample quotes
         Queue<Quote> quoteCache = new LinkedList<>();

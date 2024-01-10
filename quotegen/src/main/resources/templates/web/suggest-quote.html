@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Suggest Quote</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">Quote Management</a>
+    <div th:replace="~{fragments/navbar-fragment :: navbar}"></div>
+</nav>
+<div class="container mt-4">
+    <h2>Предложить цитату к публикации</h2>
+
+    <form th:action="@{/web/suggest-quote}" th:object="${quoteForm}" method="post">
+        <div class="form-group">
+            <label for="content" class="form-label">Ваша цитата:</label>
+            <textarea class="form-control mb-2" id="content" name="content" th:field="*{content}" maxlength="4096"
+                      style="height: auto; min-height: 400px;"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="bookTitle">Название книги:</label>
+            <input type="text" class="form-control" id="bookTitle" name="bookTitle" th:field="*{bookTitle}">
+            <small th:if="${#fields.hasErrors('bookTitle')}" th:errors="*{bookTitle}" class="text-danger"></small>
+        </div>
+
+        <div class="form-group">
+            <label for="bookAuthor">Автор:</label>
+            <input type="text" class="form-control" id="bookAuthor" name="bookAuthor" th:field="*{bookAuthor}">
+            <small th:if="${#fields.hasErrors('bookAuthor')}" th:errors="*{bookAuthor}" class="text-danger"></small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="imageUrl" class="form-label">Можете предложить изображение к цитате:</label>
+            <input type="text" class="form-control" id="imageUrl" name="imageUrl" th:field="*{imageUrl}"/>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Создать цитату</button>
+    </form>
+
+    <a class="btn btn-secondary mt-2" th:href="@{/index}">Вернуться обратно</a>
+</div>
+
+<div th:replace="~{fragments/footer-fragment :: footer}"></div>
+</body>
+</html>

@@ -12,8 +12,8 @@
 <div th:replace="~{fragments/navbar-fragment :: navbar}"></div>
 
 <div class="container">
-    <h1 class="mb-3">Report Sent Successfully</h1>
-    <p>Ваше сообщение было успешно отправлено.</p>
+    <h1 class="mb-3">Выполнено успешно</h1>
+    <p th:text="${successMessage}"></p>
 </div>
 
 <div th:replace="~{fragments/footer-fragment :: footer}"></div>

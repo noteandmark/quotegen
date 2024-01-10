@@ -16,8 +16,8 @@ public class MapperConvert<T, DTO> {
     public DTO convertToDTO(T entity, Class<DTO> dtoClass) {
         DTO dto = mapper.map(entity, dtoClass);
 
-        if (dto instanceof QuoteDTO quoteDTO) {
-            if (entity instanceof Quote quote) {
+        if (dto instanceof QuoteDTO quoteDTO && entity instanceof Quote quote) {
+            if (quote.getBookSource() != null) {
                 quoteDTO.setBookAuthor(quote.getBookSource().getAuthor());
                 quoteDTO.setBookTitle(quote.getBookSource().getTitle());
             }

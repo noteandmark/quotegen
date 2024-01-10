@@ -87,6 +87,7 @@ public class PublicController {
         try {
             log.debug("public controller try to send email");
             emailService.sendEmail(email, subject, message);
+            model.addAttribute("successMessage", "Ваше сообщение было успешно отправлено.");
             return "public/report-success";
         } catch (MessagingException e) {
             log.warn("failed to send email");

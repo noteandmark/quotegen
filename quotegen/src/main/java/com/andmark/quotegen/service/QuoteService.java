@@ -26,4 +26,6 @@ public interface QuoteService extends AbstractService<QuoteDTO>{
     AvailableDayResponseDTO getAvailableDays();
 
     Page<QuoteDTO> findAllSorted(Pageable pageable, String sortField, String sortDirection);
+
+    void suggestQuote(QuoteDTO quoteDTO, String username);
 }

@@ -182,7 +182,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return mapper.convertToDTO(user, UserDTO.class);
     }
 
-    User convertToEntity(UserDTO userDTO) {
+    @Override
+    public User convertToEntity(UserDTO userDTO) {
         return mapper.convertToEntity(userDTO, User.class);
     }
 

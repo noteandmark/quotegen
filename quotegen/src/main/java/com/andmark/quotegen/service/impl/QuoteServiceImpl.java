@@ -2,15 +2,18 @@ package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.Quote;
+import com.andmark.quotegen.domain.User;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.dto.AvailableDayResponseDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
+import com.andmark.quotegen.dto.UserDTO;
 import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.repository.QuotesRepository;
 import com.andmark.quotegen.service.QuoteService;
+import com.andmark.quotegen.service.UserService;
 import com.andmark.quotegen.util.BookFormatParser;
 import com.andmark.quotegen.util.BookFormatParserFactory;
 import com.andmark.quotegen.util.MapperConvert;
@@ -42,13 +45,15 @@ public class QuoteServiceImpl implements QuoteService {
 
     private final Queue<Quote> quoteCache;
 
+    private final UserService userService;
     private final QuotesRepository quotesRepository;
     private final BooksRepository booksRepository;
     private final BookFormatParserFactory bookFormatParserFactory;
     private final MapperConvert<Quote, QuoteDTO> mapper;
 
     @Autowired
-    public QuoteServiceImpl(QuotesRepository quotesRepository, BooksRepository booksRepository, BookFormatParserFactory bookFormatParserFactory, MapperConvert<Quote, QuoteDTO> mapper) {
+    public QuoteServiceImpl(UserService userService, QuotesRepository quotesRepository, BooksRepository booksRepository, BookFormatParserFactory bookFormatParserFactory, MapperConvert<Quote, QuoteDTO> mapper) {
+        this.userService = userService;
         this.quotesRepository = quotesRepository;
         this.booksRepository = booksRepository;
         this.bookFormatParserFactory = bookFormatParserFactory;
@@ -59,20 +64,55 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public QuoteDTO save(QuoteDTO quoteDTO) {
-        log.debug("saving quote");
+        log.debug("quote service: save");
+        log.debug("quoteDTO = {}", quoteDTO);
         Quote quote = convertToEntity(quoteDTO);
-        Optional<Book> bookSource = booksRepository.findById(quoteDTO.getBookId());
-        if (bookSource.isPresent()) {
-            quote.setBookSource(bookSource.get());
-        } else throw new NotFoundBookException("book with id = " + quoteDTO.getBookId() +"not found");
+        log.debug("quote = {}", quote);
+        Long bookId = quoteDTO.getBookId();
+        if (bookId != null) {
+            log.debug("looking a bookSource for bookId = {}", bookId);
+            Optional<Book> bookSource = booksRepository.findById(bookId);
+            if (bookSource.isPresent()) {
+                log.debug("set bookSource");
+                quote.setBookSource(bookSource.get());
+            } else throw new NotFoundBookException("book with id = " + bookId + "not found");
+        }
+        // user-suggested quote
+        else {
+            log.debug("user-suggested quote");
+
+        }
         quotesRepository.save(quote);
         log.info("saved quote with id = {}", quote.getId());
         return convertToDTO(quote);
     }
 
     @Override
+    @Transactional
+    public void suggestQuote(QuoteDTO quoteDTO, String username) {
+        log.debug("quote service: suggestQuote");
+
+        UserDTO userDTO = userService.findByUsername(username);
+        log.debug("");
+        User user = userService.convertToEntity(userDTO);
+        log.debug("user = {}", user);
+        quoteDTO.setUserId(user.getId());
+
+        StringBuilder contentBuilder = new StringBuilder();
+        contentBuilder.append("Предложено пользователем : ").append(user.getNickname()).append("\n");
+        contentBuilder.append("Цитата: ").append(quoteDTO.getContent()).append("\n");
+        contentBuilder.append("Книга: ").append(quoteDTO.getBookTitle()).append("\n");
+        contentBuilder.append("Автор: ").append(quoteDTO.getBookAuthor());
+        quoteDTO.setContent(contentBuilder.toString());
+        quoteDTO.setStatus(QuoteStatus.FREE);
+
+
+        save(quoteDTO);
+    }
+
+    @Override
     public QuoteDTO findOne(Long id) {
-        log.debug("findOne: quote by id {}", id);
+        log.debug("quote service: findOne quote by id {}", id);
         Optional<Quote> foundQuote = quotesRepository.findById(id);
         log.info("found quote with id = {}", foundQuote.map(Quote::getId).orElse(null));
         return foundQuote.map(this::convertToDTO)
@@ -81,7 +121,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     public List<QuoteDTO> findAll() {
-        log.debug("find all quotes");
+        log.debug("quote service: find all quotes");
         List<Quote> quoteList = quotesRepository.findAll();
         log.info("founded quoteList.size = {}", quoteList.size());
         return convertToDtoList(quoteList);
@@ -89,7 +129,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     public Page<QuoteDTO> findAllSorted(Pageable pageable, String sortField, String sortDirection) {
-        log.debug("quote service: find all quotes");
+        log.debug("quote service: find all quotes sorted");
         Page<Quote> quotePage;
 
         if ("bookAuthor".equals(sortField) && sortDirection != null) {
@@ -118,7 +158,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public QuoteDTO update(QuoteDTO updatedQuoteDTO) {
-        log.debug("update quote by id {}", updatedQuoteDTO.getId());
+        log.debug("quote service: update quote by id {}", updatedQuoteDTO.getId());
         Long bookId = updatedQuoteDTO.getBookId();
         log.debug("bookId in updatedQuoteDTO= {}", bookId);
         Quote updatedQuote = convertToEntity(updatedQuoteDTO);
@@ -134,7 +174,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public void delete(Long id) {
-        log.debug("delete quote by id {}", id);
+        log.debug("quote service: delete quote by id {}", id);
         quotesRepository.deleteById(id);
         log.info("delete quote with id {} perform", id);
     }
@@ -142,7 +182,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public void checkAndPopulateCache() {
-        log.debug("service checkAndPopulateCache");
+        log.debug("quote service: checkAndPopulateCache");
         int unusedQuotesCount = quotesRepository.countByUsedAtIsNullAndPendingTimeIsNull();
         log.debug("usedQuotesCount is {}", unusedQuotesCount);
 
@@ -154,8 +194,8 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     public QuoteDTO provideQuoteToClient() {
-        log.debug("service provideQuoteToClient");
-        Quote quote = quotesRepository.findFirstByUsedAtIsNullAndPendingTimeIsNull();
+        log.debug("quote service: provideQuoteToClient");
+        Quote quote = quotesRepository.findFirstByUsedAtIsNullAndPendingTimeIsNullOrderByIdAsc();
         log.info("provideQuoteToClient id = {}", quote.getId());
         return convertToDTO(quote);
     }
@@ -163,7 +203,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public void pendingQuote(QuoteDTO quoteDTO) {
-        log.debug("service pendingQuote");
+        log.debug("quote service: pendingQuote");
         Quote quote = quotesRepository.findById(quoteDTO.getId())
                 .orElseThrow(() -> new ServiceException("Quote not found with id: " + quoteDTO.getId()));
         quote.setPendingTime(quoteDTO.getPendingTime());
@@ -177,7 +217,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     public QuoteDTO getRandomPublishedQuote() {
-        log.debug("quote service getRandomPublishedQuote");
+        log.debug("quote service: getRandomPublishedQuote");
         List<Quote> publishedQuotes = quotesRepository.findByStatus(QuoteStatus.PUBLISHED);
 
         if (!publishedQuotes.isEmpty()) {
@@ -192,7 +232,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     public List<QuoteDTO> getPublishedQuotesForWeek() {
-        log.debug("quote service getPublishedQuotesForWeek");
+        log.debug("quote service: getPublishedQuotesForWeek");
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startOfWeek = now.with(DayOfWeek.MONDAY).with(LocalTime.MIN);
@@ -208,7 +248,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public void confirmQuote(QuoteDTO quoteDTO) {
-        log.debug("service confirmQuote");
+        log.debug("quote service: confirmQuote");
         Quote quote = quotesRepository.findById(quoteDTO.getId())
                 .orElseThrow(() -> new ServiceException("Quote not found with id: " + quoteDTO.getId()));
         LocalDateTime currentDateTime = LocalDateTime.now(); // Get current date and time
@@ -224,7 +264,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public void rejectQuote(Long id) {
-        log.debug("quote service rejectquote with id = {}", id);
+        log.debug("quote service: reject quote with id = {}", id);
         QuoteDTO existingQuote = findOne(id);
         log.debug("existingQuote = {}", existingQuote);
 
@@ -241,6 +281,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     @Transactional
     public void populateCache(Integer cacheSize) {
+        log.debug("quote service: populateCache");
         int size = (cacheSize != null && cacheSize > 0) ? cacheSize : this.cacheSize;
         log.debug("Populating cache with quotes (cacheSize = {})", size);
         //get list of books from DB
@@ -293,6 +334,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Transactional
     public void saveQuotesFromCache(Queue<Quote> quoteCache) {
+        log.debug("quote service: saveQuotesFromCache");
         List<Quote> quotesToSave = getQuotes(quoteCache);
 
         if (!quotesToSave.isEmpty()) {
@@ -409,7 +451,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private LocalDateTime generateRandomTime(LocalDate date) {
-        log.debug("generating random time");
+        log.debug("quote service: generating random time");
         int hour = 8 + new Random().nextInt(16); // Random hour between 8 and 23
         int minute = new Random().nextInt(60);    // Random minute between 0 and 59
         log.debug("hour = {}, minute = {}", hour, minute);
@@ -417,6 +459,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private List<LocalDate> generateDateRange(LocalDate startDate, LocalDate endDate) {
+        log.debug("quote service: generating date range");
         List<LocalDate> dateRange = new ArrayList<>();
         LocalDate currentDate = startDate;
 
@@ -429,7 +472,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private String fixFormatting(String rawText) {
-        log.debug("fixing formatting text");
+        log.debug("quote service: fixing formatting text");
         // Define a set of punctuation marks that need a space after them
         String[] punctuationMarks = {".", ",", "!", "?", ":", ";", "—"};
 
@@ -445,6 +488,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private Map<Book, Integer> selectBooksRandomly(List<Book> allBooks, int size) {
+        log.debug("quote service: select books randomly");
         Map<Book, Integer> parsedBooks = new HashMap<>();
         int counter = 0;
         Random random = new Random();
@@ -463,6 +507,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private void generateQuotes(Map<Book, Integer> parsedBooks) {
+        log.debug("quote service: generate quotes");
         // Generate quotes for selected books
         for (Book book : parsedBooks.keySet()) {
             log.debug("Generating quotes for book: {}", book);
@@ -478,6 +523,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private List<Quote> getQuotes(Queue<Quote> quoteCache) {
+        log.debug("quote service: get quotes");
         List<Quote> quotesToSave = new ArrayList<>();
         while (!quoteCache.isEmpty()) {
             Quote quote = quoteCache.poll();
@@ -490,6 +536,7 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     private void parseAndCacheQuotes(Book book, String bookText, Integer occurrences) {
+        log.debug("quote service: parse and cache quotes");
         List<String> words = Arrays.asList(bookText.split("\\s+"));
         do {
             String quoteContent = generateQuoteContent(words);

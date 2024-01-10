@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS quote
     pending_time TIMESTAMP,
     image_url    varchar(255),
     used_at      TIMESTAMP,
-    book_id      BIGINT REFERENCES book (id) ON DELETE CASCADE
+    book_id      BIGINT REFERENCES book (id) ON DELETE CASCADE,
+    user_id      BIGINT REFERENCES users (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS users

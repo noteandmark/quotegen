@@ -40,10 +40,14 @@ public class Quote {
     private LocalDateTime usedAt;
 
     @ManyToOne
-    // Join with the Book entity using "book_id" column, and it is mandatory (not nullable)
-    @JoinColumn(name = "book_id", nullable = false, referencedColumnName = "id")
+    // Join with the Book entity using "book_id" column, and it is mandatory (could be nullable)
+    @JoinColumn(name = "book_id", nullable = true, referencedColumnName = "id")
     @JsonIgnore // to prevent infinite recursion
     private Book bookSource;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "user_id", nullable = true, referencedColumnName = "id")
+    private User user;
 
     @Override
     public boolean equals(Object o) {
