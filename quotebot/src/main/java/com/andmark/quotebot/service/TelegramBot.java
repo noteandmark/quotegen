@@ -197,12 +197,14 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         register(new GetQuoteCommand(apiService));
         register(new QuotesWeekCommand(apiService));
         register(new SuggestQuoteCommand(apiService));
+        register(new WebLinkCommand(apiService));
         register(new VersionCommand());
         register(new SignUpCommand(userService, botAttributes));
         register(new SignOutCommand(userService));
         register(new ResetCommand(botAttributes));
         register(new ReportCommand());
         register(new ScanBooksCommand(apiService));
+        register(new PendingQuotesCommand(apiService, userRoleService));
         register(new RequestQuoteCommand(apiService, userRoleService));
     }
 

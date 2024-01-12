@@ -16,6 +16,8 @@ import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
@@ -74,8 +76,9 @@ public class ApiServiceImpl implements ApiService {
     public List<QuoteDTO> getPendingQuotes() {
         log.debug("api service request: getPendingQuotes");
         ResponseEntity<QuoteDTO[]> response = restTemplate.getForEntity(BotConfig.API_BASE_URL + "/quotes/get-pending", QuoteDTO[].class);
-        log.debug("get response from restTemplate.getForEntity");
-        return Arrays.asList(response.getBody());
+        List<QuoteDTO> quoteDTOList = Arrays.asList(response.getBody());
+        log.debug("get quoteDTOList count: {}", quoteDTOList.size());
+        return quoteDTOList;
     }
 
     @Override
@@ -312,7 +315,7 @@ public class ApiServiceImpl implements ApiService {
         // Prepare the request body with page and line numbers
         PageLineRequestDTO requestDTO = new PageLineRequestDTO(pageNumber, lineNumber);
         String apiUrl = BotConfig.API_BASE_URL + "/books/process-page-and-line";
-        log.debug("apiUrl = {}, requestDTO = {}",apiUrl, requestDTO);
+        log.debug("apiUrl = {}, requestDTO = {}", apiUrl, requestDTO);
         ResponseEntity<ExtractedLinesDTO> response = restTemplate.exchange(
                 apiUrl,
                 HttpMethod.POST,
@@ -383,6 +386,34 @@ public class ApiServiceImpl implements ApiService {
             telegramBot.sendMessage(quoteDTO.getUserId(), null, "Ошибка при добавлении цитаты. Попробуйте позже.");
             throw new QuoteException("Suggested quote do not added. Error.");
         }
+    }
+
+    @Override
+    public String getWebLink() {
+        log.debug("api service: send request getWebLink");
+        String apiUrl = BotConfig.API_BASE_URL + "/web-link";
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    apiUrl,
+                    HttpMethod.GET,
+                    null,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                String webLink = response.getBody();
+                log.debug("get web link from server: {}", webLink);
+                return webLink;
+            } else {
+                log.error("Error getting web link from server. Status code: {}", response.getStatusCode());
+            }
+        } catch (HttpStatusCodeException ex) {
+            log.error("Http error while getting web link from server. Status code: {}", ex.getStatusCode());
+        } catch (RestClientException ex) {
+            log.error("Error while communicating with the server: {}", ex.getMessage());
+        }
+        return null;
     }
 
     private String formatQuoteText(QuoteDTO quoteDTO) {

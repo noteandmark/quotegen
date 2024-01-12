@@ -49,4 +49,6 @@ public interface ApiService {
     AvailableDaysResponseDTO findAvailableDays();
 
     void addSuggestedQuote(QuoteDTO quoteDTO);
+
+    String getWebLink();
 }
