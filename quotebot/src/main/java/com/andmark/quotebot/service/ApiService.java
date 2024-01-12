@@ -16,6 +16,8 @@ public interface ApiService {
 
     boolean existsByUsername(String username);
 
+    UserDTO findUserByUsertgId(Long usertgId);
+
     void registerUser(Long chatId, UserDTO userDTO);
 
     UserRole getUserRole(Long usertgId);
@@ -45,4 +47,6 @@ public interface ApiService {
     byte[] downloadImage(String imageUrl);
 
     AvailableDaysResponseDTO findAvailableDays();
+
+    void addSuggestedQuote(QuoteDTO quoteDTO);
 }

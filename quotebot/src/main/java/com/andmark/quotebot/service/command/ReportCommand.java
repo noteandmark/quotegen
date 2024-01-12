@@ -18,7 +18,7 @@ public class ReportCommand extends QuoteCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
-        log.debug("report command: ");
+        log.debug("user with id = {} execute /report", user.getId());
         SendMessage message = new SendMessage();
 
         log.debug("report command: strings.length < 1");

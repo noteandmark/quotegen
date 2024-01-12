@@ -22,11 +22,11 @@ public class DefaultUserRoleService implements UserRoleService {
         UserRole userRole = apiService.getUserRole(userId);
         log.debug("user role = {} for user.getId() = {}", userRole, userId);
 
-        boolean isUser = userRole.equals(UserRole.USER);
-        boolean isAdmin = userRole.equals(UserRole.ADMIN);
+        boolean isUser = userRole.equals(UserRole.ROLE_USER);
+        boolean isAdmin = userRole.equals(UserRole.ROLE_ADMIN);
 
-        return (neededRole.equals(UserRole.ADMIN) && isAdmin) ||
-                (neededRole.equals(UserRole.USER) && (isUser || isAdmin));
+        return (neededRole.equals(UserRole.ROLE_ADMIN) && isAdmin) ||
+                (neededRole.equals(UserRole.ROLE_USER) && (isUser || isAdmin));
     }
 
 }

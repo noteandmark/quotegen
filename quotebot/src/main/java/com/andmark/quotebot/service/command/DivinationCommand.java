@@ -36,7 +36,7 @@ public class DivinationCommand extends QuoteCommand {
         UserRole userRole = apiService.getUserRole(user.getId());
         log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
 
-        if (userRole == UserRole.ADMIN || userRole == UserRole.USER) {
+        if (userRole == UserRole.ROLE_ADMIN || userRole == UserRole.ROLE_USER) {
 
             String messageText;
             if (arguments.length == 0) {

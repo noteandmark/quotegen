@@ -24,7 +24,7 @@ public class GetQuoteCommand extends QuoteCommand {
         UserRole userRole = apiService.getUserRole(user.getId());
         log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
 
-        if (userRole == UserRole.ADMIN || userRole == UserRole.USER) {
+        if (userRole == UserRole.ROLE_ADMIN || userRole == UserRole.ROLE_USER) {
             // Make a request to the quotegen API to get a random published quote
             QuoteDTO randomQuote = apiService.getRandomPublishedQuote();
 

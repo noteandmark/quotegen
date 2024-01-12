@@ -85,6 +85,9 @@ public class QuoteServiceImpl implements QuoteService {
                 case POSTPONE -> handlePostponeChoiceResponse(chatId, userInput);
                 case AWAITING_PAGE_NUMBER -> handlePageNumberInput(userId, userInput);
                 case AWAITING_LINE_NUMBER -> handleLineNumberInput(userId, userInput);
+                case AWAITING_QUOTE_CONTENT -> handleQuoteContent(userId, userInput);
+                case AWAITING_QUOTE_TITLE -> handleQuoteTitle(userId, userInput);
+                case AWAITING_QUOTE_AUTHOR -> handleQuoteAuthor(userId, userInput);
                 default -> log.warn("state encountered: {}", currentState);
             }
         }
@@ -118,6 +121,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
+    @Override
     public QuoteDTO publishQuoteToGroup(QuoteDTO quoteDTO) {
         log.debug("quote id = {} service publish to group", quoteDTO.getId());
 
@@ -145,6 +149,7 @@ public class QuoteServiceImpl implements QuoteService {
         return quoteDTO;
     }
 
+    @Override
     public void sendQuoteSavedTODatabase(QuoteDTO quoteDTO, String message) {
         log.debug("send the quote to be saved in the database");
         String confirmUrl = API_BASE_URL + "/quotes/confirm";
@@ -157,6 +162,165 @@ public class QuoteServiceImpl implements QuoteService {
                 .keyboard(null)
                 .build();
         apiService.sendRequestAndHandleResponse(requestConfig);
+    }
+
+    @Override
+    public void handleUsernameInputResponse(Update update) {
+        log.debug("QuoteService in handleUsernameInputResponse");
+        String username = update.getMessage().getText().trim();
+        Long chatId = update.getMessage().getChatId();
+        // Get the user ID of the current user
+        User user = update.getMessage().getFrom();
+        Long usertgId = user.getId();
+        // Forward the response to the UserRegistrationService if username isn't taken
+        if (!userService.isUsernameTaken(username)) {
+            log.debug("username is available, proceed with registration");
+            userRegistrationService.handleUsernameInput(usertgId, chatId, username);
+            BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_PASSWORD_INPUT);
+        } else {
+            log.warn("username is already taken");
+            telegramBot.sendMessage(chatId, null, "Имя пользователя уже занято. Пожалуйста, выберите другое имя.");
+        }
+    }
+
+    @Override
+    public void handlePasswordInputResponse(Update update) {
+        log.debug("QuoteService in handlePasswordInputResponse");
+        String password = update.getMessage().getText().trim();
+        Long chatId = update.getMessage().getChatId();
+        User user = update.getMessage().getFrom();
+        Long usertgId = user.getId();
+        // Forward the response to the UserRegistrationService
+        UserDTO userDTO = userRegistrationService.handlePasswordInput(usertgId, chatId, password);
+        if (userDTO != null) {
+            apiService.registerUser(chatId, userDTO);
+            // Remove the user from the registration in progress list
+            userRegistrationService.completeRegistration(usertgId, chatId);
+            BotAttributes.clear(usertgId);
+        } else {
+            log.warn("userRegistrationService.handlePasswordInput return null in userDTO ");
+        }
+    }
+
+    public void handlePageNumberInput(Long usertgId, String userInput) {
+        log.debug("current state is AWAITING_PAGE_NUMBER");
+        int pageNumber = 0;
+        try {
+            log.debug("handle pageNumber for usertgId = {}, userInput = {}", usertgId, userInput);
+            pageNumber = Integer.parseInt(userInput);
+        } catch (NumberFormatException e) {
+            log.warn("handlePageNumberInput wrong input");
+            telegramBot.sendMessage(usertgId, null, "Введите число!");
+            throw new QuoteException("handlePageNumberInput wrong input:" + e);
+        }
+        // Update user's current state
+        BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_LINE_NUMBER);
+        // Store the page number in user's context
+        botAttributes.setPageNumber(usertgId, pageNumber);
+        log.debug("set page number = {} to userContext for usertgId = {}", pageNumber, usertgId);
+        // Ask for line number
+        telegramBot.sendMessage(usertgId, null, "Хорошо! Теперь напиши номер строки.");
+    }
+
+    public void handleLineNumberInput(Long usertgId, String userInput) {
+        log.debug("current state is AWAITING_LINE_NUMBER");
+        int lineNumber = 0;
+        try {
+            lineNumber = Integer.parseInt(userInput);
+        } catch (NumberFormatException e) {
+            log.warn("handleLineNumberInput wrong input");
+            telegramBot.sendMessage(usertgId, null, "Введите число!");
+            throw new QuoteException("handleLineNumberInput wrong input:" + e);
+        }
+        // Update user's current state
+        log.debug("set line number = {} for usertgId = {}", lineNumber, usertgId);
+        // start divination
+        // Retrieve the user's page number from the UserContext
+        int pageNumber = botAttributes.getPageNumber(usertgId);
+
+        // Pass page and line numbers to Rest-API service
+        ExtractedLinesDTO extractedLinesDTO = apiService.processPageAndLineNumber(usertgId, pageNumber, lineNumber);
+
+        List<String> extractedLines = extractedLinesDTO.getLines();
+        log.debug("get extractedLines, size = {}", extractedLines.size());
+        // Send lines to user
+        StringBuilder formattedMessage = new StringBuilder("Книга открыта на странице " + pageNumber +
+                " строки, начиная с " + lineNumber + " такие:\n\n");
+
+        for (String extractedLine : extractedLines) {
+            formattedMessage.append(extractedLine).append("\n");
+        }
+
+        formattedMessage.append("\n\n").append(extractedLinesDTO.getBookAuthor()).append("\n").append(extractedLinesDTO.getBookTitle());
+        log.info("sending formattedMessage with divination lines to user: {}", formattedMessage);
+        telegramBot.sendMessage(usertgId, null, formattedMessage.toString());
+        // Clear user's context after processing
+        BotAttributes.clear(usertgId);
+    }
+
+    @Override
+    public void handleReportInput(User user, String reportMessage) {
+        log.debug("current state is AWAITING_REPORT");
+        reportMessage = "Новое сообщение от пользователя @" + user.getUserName() + ":\n" + reportMessage;
+        telegramBot.sendMessage(adminChatId, null, reportMessage);
+        log.info("new report from user id = {}, username = {}, message = {}", user.getId(), user.getUserName(), reportMessage);
+        telegramBot.sendMessage(user.getId(), null, "Ваше сообщение отправлено.");
+        BotAttributes.clear(user.getId());
+    }
+
+    public void handleQuoteContent(Long usertgId, String userInput) {
+        log.debug("current state is AWAITING_QUOTE_CONTENT");
+
+        StringBuilder contentBuilder = new StringBuilder();
+        contentBuilder.append("Цитата : ").append(userInput).append("\n");
+        // Update user's current state
+        BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_QUOTE_TITLE);
+        // Store the quote's content in user's context
+        botAttributes.setSuggestQuoteContent(usertgId, contentBuilder.toString());
+        log.debug("set suggesting quote's content to userContext for userId = {}", usertgId);
+        // Ask for book title for this quote
+        telegramBot.sendMessage(usertgId, null, "Хорошо! Теперь напиши название книги, откуда эта цитата?");
+    }
+
+    public void handleQuoteTitle(Long usertgId, String userInput) {
+        log.debug("current state is AWAITING_QUOTE_TITLE");
+        String content = botAttributes.getSuggestQuoteContent(usertgId);
+        StringBuilder contentBuilder = new StringBuilder();
+        contentBuilder.append(content).append("\n");
+        // add book title to content
+        contentBuilder.append("Книга : ").append(userInput);
+        // Update user's current state
+        BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_QUOTE_AUTHOR);
+        // Store the quote's content in user's context
+        botAttributes.setSuggestQuoteContent(usertgId, contentBuilder.toString());
+        log.debug("set suggesting quote's content and title to userContext for userId = {}", usertgId);
+        // Ask for book author for this quote
+        telegramBot.sendMessage(usertgId, null, "Хорошо! Теперь напиши, какой автор написал книгу?");
+    }
+
+    public void handleQuoteAuthor(Long usertgId, String userInput) {
+        log.debug("current state is AWAITING_QUOTE_AUTHOR");
+        UserDTO userDTO = apiService.findUserByUsertgId(usertgId);
+        String nickname = userDTO.getNickname();
+
+        StringBuilder contentBuilder = new StringBuilder();
+        contentBuilder.append("Предложено пользователем : ").append(nickname).append("\n");
+        String content = botAttributes.getSuggestQuoteContent(usertgId);
+        contentBuilder.append(content).append("\n");
+        // add book author to content
+        contentBuilder.append("Автор : ").append(userInput);
+        // create and send quote to database
+        QuoteDTO quoteDTO = QuoteDTO.builder()
+                .content(contentBuilder.toString())
+                .status(QuoteStatus.FREE)
+                .imageUrl(null) // in future versions could be to adding image
+                .userId(userDTO.getId())
+                .build();
+
+        apiService.addSuggestedQuote(quoteDTO);
+
+        log.debug("add suggesting quote to database");
+        telegramBot.sendMessage(usertgId, null, "Спасибо! Ваша цитата добавлена в раздел предлагаемых к публикации!");
     }
 
     void handleImageChoiceResponse(Long chatId, String userInput) {
@@ -220,7 +384,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
     }
 
-    private void handlePostponeChoiceResponse(Long chatId, String userInput) {
+    void handlePostponeChoiceResponse(Long chatId, String userInput) {
         log.debug("current state is POSTPONE");
         // random selection of publication date
         if (userInput.equalsIgnoreCase("случайно")) {
@@ -351,107 +515,6 @@ public class QuoteServiceImpl implements QuoteService {
         } catch (NumberFormatException e) {
             return false;
         }
-    }
-
-    public void handleUsernameInputResponse(Update update) {
-        log.debug("QuoteService in handleUsernameInputResponse");
-        String username = update.getMessage().getText().trim();
-        Long chatId = update.getMessage().getChatId();
-        // Get the user ID of the current user
-        User user = update.getMessage().getFrom();
-        Long usertgId = user.getId();
-        // Forward the response to the UserRegistrationService if username isn't taken
-        if (!userService.isUsernameTaken(username)) {
-            log.debug("username is available, proceed with registration");
-            userRegistrationService.handleUsernameInput(usertgId, chatId, username);
-            BotAttributes.setUserCurrentBotState(usertgId, BotState.AWAITING_PASSWORD_INPUT);
-        } else {
-            log.warn("username is already taken");
-            telegramBot.sendMessage(chatId, null, "Имя пользователя уже занято. Пожалуйста, выберите другое имя.");
-        }
-    }
-
-    public void handlePasswordInputResponse(Update update) {
-        log.debug("QuoteService in handlePasswordInputResponse");
-        String password = update.getMessage().getText().trim();
-        Long chatId = update.getMessage().getChatId();
-        User user = update.getMessage().getFrom();
-        Long usertgId = user.getId();
-        // Forward the response to the UserRegistrationService
-        UserDTO userDTO = userRegistrationService.handlePasswordInput(usertgId, chatId, password);
-        if (userDTO != null) {
-            apiService.registerUser(chatId, userDTO);
-            // Remove the user from the registration in progress list
-            userRegistrationService.completeRegistration(usertgId, chatId);
-            BotAttributes.clear(usertgId);
-        } else {
-            log.warn("userRegistrationService.handlePasswordInput return null in userDTO ");
-        }
-    }
-
-    public void handlePageNumberInput(Long userId, String userInput) {
-        log.debug("current state is AWAITING_PAGE_NUMBER");
-        int pageNumber = 0;
-        try {
-            log.debug("handle pageNumber for userId = {}, userInput = {}", userId, userInput);
-            pageNumber = Integer.parseInt(userInput);
-        } catch (NumberFormatException e) {
-            log.warn("handlePageNumberInput wrong input");
-            telegramBot.sendMessage(userId, null, "Введите число!");
-            throw new QuoteException("handlePageNumberInput wrong input:" + e);
-        }
-        // Update user's current state
-        BotAttributes.setUserCurrentBotState(userId, BotState.AWAITING_LINE_NUMBER);
-        // Store the page number in user's context
-        botAttributes.setPageNumber(userId, pageNumber);
-        log.debug("set page number = {} to userContext for userId = {}", pageNumber, userId);
-        // Ask for line number
-        telegramBot.sendMessage(userId, null, "Хорошо! Теперь напиши номер строки.");
-    }
-
-    public void handleLineNumberInput(Long userId, String userInput) {
-        log.debug("current state is AWAITING_LINE_NUMBER");
-        int lineNumber = 0;
-        try {
-            lineNumber = Integer.parseInt(userInput);
-        } catch (NumberFormatException e) {
-            log.warn("handleLineNumberInput wrong input");
-            telegramBot.sendMessage(userId, null, "Введите число!");
-            throw new QuoteException("handleLineNumberInput wrong input:" + e);
-        }
-        // Update user's current state
-        log.debug("set line number = {} for userId = {}", lineNumber, userId);
-        // start divination
-        // Retrieve the user's page number from the UserContext
-        int pageNumber = botAttributes.getPageNumber(userId);
-
-        // Pass page and line numbers to Rest-API service
-        ExtractedLinesDTO extractedLinesDTO = apiService.processPageAndLineNumber(userId, pageNumber, lineNumber);
-
-        List<String> extractedLines = extractedLinesDTO.getLines();
-        log.debug("get extractedLines, size = {}", extractedLines.size());
-        // Send lines to user
-        StringBuilder formattedMessage = new StringBuilder("Книга открыта на странице " + pageNumber +
-                " строки, начиная с " + lineNumber + " такие:\n\n");
-
-        for (String extractedLine : extractedLines) {
-            formattedMessage.append(extractedLine).append("\n");
-        }
-
-        formattedMessage.append("\n\n").append(extractedLinesDTO.getBookAuthor()).append("\n").append(extractedLinesDTO.getBookTitle());
-        log.info("sending formattedMessage with divination lines to user: {}", formattedMessage);
-        telegramBot.sendMessage(userId, null, formattedMessage.toString());
-        // Clear user's context after processing
-        BotAttributes.clear(userId);
-    }
-
-    public void handleReportInput(User user, String reportMessage) {
-        log.debug("current state is AWAITING_REPORT");
-        reportMessage = "Новое сообщение от пользователя @" + user.getUserName() + ":\n" + reportMessage;
-        telegramBot.sendMessage(adminChatId, null, reportMessage);
-        log.info("new report from user id = {}, username = {}, message = {}", user.getId(), user.getUserName(), reportMessage);
-        telegramBot.sendMessage(user.getId(), null, "Ваше сообщение отправлено.");
-        BotAttributes.clear(user.getId());
     }
 
     private void clearBotAttributes(Long userId) {

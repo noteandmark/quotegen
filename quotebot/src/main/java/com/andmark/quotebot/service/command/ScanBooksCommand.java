@@ -24,7 +24,7 @@ public class ScanBooksCommand extends QuoteCommand {
         UserRole userRole = apiService.getUserRole(user.getId());
         log.debug("user role = {} for user.getId() = {}", userRole, user.getId());
 
-        if (userRole == UserRole.ADMIN) {
+        if (userRole == UserRole.ROLE_ADMIN) {
             log.debug("user with role ADMIN run scan books command");
 
             SendMessage message = new SendMessage();

@@ -71,13 +71,16 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
                 // the user has not yet registered anywhere, can only send a message in these cases:
                 if (!isRegistered) {
                     log.debug("user is not registered");
+                    // check the status of a task for a specific Telegram user
                     BotState state = BotAttributes.getUserCurrentBotState(usertgId);
                     log.debug("state = {}", state);
+                    final User fromUser = update.getMessage().getFrom();
+                    final String messageText = message.getText();
                     switch (state) {
                         case AWAITING_USERNAME_INPUT -> quoteService.handleUsernameInputResponse(update);
                         case AWAITING_PASSWORD_INPUT -> quoteService.handlePasswordInputResponse(update);
                         case AWAITING_REPORT ->
-                                quoteService.handleReportInput(update.getMessage().getFrom(), message.getText());
+                                quoteService.handleReportInput(fromUser, messageText);
                         default -> {
                             log.debug("the bot is silent");
                             return;
@@ -193,6 +196,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot implements Bot {
         register(new DivinationCommand(apiService));
         register(new GetQuoteCommand(apiService));
         register(new QuotesWeekCommand(apiService));
+        register(new SuggestQuoteCommand(apiService));
         register(new VersionCommand());
         register(new SignUpCommand(userService, botAttributes));
         register(new SignOutCommand(userService));

@@ -4,6 +4,7 @@ import com.andmark.quotebot.config.BotConfig;
 import com.andmark.quotebot.domain.RequestConfiguration;
 import com.andmark.quotebot.domain.enums.UserRole;
 import com.andmark.quotebot.dto.*;
+import com.andmark.quotebot.exception.QuoteException;
 import com.andmark.quotebot.service.ApiService;
 import com.andmark.quotebot.service.Bot;
 import com.andmark.quotebot.util.BotAttributes;
@@ -16,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.util.Arrays;
@@ -101,12 +101,18 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
+    public UserDTO findUserByUsertgId(Long usertgId) {
+        log.debug("getting user role for usertgId = {}", usertgId);
+        ResponseEntity<UserDTO> response = restTemplate.getForEntity(BotConfig.API_BASE_URL + "/users/finduser-usertgid/" + usertgId, UserDTO.class);
+        return response.getBody();
+    }
+
+    @Override
     public void registerUser(Long chatId, UserDTO userDTO) {
         log.debug("api service request: registerUser with username = {}", userDTO.getUsername());
         // Hash the password before sending it to the API
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
         userDTO.setPassword(hashedPassword);
-        userDTO.setNickname(userDTO.getUsername());
         String registerUserUrl = BotConfig.API_BASE_URL + "/users/register";
 
         RequestConfiguration requestConfig = new RequestConfiguration.Builder()
@@ -326,7 +332,8 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public byte[] downloadImage(String imageUrl) {
         log.debug("downloadImage from imageUrl = {}", imageUrl);
-        ResponseEntity<byte[]> response = restTemplate.exchange(imageUrl,
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                imageUrl,
                 HttpMethod.GET,
                 null,
                 byte[].class);
@@ -336,9 +343,10 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public AvailableDaysResponseDTO findAvailableDays() {
         log.debug("api service: send request findAvailableDays");
-        String imageUrl = BotConfig.API_BASE_URL + "/quotes/get-available-days";
+        String apiUrl = BotConfig.API_BASE_URL + "/quotes/get-available-days";
 
-        ResponseEntity<AvailableDaysResponseDTO> response = restTemplate.exchange(imageUrl,
+        ResponseEntity<AvailableDaysResponseDTO> response = restTemplate.exchange(
+                apiUrl,
                 HttpMethod.GET,
                 null,
                 AvailableDaysResponseDTO.class);
@@ -354,6 +362,27 @@ public class ApiServiceImpl implements ApiService {
             log.error("Error fetching available days. Status code: {}", response.getStatusCode());
         }
         return new AvailableDaysResponseDTO();
+    }
+
+    @Override
+    public void addSuggestedQuote(QuoteDTO quoteDTO) {
+        log.debug("api service: send request addSuggestedQuote");
+        String apiUrl = BotConfig.API_BASE_URL + "/quotes/add-suggested";
+
+        ResponseEntity<Void> response = restTemplate.exchange(
+                apiUrl,
+                HttpMethod.POST,
+                new HttpEntity<>(quoteDTO),
+                Void.class
+        );
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            log.debug("added suggested quote");
+        } else {
+            log.error("Error add suggested quote. Status code: {}", response.getStatusCode());
+            telegramBot.sendMessage(quoteDTO.getUserId(), null, "Ошибка при добавлении цитаты. Попробуйте позже.");
+            throw new QuoteException("Suggested quote do not added. Error.");
+        }
     }
 
     private String formatQuoteText(QuoteDTO quoteDTO) {

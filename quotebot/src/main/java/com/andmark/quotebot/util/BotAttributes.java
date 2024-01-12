@@ -28,6 +28,7 @@ public class BotAttributes {
     private String username;
     private static final Map<Long, BotState> userStates = new ConcurrentHashMap<>();
     private static final Map<Long, UserSession> userSessions = new ConcurrentHashMap<>();
+    private static final Map<Long, UserSuggestQuote> userSuggestQuote = new ConcurrentHashMap<>();
 
     public static BotState getUserCurrentBotState(Long userId) {
         return userStates.getOrDefault(userId, BotState.START);
@@ -53,17 +54,30 @@ public class BotAttributes {
         return getUserSession(userId).getLineNumber();
     }
 
+    public void setSuggestQuoteContent(Long userId, String suggestQuoteContent) {
+        getUserSuggestQuote(userId).setContent(suggestQuoteContent);
+    }
+
+    public String getSuggestQuoteContent(Long userId) {
+        return getUserSuggestQuote(userId).getContent();
+    }
+
     public static void clear(long userId) {
         log.debug("clear botAttributes for userId = {}", userId);
         userSessions.remove(userId);
         userStates.remove(userId);
+        userSuggestQuote.remove(userId);
     }
 
     private UserSession getUserSession(long userId) {
         return userSessions.computeIfAbsent(userId, k -> new UserSession());
     }
 
+    private UserSuggestQuote getUserSuggestQuote(long userId) {
+        return userSuggestQuote.computeIfAbsent(userId, k -> new UserSuggestQuote());
+    }
 
+    // internal class for saving parameters of guessing by book
     private static class UserSession {
         private int pageNumber;
         private int lineNumber;
@@ -84,4 +98,15 @@ public class BotAttributes {
             this.lineNumber = lineNumber;
         }
     }
+
+    // internal class for saving parameters of the proposed quote
+    @Getter
+    @Setter
+    private static class UserSuggestQuote {
+        private String nickname;
+        private String content;
+        private String bookTitle;
+        private String bookAuthor;
+    }
+
 }

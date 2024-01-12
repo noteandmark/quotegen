@@ -20,4 +20,5 @@ public interface QuoteService {
     void sendQuoteSavedTODatabase(QuoteDTO pendingQuote, String s);
 
     void handleReportInput(User from, String text);
+
 }

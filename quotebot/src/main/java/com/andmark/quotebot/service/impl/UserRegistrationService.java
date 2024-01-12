@@ -59,7 +59,7 @@ public class UserRegistrationService {
             //nickname = username by default
             userDTO.setNickname(username);
             userDTO.setPassword(password);
-            userDTO.setRole(UserRole.USER);
+            userDTO.setRole(UserRole.ROLE_USER);
         }
         return userDTO;
     }
