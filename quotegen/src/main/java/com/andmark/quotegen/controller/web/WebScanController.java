@@ -30,9 +30,6 @@ public class WebScanController {
     }
 
     @PostMapping("/scanbooks")
-//    public String scanBooks(@RequestParam(name = "directoryPath") String directoryPath,
-//                            RedirectAttributes redirectAttributes,
-//                            Model model) {
     public String scanBooks(@RequestParam(name = "directoryPath") String directoryPath,
                             Model model) {
         log.debug("WebScanController POST scanBooks");
@@ -40,9 +37,6 @@ public class WebScanController {
 
         List<BookDTO> scannedBooks = scanService.scanBooks(directoryPath);
         log.debug("scannedBooks count = " + scannedBooks.size());
-
-//        redirectAttributes.addFlashAttribute("scannedBooks", scannedBooks);
-//        return "redirect:/admin/scanbooks";
 
         model.addAttribute("scannedBooks", scannedBooks);
 

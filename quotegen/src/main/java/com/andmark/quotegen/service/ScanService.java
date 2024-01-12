@@ -11,4 +11,6 @@ public interface ScanService {
     List<BookDTO> scanBooks(String directoryPath);
 
     StatsDTO getStatistics();
+
+    String getWebLink();
 }

@@ -5,10 +5,13 @@ import com.andmark.quotegen.domain.enums.BookFormat;
 import com.andmark.quotegen.domain.enums.QuoteStatus;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.StatsDTO;
+import com.andmark.quotegen.exception.InvalidWebLinkException;
 import com.andmark.quotegen.exception.ServiceException;
 import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.repository.QuotesRepository;
 import com.andmark.quotegen.service.ScanService;
+import com.andmark.quotegen.util.NgrokUrlHolder;
+import com.andmark.quotegen.util.UrlValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +34,14 @@ import static com.andmark.quotegen.domain.enums.BookStatus.DELETED;
 @Transactional(readOnly = true)
 @Slf4j
 public class ScanServiceImpl implements ScanService {
-
+    private final NgrokUrlHolder ngrokUrlHolder;
     private final BooksRepository booksRepository;
     private final QuotesRepository quotesRepository;
     private final ModelMapper mapper;
 
     @Autowired
-    public ScanServiceImpl(BooksRepository booksRepository, QuotesRepository quotesRepository, ModelMapper mapper) {
+    public ScanServiceImpl(NgrokUrlHolder ngrokUrlHolder, BooksRepository booksRepository, QuotesRepository quotesRepository, ModelMapper mapper) {
+        this.ngrokUrlHolder = ngrokUrlHolder;
         this.booksRepository = booksRepository;
         this.quotesRepository = quotesRepository;
         this.mapper = mapper;
@@ -189,6 +193,20 @@ public class ScanServiceImpl implements ScanService {
 
         log.info("getting stats: {} , {} , {}", bookCount, publishedQuotesThisYear, pendingQuotesCount);
         return new StatsDTO(bookCount, publishedQuotesThisYear, pendingQuotesCount);
+    }
+
+    @Override
+    public String getWebLink() {
+        String publicUrl = ngrokUrlHolder.getPublicUrl();
+        log.debug("scan service: get web link");
+        if (UrlValidator.isValidUrl(publicUrl)) {
+            log.debug("web link valid, return");
+            return publicUrl;
+        } else {
+            log.error("web link does not valid");
+            throw new InvalidWebLinkException("Invalid web link: " + publicUrl);
+        }
+
     }
 }
 

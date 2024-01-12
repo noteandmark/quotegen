@@ -3,12 +3,14 @@ package com.andmark.quotegen.controller.api;
 import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.StatsDTO;
+import com.andmark.quotegen.exception.InvalidWebLinkException;
 import com.andmark.quotegen.service.BookService;
 import com.andmark.quotegen.service.ScanService;
 import com.andmark.quotegen.util.impl.Fb2BookFormatParser;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +66,24 @@ public class ScanController {
     public ResponseEntity<String> testConnection() {
         log.info("log.info test-connection");
         return ResponseEntity.ok("Connection is ok");
+    }
+
+    @GetMapping("/web-link")
+    public ResponseEntity<String> getWebLink() {
+        log.debug("scan controller: get web link");
+
+        try {
+            String webLink = scanService.getWebLink();
+            return ResponseEntity.ok(webLink);
+        } catch (InvalidWebLinkException e) {
+            // Handling an invalid web link error
+            log.error("Error getting web link: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid web link: " + e.getMessage());
+        } catch (Exception e) {
+            // Handling other errors
+            log.error("Error getting web link: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while getting web link");
+        }
     }
 
 }

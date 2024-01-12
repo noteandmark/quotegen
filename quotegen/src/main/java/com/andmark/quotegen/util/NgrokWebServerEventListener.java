@@ -20,10 +20,12 @@ import static java.util.Objects.nonNull;
 @Slf4j
 public class NgrokWebServerEventListener {
     private final NgrokConfiguration ngrokConfiguration;
+    private final NgrokUrlHolder ngrokUrlHolder;
 
     @Autowired
-    public NgrokWebServerEventListener(final NgrokConfiguration ngrokConfiguration) {
+    public NgrokWebServerEventListener(final NgrokConfiguration ngrokConfiguration, NgrokUrlHolder ngrokUrlHolder) {
         this.ngrokConfiguration = ngrokConfiguration;
+        this.ngrokUrlHolder = ngrokUrlHolder;
     }
 
     @EventListener
@@ -55,6 +57,7 @@ public class NgrokWebServerEventListener {
 
     private void initWebhooks(final String publicUrl) {
         // Update inbound traffic via APIs to use the public-facing ngrok URL
+        ngrokUrlHolder.setPublicUrl(publicUrl);
     }
 
 }

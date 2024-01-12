@@ -39,7 +39,8 @@
                             </thead>
                             <tr th:each="book : ${books}">
                                 <td th:text="${book.id}">334</td>
-                                <td th:text="${book.title} + '.' + ${book.format} + ' - ' + ${book.author}"
+                                <td th:text="${book.title} + '.' + ${book.format} + ' - ' + ${book.author}
+                                + ' - ' + ${book.bookStatus}"
                                     style="max-width: 150px; overflow-wrap: break-word;">Some Book</td>
                                 <td><a href="#" th:href="@{'/admin/book/view/' + ${book.id}}">View</a></td>
                                 <td><a href="#" th:href="@{'/admin/book/edit/' + ${book.id}}">Edit</a></td>
