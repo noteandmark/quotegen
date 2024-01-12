@@ -80,7 +80,7 @@ class UserServiceImplTest {
         // Mocking behavior
         when(userService.convertToEntity(updatedGreetingDTO)).thenReturn(updatedGreeting);
         // Test
-        userService.update(userId, updatedGreetingDTO);
+        userService.update(updatedGreetingDTO);
         // Verification
         verify(usersRepository).save(updatedGreeting);
     }
@@ -119,7 +119,7 @@ class UserServiceImplTest {
         User mockUser = new User();
         mockUser.setRole(UserRole.ROLE_ADMIN);
 
-        when(usersRepository.findByUsertgId(userId)).thenReturn(mockUser);
+        when(usersRepository.findByUsertgId(userId)).thenReturn(Optional.of(mockUser));
 
         UserRole result = userService.getUserRole(userId);
 

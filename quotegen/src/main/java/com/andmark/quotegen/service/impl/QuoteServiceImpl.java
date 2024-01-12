@@ -89,8 +89,9 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     @Transactional
+    // add suggest quote from web
     public void suggestQuote(QuoteDTO quoteDTO, String username) {
-        log.debug("quote service: suggestQuote");
+        log.debug("quote service: suggestQuote from web");
 
         UserDTO userDTO = userService.findByUsername(username);
         log.debug("");
@@ -106,7 +107,14 @@ public class QuoteServiceImpl implements QuoteService {
         quoteDTO.setContent(contentBuilder.toString());
         quoteDTO.setStatus(QuoteStatus.FREE);
 
+        save(quoteDTO);
+    }
 
+    @Override
+    @Transactional
+    // add suggest quote from telegram-bot
+    public void addSuggestedQuote(QuoteDTO quoteDTO) {
+        log.debug("quote service: addSuggestedQuote from telegram-bot");
         save(quoteDTO);
     }
 

@@ -28,4 +28,6 @@ public interface QuoteService extends AbstractService<QuoteDTO>{
     Page<QuoteDTO> findAllSorted(Pageable pageable, String sortField, String sortDirection);
 
     void suggestQuote(QuoteDTO quoteDTO, String username);
+
+    void addSuggestedQuote(QuoteDTO quoteDTO);
 }

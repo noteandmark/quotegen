@@ -124,16 +124,3 @@ public class WebAdminController {
     }
 
 }
-
-//            List<String> imageUrls = List.of(
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRq3Qu9hdaxRk66j5he0jMCm0Iqz-3lvEryFO8Yxr91dNDroTjC9B0cYw&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgsEduSV5RgaT36tDc-Pb_h-voTsNexfFPT35nX2Keu2b8bIwZZtbMDRw&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGiENqPYh_elPDhTS58Y9YwN95pS9F_akwCDEmiTSlMKnV2O0wG7mQlg&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_yqyadOdnemlLb6am3sDcoGCIoKxgNsF9Oc8DDFxndafReIlG4YJwdg&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzQLu_AJ9zY_V9hEuo2XA27Vtvbyi67ud1yF95i-dgqoUUROO65kyBjQE&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSt8RRuulTm1e3YiAV3ixW3I0zW12DKIlVvlQQQHDasH7dtl-jTKKYtsg&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVvHAL0rwhCmtiQZJIuft7jr3AcvziPw4sLGqsJ12BmOk2NVx_U8n6lQ&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqeZxq9aC2qwo2yv9NatbHgL0dku2p-vT0ERctmeNL_fGfArysneQnQA&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWrRr8OlLORes8-pwE0s41w7Kc2iWZcfzQsqLK_R10pQaTpytb90QYWA&s",
-//                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbCPGafo5vo51hqNq-iOsF5gm5H4-Cxry4gJiAatl19H9rLO1eQPMrCQo&"
-//            );

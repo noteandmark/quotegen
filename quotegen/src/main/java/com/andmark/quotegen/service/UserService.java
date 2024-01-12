@@ -13,6 +13,8 @@ public interface UserService extends AbstractService<UserDTO>{
 
     void changePassword(String username, String currentPassword, String newPassword);
 
+    UserDTO findOneByUsertgId(Long usertgId);
+
     void deleteByUsername(String username);
 
     User convertToEntity(UserDTO userDTO);

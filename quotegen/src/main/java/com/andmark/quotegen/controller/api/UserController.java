@@ -18,6 +18,17 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/finduser-usertgid/{usertgId}")
+    public ResponseEntity<UserDTO> findUserByUsertgId(@PathVariable long usertgId) {
+        log.debug("user controller in findUserByUsertgId");
+        UserDTO foundUser = userService.findOneByUsertgId(usertgId);
+        if (foundUser != null) {
+            return ResponseEntity.ok(foundUser);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/exists/{usertgId}")
     public ResponseEntity<Boolean> isUserRegistered(@PathVariable long usertgId) {
         log.debug("user controller in isUserRegistered");

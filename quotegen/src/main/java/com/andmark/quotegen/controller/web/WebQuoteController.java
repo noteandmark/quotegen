@@ -76,7 +76,7 @@ public class WebQuoteController {
 
         quoteService.suggestQuote(quoteDTO, username);
 
-        model.addAttribute("successMessage", "Ваша цитата добавлена в раздел предлагаемых к публикации! Спасибо!");
+        model.addAttribute("successMessage", "Спасибо! Ваша цитата добавлена в раздел предлагаемых к публикации!");
         return "public/report-success";
     }
 

@@ -23,6 +23,13 @@ public class QuoteController {
         this.quoteService = quoteService;
     }
 
+    @PostMapping("/add-suggested")
+    public ResponseEntity<Void> addSuggestedQuote(@RequestBody QuoteDTO quoteDTO) {
+        log.debug("controller addSuggestedQuote from user id = {}", quoteDTO.getUserId());
+        quoteService.addSuggestedQuote(quoteDTO);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/all")
     public ResponseEntity<List<QuoteDTO>> getAllQuotes() {
         log.debug("controller getAllQuotes");

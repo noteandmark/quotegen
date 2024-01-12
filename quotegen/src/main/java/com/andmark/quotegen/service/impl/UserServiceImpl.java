@@ -54,6 +54,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public UserDTO findOneByUsertgId(Long usertgId) {
+        log.debug("find user by usertgId {}", usertgId);
+        Optional<User> byUsertgId = usersRepository.findByUsertgId(usertgId);
+        log.info("find user {}", byUsertgId);
+        return byUsertgId.map(this::convertToDTO)
+                .orElse(null);
+    }
+
+    @Override
     public List<UserDTO> findAll() {
         log.debug("find all users");
         List<User> userList = usersRepository.findAll();
@@ -116,9 +125,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserRole getUserRole(Long usertgId) {
         log.debug("user service getUserRole");
-        User user = usersRepository.findByUsertgId(usertgId);
-        if (user != null) {
-            return user.getRole();
+        Optional<User> user = usersRepository.findByUsertgId(usertgId);
+        if (user.isPresent()) {
+            return user.get().getRole();
         }
         return null; // User not found
     }

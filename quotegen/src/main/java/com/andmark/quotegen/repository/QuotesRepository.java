@@ -17,7 +17,7 @@ public interface QuotesRepository extends JpaRepository<Quote, Long> {
 
     int countByUsedAtIsNullAndPendingTimeIsNull();
 
-    Quote findFirstByUsedAtIsNullAndPendingTimeIsNull();
+    Quote findFirstByUsedAtIsNullAndPendingTimeIsNullOrderByIdAsc();
 
     List<Quote> findByStatus(QuoteStatus status);
 
