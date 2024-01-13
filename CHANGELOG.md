@@ -1,9 +1,49 @@
 # Changelog
 ## [Unreleased] - yyyy-mm-dd
 ### Added
+- протестировать новые методы
+- вопросник 1-10
 ### Changed
 ### Fixed
 
+## [2.0.0-RELEASE] - 2024-01-13
+### Added
+- added clearing the database of books with DELETED status
+- added private-policy.md
+### Changed
+- user access to the web version
+### Fixed
+- fixed errors in tests
+## [1.7.2] - 2024-01-12
+### Added
+- added a command to get a link to go to the web version
+## [1.7.1] - 2024-01-12
+### Added
+- added getting dates of all expected quotes for publication
+## [1.7.0] - 2024-01-12
+### Added
+- added option 'suggested quote' for telegram bot
+## [1.6.0] - 2024-01-10
+### Added
+- added the ability for a user to suggest a quote for publication (web version)
+## [1.5.0] - 2024-01-09
+### Added
+- added ngrok tunnel plugin
+## [1.4.5] - 2024-01-04
+### Added
+- added the report web page and bot check option
+## [1.4.4] - 2024-01-02
+### Added
+- added the ability to delete a user
+- ## [1.4.3] - 2023-12-22
+### Added
+- added admin greeting page
+## [1.4.2] - 2023-12-22
+### Added
+- added a nickname to the user profile, you can change it
+## [1.4.1] - 2023-12-16
+### Added
+- quotes page for admin: view the whole list with pagination, got an individual quote, edit, delete
 ## [1.4.0] - 2023-12-10
 ### Added
 - implemented the core functionality of the web access application
