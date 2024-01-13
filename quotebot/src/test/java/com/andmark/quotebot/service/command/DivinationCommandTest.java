@@ -42,7 +42,7 @@ class DivinationCommandTest {
     public void testExecuteWithUserRole() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.USER);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_USER);
 
         divinationCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
 
@@ -57,7 +57,7 @@ class DivinationCommandTest {
     public void testExecuteUserNotUsedCommandToday() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ADMIN);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_ADMIN);
 
         // Ensure user hasn't used the command today
         DivinationCommand.usersLastUsage.clear();
@@ -78,7 +78,7 @@ class DivinationCommandTest {
     public void testExecuteUserUsedCommandToday() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ADMIN);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_ADMIN);
 
         // Set user's usage for today
         DivinationCommand.usersLastUsage.put(mockUser.getId(), LocalDate.now());

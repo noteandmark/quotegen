@@ -27,14 +27,14 @@ public class HelpCommand extends QuoteCommand {
         message.append("/suggestquote - предложить цитату (user)\n");
         message.append("/weblink - ссылка на веб-версию программы (user)\n");
         message.append("/stats - разная статистика\n");
-        message.append("/version - версия и список изменений\n");
+        message.append("/readme - о программе, список изменений, пользовательское соглашение\n");
         message.append("/signup - зарегистрироваться\n");
         message.append("/signout - сброс логина, пароля\n");
         message.append("/reset - сброс до настроек по умолчанию\n");
         message.append("/report - сообщить админу что-либо (баги, предложения, отзывы, др.)\n");
         message.append("/requestquote - сгенерировать цитату (админ)\n");
         message.append("/pendingquotes - получить даты ожидаемых публикаций (админ)\n");
-        message.append("/scanbooks - поиск электронных книг (админ)\n");
+        message.append("/scanbooks - поиск электронных книг (админ)");
         sendMessage(absSender, chat, message.toString());
     }
 }

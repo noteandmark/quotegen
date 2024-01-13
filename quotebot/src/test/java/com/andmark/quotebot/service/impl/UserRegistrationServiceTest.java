@@ -112,7 +112,7 @@ public class UserRegistrationServiceTest {
             assertEquals(userId, userDTO.getUsertgId());
             assertEquals(username, userDTO.getUsername());
             assertEquals(password, userDTO.getPassword());
-            assertEquals(UserRole.USER, userDTO.getRole());
+            assertEquals(UserRole.ROLE_USER, userDTO.getRole());
             verify(telegramBot, times(1)).sendMessage(eq(chatId), eq(null), eq("Пароль принят."));
         }
     }

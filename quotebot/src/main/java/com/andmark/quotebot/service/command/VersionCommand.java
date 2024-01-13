@@ -15,8 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.andmark.quotebot.config.BotConfig.changelogFile;
-import static com.andmark.quotebot.config.BotConfig.readmeFile;
+import static com.andmark.quotebot.config.BotConfig.*;
 
 @Slf4j
 public class VersionCommand extends QuoteCommand {
@@ -30,6 +29,7 @@ public class VersionCommand extends QuoteCommand {
         log.debug("user with id = {} execute /version", user.getId());
         String readmeContent = loadFileContent(readmeFile);
         String changelogContent = loadFileContent(changelogFile);
+        String privatePolicyContent = loadFileContent(privatePolicyFile);
 
         if (!readmeContent.isEmpty() || !changelogContent.isEmpty()) {
             List<String> messages = splitContentIntoMessages(changelogContent + "\n\n" + readmeContent);

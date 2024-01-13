@@ -27,8 +27,8 @@ public class DefaultUserRoleServiceTest {
     public void testHasRequiredRole_AdminUserWithAdminRequired_ShouldReturnTrue() {
         // Given
         Long userId = 1L;
-        UserRole userRole = UserRole.ADMIN;
-        UserRole neededRole = UserRole.ADMIN;
+        UserRole userRole = UserRole.ROLE_ADMIN;
+        UserRole neededRole = UserRole.ROLE_ADMIN;
 
         when(apiService.getUserRole(userId)).thenReturn(userRole);
 
@@ -44,8 +44,8 @@ public class DefaultUserRoleServiceTest {
     public void testHasRequiredRole_AdminUserWithUserRequired_ShouldReturnTrue() {
         // Given
         Long userId = 1L;
-        UserRole userRole = UserRole.ADMIN;
-        UserRole neededRole = UserRole.USER;
+        UserRole userRole = UserRole.ROLE_ADMIN;
+        UserRole neededRole = UserRole.ROLE_USER;
 
         when(apiService.getUserRole(userId)).thenReturn(userRole);
 
@@ -61,8 +61,8 @@ public class DefaultUserRoleServiceTest {
     public void testHasRequiredRole_UserWithUserRequired_ShouldReturnTrue() {
         // Given
         Long userId = 1L;
-        UserRole userRole = UserRole.USER;
-        UserRole neededRole = UserRole.USER;
+        UserRole userRole = UserRole.ROLE_USER;
+        UserRole neededRole = UserRole.ROLE_USER;
 
         when(apiService.getUserRole(userId)).thenReturn(userRole);
 
@@ -78,8 +78,8 @@ public class DefaultUserRoleServiceTest {
     public void testHasRequiredRole_UserWithAdminRequired_ShouldReturnFalse() {
         // Given
         Long userId = 1L;
-        UserRole userRole = UserRole.USER;
-        UserRole neededRole = UserRole.ADMIN;
+        UserRole userRole = UserRole.ROLE_USER;
+        UserRole neededRole = UserRole.ROLE_ADMIN;
 
         when(apiService.getUserRole(userId)).thenReturn(userRole);
 

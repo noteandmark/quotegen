@@ -36,7 +36,7 @@ class ScanBooksCommandTest {
     public void testExecuteWithAdminRole() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ADMIN);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_ADMIN);
 
         String[] arguments = {"path/to/books"};
         // Mock the apiService.scanBooks method to return a non-null value
@@ -59,7 +59,7 @@ class ScanBooksCommandTest {
     public void testExecuteWithoutAdminRole() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.USER);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_USER);
 
         String[] arguments = {"path/to/books"};
 

@@ -39,7 +39,7 @@ class StartCommandTest {
     @Test
     public void testExecuteWithUserRole() throws TelegramApiException {
         when(mockUser.getFirstName()).thenReturn("John");
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.USER);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_USER);
 
         startCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
 

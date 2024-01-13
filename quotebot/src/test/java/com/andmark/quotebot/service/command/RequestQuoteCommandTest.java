@@ -39,13 +39,12 @@ class RequestQuoteCommandTest {
     public void testExecuteWithAdminRole() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ADMIN);
+        when(userRoleService.hasRequiredRole(anyLong(), eq(UserRole.ROLE_ADMIN))).thenReturn(true);
 
         requestQuoteCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
 
         // Verify that the API service's getNextQuote() method is called
         verify(mockApiService, times(1)).getNextQuote();
-
         // Make sure no sendMessage is called for admins
         verify(mockAbsSender, never()).execute(any(SendMessage.class));
     }
@@ -54,7 +53,7 @@ class RequestQuoteCommandTest {
     public void testExecuteWithoutAdminRole() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.USER);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_USER);
 
         requestQuoteCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
 

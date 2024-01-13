@@ -170,7 +170,7 @@ public class ApiServiceImplTest {
     @Test
     public void testGetUserRole() {
         long userId = 123L;
-        UserRole mockUserRole = UserRole.USER;
+        UserRole mockUserRole = UserRole.ROLE_USER;
 
         // Mock the response entity
         ResponseEntity<UserRole> mockResponseEntity = ResponseEntity.ok(mockUserRole);

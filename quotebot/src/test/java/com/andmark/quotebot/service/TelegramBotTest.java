@@ -77,7 +77,7 @@ public class TelegramBotTest {
             Update update = createUpdateWithMessageText("some request");
 
             when(userService.isRegistered(123L)).thenReturn(true);
-            when(apiService.getUserRole(123L)).thenReturn(UserRole.USER);
+            when(apiService.getUserRole(123L)).thenReturn(UserRole.ROLE_USER);
             doNothing().when(quoteService).handleIncomingMessage(update);
 
             telegramBot.processNonCommandUpdate(update);
@@ -98,7 +98,7 @@ public class TelegramBotTest {
             Update update = createUpdateWithMessageText("some request");
 
             when(userService.isRegistered(eq(123L))).thenReturn(false);
-            when(apiService.getUserRole(123L)).thenReturn(UserRole.USER);
+            when(apiService.getUserRole(123L)).thenReturn(UserRole.ROLE_USER);
             doNothing().when(quoteService).handleUsernameInputResponse(eq(update));
             doNothing().when(quoteService).handleIncomingMessage(eq(update));
 
@@ -121,7 +121,7 @@ public class TelegramBotTest {
             Update update = createUpdateWithMessageText("some request");
 
             when(userService.isRegistered(123L)).thenReturn(false);
-            when(apiService.getUserRole(123L)).thenReturn(UserRole.USER);
+            when(apiService.getUserRole(123L)).thenReturn(UserRole.ROLE_USER);
             doNothing().when(quoteService).handlePasswordInputResponse(update);
             doNothing().when(quoteService).handleIncomingMessage(update);
 
@@ -144,7 +144,7 @@ public class TelegramBotTest {
             Update update = createUpdateWithMessageText(reportMessage);
 
             when(userService.isRegistered(123L)).thenReturn(false);
-            when(apiService.getUserRole(123L)).thenReturn(UserRole.USER);
+            when(apiService.getUserRole(123L)).thenReturn(UserRole.ROLE_USER);
             doNothing().when(quoteService).handleReportInput(eq(update.getMessage().getFrom()),eq(reportMessage));
             doNothing().when(quoteService).handleIncomingMessage(update);
 

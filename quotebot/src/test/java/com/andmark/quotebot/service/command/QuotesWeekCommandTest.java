@@ -44,13 +44,13 @@ class QuotesWeekCommandTest {
     public void testExecuteWithPublishedQuotes() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ADMIN);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_ADMIN);
 
         // Prepare a list of QuoteDTOs
         List<QuoteDTO> quoteDTOs = new ArrayList<>();
 
-        quoteDTOs.add(new QuoteDTO(1L, "content 1", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), "author1", "title1"));
-        quoteDTOs.add(new QuoteDTO(2L, "content 2", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), "author2", "title2"));
+        quoteDTOs.add(new QuoteDTO(1L, "content 1", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), null, "author1", "title1", null));
+        quoteDTOs.add(new QuoteDTO(2L, "content 2", QuoteStatus.FREE, LocalDateTime.now(), null, LocalDateTime.now(), null, "author2", "title2", null));
         when(mockApiService.getWeekPublishedQuotes()).thenReturn(quoteDTOs);
 
         quotesWeekCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
@@ -68,7 +68,7 @@ class QuotesWeekCommandTest {
     public void testExecuteWithNoPublishedQuotes() throws TelegramApiException {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
-        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ADMIN);
+        when(mockApiService.getUserRole(anyLong())).thenReturn(UserRole.ROLE_ADMIN);
 
         when(mockApiService.getWeekPublishedQuotes()).thenReturn(null);
 

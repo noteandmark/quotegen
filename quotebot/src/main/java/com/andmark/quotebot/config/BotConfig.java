@@ -21,6 +21,7 @@ public class BotConfig {
     public static Long adminChatId;
     public static String readmeFile;
     public static String changelogFile;
+    public static String privatePolicyFile;
     public static Integer hoursScheduleExecution;
 
     @Value("${api.base.url}")
@@ -56,6 +57,11 @@ public class BotConfig {
     @Value("${changelog.file}")
     public void setChangelogFile(String changelogFile) {
         BotConfig.changelogFile = changelogFile;
+    }
+
+    @Value("${privatePolicy.file}")
+    public void setPrivatePolicyFile(String privatePolicyFile) {
+        BotConfig.privatePolicyFile = privatePolicyFile;
     }
 
     @Value("${telegram.bot.hours-schedule-execution}")
