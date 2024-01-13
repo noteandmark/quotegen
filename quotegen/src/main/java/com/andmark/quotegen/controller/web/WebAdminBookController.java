@@ -1,7 +1,9 @@
 package com.andmark.quotegen.controller.web;
 
+import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.QuoteDTO;
+import com.andmark.quotegen.exception.NotFoundBookException;
 import com.andmark.quotegen.service.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -77,6 +80,28 @@ public class WebAdminBookController {
         } else {
             return "redirect:/admin/quote";
         }
+    }
+
+    @GetMapping("/view-deleted")
+    public String viewDeletedBoooks(Model model) {
+        log.debug("web admin book controller viewDeletedBoooks");
+        List<Book> deletedBooks = bookService.getDeletedBooks();
+        if (deletedBooks.isEmpty()) {
+            log.debug("deletedBooks is empty");
+            model.addAttribute("message", "Книг со статусом DELETED нет в базе данных");
+        } else {
+            log.debug("deletedBooks is not empty");
+            model.addAttribute("deletedBooks", deletedBooks);
+        }
+        return "admin/book/view-deleted";
+    }
+
+    @PostMapping("/clean-db")
+    public String cleanDataBase() {
+        log.debug("web admin book controller cleanDataBase");
+        bookService.clearDeletedBooks();
+        log.debug("cleaned, redirect to view-deleted");
+        return "redirect:/admin/book/view-deleted";
     }
 
 }

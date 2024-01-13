@@ -26,6 +26,11 @@ public class WebVersionServiceImpl implements WebVersionService {
         return loadFileContent("static/version-info/CHANGELOG.md");
     }
 
+    @Override
+    public String getPrivatePolicyContent() {
+        return loadFileContent("static/version-info/private-policy.md");
+    }
+
     private String loadFileContent(String resourcePath) {
         log.debug("try to load file content from file: {}", resourcePath);
 

@@ -1,12 +1,19 @@
 # Changelog
 ## [Unreleased] - yyyy-mm-dd
 ### Added
-- сделать сортировку и пагинацию для цитат для пользователя с ролью user
-- добавить на страницу Книги кнопку Очиста БД
-- протестировать все новые методы
+- протестировать новые методы
+- вопросник 1-10
 ### Changed
 ### Fixed
 
+## [2.0.0-RELEASE] - 2024-01-13
+### Added
+- added clearing the database of books with DELETED status
+- added private-policy.md
+### Changed
+- user access to the web version
+### Fixed
+- fixed errors in tests 
 ## [1.7.2] - 2024-01-12
 ### Added
 - added a command to get a link to go to the web version

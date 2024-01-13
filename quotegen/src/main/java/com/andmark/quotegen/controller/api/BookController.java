@@ -34,4 +34,5 @@ public class BookController {
         ExtractedLinesDTO extractedLinesDTO = bookService.processPageAndLineNumber(requestDTO);
         return ResponseEntity.ok(extractedLinesDTO);
     }
+
 }

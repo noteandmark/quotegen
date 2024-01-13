@@ -1,7 +1,6 @@
 package com.andmark.quotegen.service.impl;
 
 import com.andmark.quotegen.domain.Book;
-import com.andmark.quotegen.domain.Quote;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.dto.BookDTO;
 import com.andmark.quotegen.dto.ExtractedLinesDTO;
@@ -139,6 +138,14 @@ public class BookServiceImpl implements BookService {
         }
         log.debug("find activeBooks in size: {}", activeBooks.size());
         return activeBooks;
+    }
+
+    @Override
+    public List<Book> getDeletedBooks() {
+        log.debug("book service: get deleted books");
+        List<Book> deletedBooks = booksRepository.findByBookStatus(BookStatus.DELETED);
+        log.debug("find deletedBooks in size: {}", deletedBooks.size());
+        return deletedBooks;
     }
 
     Book selectRandomBook(List<Book> activeBooks) {

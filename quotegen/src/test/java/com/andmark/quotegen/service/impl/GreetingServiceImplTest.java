@@ -79,7 +79,7 @@ class GreetingServiceImplTest {
         // Mocking behavior
         when(greetingService.convertToEntity(updatedGreetingDTO)).thenReturn(updatedGreeting);
         // Test
-        greetingService.update(greetingId, updatedGreetingDTO);
+        greetingService.update(updatedGreetingDTO);
         // Verification
         verify(greetingRepository).save(updatedGreeting);
     }

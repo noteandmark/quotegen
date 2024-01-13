@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,19 +71,23 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testUpdateGreeting() {
+    void testUpdateGreeting_whenUserIsFound_thenUpdateNickname() {
         // Mocking
-        UserDTO updatedGreetingDTO = new UserDTO();
-        updatedGreetingDTO.setUsername("new user");
-        User updatedGreeting = new User();
-        updatedGreeting.setUsername(updatedGreetingDTO.getUsername());
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("testUser");
+        userDTO.setNickname("newNickname");
 
-        // Mocking behavior
-        when(userService.convertToEntity(updatedGreetingDTO)).thenReturn(updatedGreeting);
-        // Test
-        userService.update(updatedGreetingDTO);
-        // Verification
-        verify(usersRepository).save(updatedGreeting);
+        User user = new User();
+        user.setUsername(userDTO.getUsername());
+        user.setNickname(userDTO.getNickname());
+
+        when(usersRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        doNothing().when(usersRepository).updateNickname(anyString(), anyString());
+        // Act
+        userService.update(userDTO);
+        // Assert
+        verify(usersRepository, times(1)).updateNickname(userDTO.getUsername(), userDTO.getNickname());
+        verify(usersRepository, times(1)).findByUsername(userDTO.getUsername());
     }
 
     @Test
@@ -128,8 +133,7 @@ class UserServiceImplTest {
 
     @Test
     void testGetUserRole_UserNotFound() {
-
-        when(usersRepository.findByUsertgId(userId)).thenReturn(null);
+        when(usersRepository.findByUsertgId(userId)).thenReturn(Optional.empty());
 
         UserRole result = userService.getUserRole(userId);
 

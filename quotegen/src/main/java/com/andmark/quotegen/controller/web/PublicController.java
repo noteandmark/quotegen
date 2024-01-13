@@ -59,9 +59,11 @@ public class PublicController {
     public String showVersionPage(Model model) {
         String readmeContent = versionService.getReadmeContent();
         String changelogContent = versionService.getChangelogContent();
+        String privatePolicyContent = versionService.getPrivatePolicyContent();
 
         model.addAttribute("readmeContent", readmeContent);
         model.addAttribute("changelogContent", changelogContent);
+        model.addAttribute("private-policy", privatePolicyContent);
 
         return "public/version";
     }

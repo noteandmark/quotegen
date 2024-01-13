@@ -84,10 +84,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             log.error("Error updating nickname for user " + username, e);
             throw new ServiceException("Failed to update nickname");
         }
-        User user = usersRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        Optional<User> user = usersRepository.findByUsername(username);
         log.info("update user {}", user);
-        return convertToDTO(user);
+        return convertToDTO(user.get());
     }
 
     @Override
@@ -126,10 +125,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserRole getUserRole(Long usertgId) {
         log.debug("user service getUserRole");
         Optional<User> user = usersRepository.findByUsertgId(usertgId);
-        if (user.isPresent()) {
-            return user.get().getRole();
-        }
-        return null; // User not found
+        // User not found
+        return user.map(User::getRole).orElse(null);
     }
 
     @Override

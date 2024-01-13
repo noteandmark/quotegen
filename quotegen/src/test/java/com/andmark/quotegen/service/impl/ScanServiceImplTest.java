@@ -233,18 +233,23 @@ public class ScanServiceImplTest {
 
     @Test
     public void testGetStatistics() {
-        LocalDate currentDate = LocalDate.of(2023, 8, 22);
-        LocalDate startOfYear = LocalDate.of(2023, 1, 1);
+        // Получаем текущую дату
+        LocalDate currentDate = LocalDate.now();
+        // Получаем текущий год из текущей даты
+        int currentYear = currentDate.getYear();
+        LocalDate startOfYear = LocalDate.of(currentYear, 1, 1);
         LocalDateTime startOfYearDateTime = startOfYear.atStartOfDay();
 
         when(booksRepository.count()).thenReturn(10L);
-        when(quotesRepository.countByStatusAndUsedAtAfter(QuoteStatus.PUBLISHED, startOfYearDateTime)).thenReturn(5L);
+        when(quotesRepository.countByStatusAndUsedAtAfter(eq(QuoteStatus.PUBLISHED), eq(LocalDateTime.of(currentYear, 1, 1, 0, 0)))).thenReturn(5L);
         when(quotesRepository.countByStatus(QuoteStatus.PENDING)).thenReturn(3L);
 
         StatsDTO result = scanService.getStatistics();
 
         verify(booksRepository).count();
-        verify(quotesRepository).countByStatusAndUsedAtAfter(QuoteStatus.PUBLISHED, startOfYearDateTime);
+//        verify(quotesRepository).countByStatusAndUsedAtAfter(QuoteStatus.PUBLISHED, startOfYearDateTime);
+        verify(quotesRepository).countByStatusAndUsedAtAfter(eq(QuoteStatus.PUBLISHED), eq(LocalDateTime.of(currentYear, 1, 1, 0, 0)));
+
         verify(quotesRepository).countByStatus(QuoteStatus.PENDING);
 
         assertEquals(10L, result.getBookCount());
