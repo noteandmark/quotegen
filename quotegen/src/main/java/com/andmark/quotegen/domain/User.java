@@ -29,7 +29,6 @@ public class User {
     @Setter
     @NotBlank(message = "Password must not be blank")
     @Column(name = "password", nullable = false)
-    @Size(min = 3, max = 20, message = "Password must be between 3 and 20 characters")
     private String password;
 
     @Enumerated(EnumType.STRING)

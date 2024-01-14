@@ -3,9 +3,14 @@
 ### Added
 - протестировать новые методы
 - вопросник 1-10
+- /admin/users реализовать crud
 ### Changed
 ### Fixed
 
+## [2.0.2] - 2024-01-14
+### Fixed
+- added css folder to security config permit-all
+- added text field to nickname in profile page
 ## [2.0.1] - 2024-01-14
 ### Fixed
 - added the ability to automatically create an ngrok tunnel in the event of a shutdown

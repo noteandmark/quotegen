@@ -1,10 +1,9 @@
-#readmeContainer, #changelogContainer {
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    color: #007bff;
-}
 
 h2 {
     color: bisque;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }

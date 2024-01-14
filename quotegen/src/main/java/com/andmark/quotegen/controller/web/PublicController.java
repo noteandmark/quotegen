@@ -63,7 +63,7 @@ public class PublicController {
 
         model.addAttribute("readmeContent", readmeContent);
         model.addAttribute("changelogContent", changelogContent);
-        model.addAttribute("private-policy", privatePolicyContent);
+        model.addAttribute("privatePolicyContent", privatePolicyContent);
 
         return "public/version";
     }

@@ -25,7 +25,10 @@
         <form th:action="@{'/web/profile/' + ${user.username}}" method="post">
             <div class="mb-3">
                 <label class="form-label">Ник пользователя:</label>
-                <input type="text" class="form-control" th:field="*{user.nickname}" />
+                <div class="input-group">
+                    <span class="input-group-text" th:text="${user.nickname}"></span>
+                    <input type="text" class="form-control" th:field="*{user.nickname}" />
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">Изменить никнейм</button>
         </form>

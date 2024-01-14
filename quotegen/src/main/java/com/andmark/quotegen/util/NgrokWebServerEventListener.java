@@ -6,11 +6,14 @@ import com.github.alexdlaird.ngrok.conf.JavaNgrokConfig;
 import com.github.alexdlaird.ngrok.protocol.CreateTunnel;
 import com.github.alexdlaird.ngrok.protocol.Region;
 import com.github.alexdlaird.ngrok.protocol.Tunnel;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static com.andmark.quotegen.config.AppConfig.ngrokAuthToken;
 import static com.github.alexdlaird.util.StringUtils.isNotBlank;
@@ -46,6 +49,7 @@ public class NgrokWebServerEventListener {
                     .withJavaNgrokConfig(javaNgrokConfig)
                     .build();
             serverPort = event.getWebServer().getPort();
+            log.debug("serverPort = {}", serverPort);
             createNgrokTunnel(serverPort);
         } else {
             log.warn("ngrok configuration is not enabled or invalid");
@@ -66,6 +70,14 @@ public class NgrokWebServerEventListener {
         } else {
             log.warn("ngrok configuration is not enabled or invalid");
             return null;
+        }
+    }
+
+    @PreDestroy
+    public void closeNgrokTunnel() {
+        if (ngrokClient != null) {
+            ngrokClient.disconnect(ngrokUrlHolder.getPublicUrl());
+            log.info("Closed ngrok tunnel");
         }
     }
 
