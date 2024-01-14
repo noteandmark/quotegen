@@ -99,6 +99,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
+    public void deleteByUsertgId(Long usertgId) {
+        log.debug("delete user by id {}", usertgId);
+        usersRepository.deleteByUsertgId(usertgId);
+        log.info("delete user with id {} perform", usertgId);
+    }
+
+    @Override
+    @Transactional
     public void deleteByUsername(String username) {
         log.debug("deleting user by username {}", username);
         User user = usersRepository.findByUsername(username)

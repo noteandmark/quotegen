@@ -45,7 +45,7 @@ public class ReadmeCommand extends QuoteCommand {
                 sendMessage(absSender, chat, "Содержание Readme в настоящее время недоступно");
             }
         } else {
-            sendMessage(absSender, chat, "В настоящее время Readme недоступны.");
+            sendMessage(absSender, chat, "В настоящее время Readme недоступен. Попробуйте позже.");
         }
     }
 

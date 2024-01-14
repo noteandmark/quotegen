@@ -10,6 +10,7 @@
 ### Fixed
 - added the ability to automatically create an ngrok tunnel in the event of a shutdown
 - readme command
+- signout command, delete by usertgid
 ## [2.0.0-RELEASE] - 2024-01-13
 ### Added
 - added clearing the database of books with DELETED status

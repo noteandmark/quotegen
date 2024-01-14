@@ -66,7 +66,7 @@ class ReadmeCommandTest {
 
         SendMessage sentMessage = sendMessageCaptor.getValue();
         assertEquals(mockChat.getId(), Long.parseLong(sentMessage.getChatId()));
-        assertTrue(sentMessage.getText().contains("readme и changelog недоступны"));
+        assertTrue(sentMessage.getText().contains("В настоящее время Readme недоступен. Попробуйте позже."));
     }
 
 }
