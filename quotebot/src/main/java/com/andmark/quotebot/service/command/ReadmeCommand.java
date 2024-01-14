@@ -18,10 +18,10 @@ import java.util.List;
 import static com.andmark.quotebot.config.BotConfig.*;
 
 @Slf4j
-public class VersionCommand extends QuoteCommand {
+public class ReadmeCommand extends QuoteCommand {
 
-    public VersionCommand() {
-        super("version", "Display current version and changelog");
+    public ReadmeCommand() {
+        super("readme", "Display current version, changelog and private policy");
     }
 
     @Override
@@ -31,18 +31,21 @@ public class VersionCommand extends QuoteCommand {
         String changelogContent = loadFileContent(changelogFile);
         String privatePolicyContent = loadFileContent(privatePolicyFile);
 
-        if (!readmeContent.isEmpty() || !changelogContent.isEmpty()) {
-            List<String> messages = splitContentIntoMessages(changelogContent + "\n\n" + readmeContent);
+        if (!readmeContent.isEmpty() || !changelogContent.isEmpty() || !privatePolicyContent.isEmpty()) {
+            List<String> messages = splitContentIntoMessages(
+                    changelogContent + "\n\n"
+                    + readmeContent + "\n\n"
+                    + privatePolicyContent);
 
             if (!messages.isEmpty()) {
                 for (String message : messages) {
                     sendMessage(absSender, chat, message);
                 }
             } else {
-                sendMessage(absSender, chat, "Содержание версий в настоящее время недоступно");
+                sendMessage(absSender, chat, "Содержание Readme в настоящее время недоступно");
             }
         } else {
-            sendMessage(absSender, chat, "В настоящее время readme и changelog недоступны.");
+            sendMessage(absSender, chat, "В настоящее время Readme недоступны.");
         }
     }
 

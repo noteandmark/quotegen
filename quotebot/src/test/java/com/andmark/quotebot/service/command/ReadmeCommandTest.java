@@ -1,11 +1,8 @@
 package com.andmark.quotebot.service.command;
 
-import com.andmark.quotebot.config.BotConfig;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -24,18 +21,18 @@ import static org.junit.jupiter.api.Assertions.*;
         "readmeFile=static/version_info/readme.txt",
         "changelogFile=static/version_info/CHANGELOG.md"
 })
-class VersionCommandTest {
+class ReadmeCommandTest {
     @Mock
     private AbsSender mockAbsSender;
     @Mock
     private Chat mockChat;
 
-    private VersionCommand versionCommand;
+    private ReadmeCommand readmeCommand;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        versionCommand = spy(new VersionCommand());
+        readmeCommand = spy(new ReadmeCommand());
     }
 
     @Test
@@ -44,9 +41,9 @@ class VersionCommandTest {
         mockUser.setId(123L); // Set user ID
 
         // Mock the loadFileContent method
-        doReturn("Mock Readme Content").when(versionCommand).loadFileContent(anyString());
+        doReturn("Mock Readme Content").when(readmeCommand).loadFileContent(anyString());
 
-        versionCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
+        readmeCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
 
         ArgumentCaptor<SendMessage> sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
         verify(mockAbsSender, times(1)).execute(sendMessageCaptor.capture());
@@ -60,9 +57,9 @@ class VersionCommandTest {
         User mockUser = new User();
         mockUser.setId(123L); // Set user ID
 
-        doReturn("").when(versionCommand).loadFileContent(anyString());
+        doReturn("").when(readmeCommand).loadFileContent(anyString());
 
-        versionCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
+        readmeCommand.execute(mockAbsSender, mockUser, mockChat, new String[0]);
 
         ArgumentCaptor<SendMessage> sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
         verify(mockAbsSender, times(1)).execute(sendMessageCaptor.capture());
