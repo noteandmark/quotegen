@@ -11,7 +11,10 @@ import com.andmark.quotegen.repository.BooksRepository;
 import com.andmark.quotegen.repository.QuotesRepository;
 import com.andmark.quotegen.service.ScanService;
 import com.andmark.quotegen.util.NgrokUrlHolder;
+import com.andmark.quotegen.util.NgrokWebServerEventListener;
 import com.andmark.quotegen.util.UrlValidator;
+import com.github.alexdlaird.ngrok.NgrokClient;
+import com.github.alexdlaird.ngrok.protocol.Tunnel;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +37,14 @@ import static com.andmark.quotegen.domain.enums.BookStatus.DELETED;
 @Transactional(readOnly = true)
 @Slf4j
 public class ScanServiceImpl implements ScanService {
-    private final NgrokUrlHolder ngrokUrlHolder;
+    private final NgrokWebServerEventListener ngrokWebServerEventListener;
     private final BooksRepository booksRepository;
     private final QuotesRepository quotesRepository;
     private final ModelMapper mapper;
 
     @Autowired
-    public ScanServiceImpl(NgrokUrlHolder ngrokUrlHolder, BooksRepository booksRepository, QuotesRepository quotesRepository, ModelMapper mapper) {
-        this.ngrokUrlHolder = ngrokUrlHolder;
+    public ScanServiceImpl(NgrokWebServerEventListener ngrokWebServerEventListener, BooksRepository booksRepository, QuotesRepository quotesRepository, ModelMapper mapper) {
+        this.ngrokWebServerEventListener = ngrokWebServerEventListener;
         this.booksRepository = booksRepository;
         this.quotesRepository = quotesRepository;
         this.mapper = mapper;
@@ -197,8 +200,9 @@ public class ScanServiceImpl implements ScanService {
 
     @Override
     public String getWebLink() {
-        String publicUrl = ngrokUrlHolder.getPublicUrl();
         log.debug("scan service: get web link");
+        String publicUrl = ngrokWebServerEventListener.getWebLink();
+        log.debug("web link: {}", publicUrl);
         if (UrlValidator.isValidUrl(publicUrl)) {
             log.debug("web link valid, return");
             return publicUrl;
@@ -206,7 +210,7 @@ public class ScanServiceImpl implements ScanService {
             log.error("web link does not valid");
             throw new InvalidWebLinkException("Invalid web link: " + publicUrl);
         }
-
     }
+
 }
 

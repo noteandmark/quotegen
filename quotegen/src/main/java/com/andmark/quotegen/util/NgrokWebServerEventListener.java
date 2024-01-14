@@ -19,45 +19,73 @@ import static java.util.Objects.nonNull;
 @Component
 @Slf4j
 public class NgrokWebServerEventListener {
-    private final NgrokConfiguration ngrokConfiguration;
-    private final NgrokUrlHolder ngrokUrlHolder;
+    private NgrokConfiguration ngrokConfiguration;
+    private NgrokUrlHolder ngrokUrlHolder;
+    private NgrokClient ngrokClient;
+    private int serverPort;
 
     @Autowired
-    public NgrokWebServerEventListener(final NgrokConfiguration ngrokConfiguration, NgrokUrlHolder ngrokUrlHolder) {
+    public void setNgrokConfiguration(NgrokConfiguration ngrokConfiguration) {
         this.ngrokConfiguration = ngrokConfiguration;
+    }
+
+    @Autowired
+    public void setNgrokUrlHolder(NgrokUrlHolder ngrokUrlHolder) {
         this.ngrokUrlHolder = ngrokUrlHolder;
     }
 
     @EventListener
-    public void onApplicationEvent(final WebServerInitializedEvent event) {
+    public void onApplicationEvent(WebServerInitializedEvent event) {
         log.debug("ngrok event WebServerInitializedEvent");
-        // java-ngrok will only be installed, and should only ever be initialized, in a dev environment
-        if (ngrokConfiguration.isEnabled() && isNotBlank(ngrokAuthToken)) {
+        if (ngrokConfiguration != null && ngrokConfiguration.isEnabled() && isNotBlank(ngrokAuthToken)) {
             log.debug("ngrok config enabled");
-            final JavaNgrokConfig javaNgrokConfig = new JavaNgrokConfig.Builder()
+            JavaNgrokConfig javaNgrokConfig = new JavaNgrokConfig.Builder()
                     .withRegion(nonNull(ngrokConfiguration.getRegion()) ? Region.valueOf(ngrokConfiguration.getRegion().toUpperCase()) : null)
                     .build();
-            final NgrokClient ngrokClient = new NgrokClient.Builder()
+            ngrokClient = new NgrokClient.Builder()
                     .withJavaNgrokConfig(javaNgrokConfig)
                     .build();
-
-            final int port = event.getWebServer().getPort();
-
-            final CreateTunnel createTunnel = new CreateTunnel.Builder()
-                    .withAddr(port)
-                    .build();
-            final Tunnel tunnel = ngrokClient.connect(createTunnel);
-
-            log.info(String.format("ngrok tunnel \"%s\" -> \"http://127.0.0.1:%d\"", tunnel.getPublicUrl(), port));
-
-            // Update any base URLs or webhooks to use the public ngrok URL
-            initWebhooks(tunnel.getPublicUrl());
+            serverPort = event.getWebServer().getPort();
+            createNgrokTunnel(serverPort);
+        } else {
+            log.warn("ngrok configuration is not enabled or invalid");
         }
     }
 
-    private void initWebhooks(final String publicUrl) {
+    public String getWebLink() {
+        log.debug("ngrok event WebServerInitializedEvent");
+        if (ngrokConfiguration != null && ngrokConfiguration.isEnabled() && isNotBlank(ngrokAuthToken)) {
+            log.debug("ngrok config enabled");
+            if (isNgrokTunnelOpen()) {
+                log.debug("ngrok tunnel is open, using existing tunnel");
+            } else {
+                log.debug("ngrok tunnel is not open, creating new tunnel");
+                createNgrokTunnel(serverPort);
+            }
+            return ngrokUrlHolder.getPublicUrl();
+        } else {
+            log.warn("ngrok configuration is not enabled or invalid");
+            return null;
+        }
+    }
+
+    private void createNgrokTunnel(int port) {
+        CreateTunnel createTunnel = new CreateTunnel.Builder()
+                .withAddr(port)
+                .build();
+        Tunnel tunnel = ngrokClient.connect(createTunnel);
+        ngrokUrlHolder.setPublicUrl(tunnel.getPublicUrl());
+        log.info(String.format("ngrok tunnel \"%s\" -> \"http://127.0.0.1:%d\"", tunnel.getPublicUrl(), port));
+        initWebhooks(tunnel.getPublicUrl());
+    }
+
+    private void initWebhooks(String publicUrl) {
         // Update inbound traffic via APIs to use the public-facing ngrok URL
         ngrokUrlHolder.setPublicUrl(publicUrl);
     }
 
+    private boolean isNgrokTunnelOpen() {
+        return ngrokClient != null && ngrokClient.getTunnels().stream()
+                .anyMatch(tunnel -> tunnel.getPublicUrl().startsWith("https://"));
+    }
 }
