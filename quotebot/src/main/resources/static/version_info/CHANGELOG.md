@@ -6,6 +6,9 @@
 ### Changed
 ### Fixed
 
+## [2.0.1] - 2024-01-14
+### Fixed
+- added the ability to automatically create an ngrok tunnel in the event of a shutdown
 ## [2.0.0-RELEASE] - 2024-01-13
 ### Added
 - added clearing the database of books with DELETED status

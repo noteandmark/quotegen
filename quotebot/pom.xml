@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.andmark</groupId>
     <artifactId>quotebot</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <name>QuoteBot</name>
     <description>QuoteGen client telegram bot</description>
 
