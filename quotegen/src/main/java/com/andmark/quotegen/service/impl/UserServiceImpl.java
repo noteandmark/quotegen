@@ -1,5 +1,6 @@
 package com.andmark.quotegen.service.impl;
 
+import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.User;
 import com.andmark.quotegen.domain.enums.UserRole;
 import com.andmark.quotegen.dto.UserDTO;
@@ -70,24 +71,43 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return convertToDtoList(userList);
     }
 
-    // method is used to change the user's nickname
     @Override
     @Transactional
     public UserDTO update(UserDTO updatedUserDTO) {
-        String username = updatedUserDTO.getUsername();
-        log.debug("update user with username = {}", username);
-        String nickname = updatedUserDTO.getNickname();
-        log.debug("update user nickname to new : {}", nickname);
-        try {
-            usersRepository.updateNickname(username, nickname);
-        } catch (Exception e) {
-            log.error("Error updating nickname for user " + username, e);
-            throw new ServiceException("Failed to update nickname");
-        }
-        Optional<User> user = usersRepository.findByUsername(username);
-        log.info("update user {}", user);
-        return convertToDTO(user.get());
+        log.debug("update user by id {}", updatedUserDTO.getId());
+        User updatedUser = convertToEntity(updatedUserDTO);
+        usersRepository.save(updatedUser);
+        log.info("updated user {}", updatedUser);
+        return updatedUserDTO;
     }
+
+    @Override
+    @Transactional
+    public UserDTO updateNickname(UserDTO updatedUserDTO) {
+        String username = updatedUserDTO.getUsername();
+        log.debug("update user by username {}", username);
+        UserDTO userDTO = findByUsername(username);
+        userDTO.setNickname(updatedUserDTO.getNickname());
+        User updatedUser = convertToEntity(userDTO);
+        usersRepository.save(updatedUser);
+        log.info("updated user nickname = {}", updatedUser);
+        return convertToDTO(updatedUser);
+    }
+
+//        String username = updatedUserDTO.getUsername();
+//        log.debug("update user with username = {}", username);
+//        String nickname = updatedUserDTO.getNickname();
+//        log.debug("update user nickname to new : {}", nickname);
+//        try {
+//            usersRepository.updateNickname(username, nickname);
+//        } catch (Exception e) {
+//            log.error("Error updating nickname for user " + username, e);
+//            throw new ServiceException("Failed to update nickname");
+//        }
+//        Optional<User> user = usersRepository.findByUsername(username);
+//        log.info("update user {}", user);
+//        return convertToDTO(user.get());
+//    }
 
     @Override
     @Transactional
@@ -206,6 +226,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
 
 }

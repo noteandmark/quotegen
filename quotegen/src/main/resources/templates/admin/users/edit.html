@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Users Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"
+          th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" >
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous" th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.min.js}"></script>
+</head>
+<body style="padding-top: 60px;">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">Users Management</a>
+    <div th:replace="~{fragments/navbar-fragment :: navbar}"></div>
+</nav>
+<div class="container">
+    <h1>Edit User</h1>
+    <form th:action="@{'/admin/users/edit/' + ${userDTO.id}}" method="post" th:object="${userDTO}">
+        <div class="mb-3">
+            <label for="id" class="form-label">Id</label>
+            <input type="text" class="form-control" id="id" th:field="*{id}" readonly/>
+        </div>
+        <div class="mb-3">
+            <label for="usertgId" class="form-label">UsertgId</label>
+            <input type="text" class="form-control" id="usertgId" th:field="*{usertgId}" readonly/>
+        </div>
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" th:field="*{username}" readonly/>
+        </div>
+        <div class="mb-3">
+            <label for="nickname" class="form-label">Nickname</label>
+            <input type="text" class="form-control" id="nickname" th:field="*{nickname}" readonly/>
+        </div>
+        <div class="mb-3">
+            <label for="role" class="form-label">Role</label>
+            <select class="form-select" id="role" th:field="*{role}">
+                <option th:each="role : ${T(com.andmark.quotegen.domain.enums.UserRole).values()}"
+                        th:value="${role}" th:text="${role}"></option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Give the user a new role</button>
+        <br>
+        <a class="btn btn-secondary" th:href="@{/admin/users}">Back to List</a>
+    </form>
+</div>
+
+<div th:replace="~{fragments/footer-fragment :: footer}"></div>
+</body>
+</html>

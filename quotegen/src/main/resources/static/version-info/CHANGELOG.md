@@ -7,6 +7,11 @@
 ### Changed
 ### Fixed
 
+## [2.0.3] - 2024-01-15
+### Added
+- added admin users crud pages
+### Fixed
+- user update methods
 ## [2.0.2] - 2024-01-14
 ### Fixed
 - added css folder to security config permit-all

@@ -22,4 +22,6 @@ public interface UserService extends AbstractService<UserDTO>{
     void deleteByUsername(String username);
 
     User convertToEntity(UserDTO userDTO);
+
+    UserDTO updateNickname(UserDTO updatedUser);
 }

@@ -32,7 +32,8 @@ public class WebProfileController {
     public String updateNickname(@PathVariable String username, @ModelAttribute("user") UserDTO updatedUser,
                                  Model model) {
         try {
-            userService.update(updatedUser);
+            log.debug("controller updateNickname");
+            userService.updateNickname(updatedUser);
             return "redirect:/web/profile/" + username;
         } catch (ServiceException e) {
             log.warn("ServiceException in updateNickname");
