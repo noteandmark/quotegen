@@ -13,8 +13,6 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 import static com.andmark.quotegen.config.AppConfig.ngrokAuthToken;
 import static com.github.alexdlaird.util.StringUtils.isNotBlank;
 import static java.util.Objects.nonNull;

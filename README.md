@@ -1,6 +1,6 @@
 # Quote Generator REST API and Client Telegram Bot
 
-**Version:** 2.0.0 (Released on 13.01.2024)
+**Version:** 2.0.2 (Released on 13.01.2024)
 
 **Author:** andmark
 
@@ -8,7 +8,7 @@
 
 **LinkedIn:** [linkedin.com/in/noteandmark/](https://linkedin.com/in/noteandmark/)
 
-**Telegram:** [t.me/note_and_mark](https://t.me/note_and_mark)
+**Telegram:** [t.me/and_mark](https://t.me/and_mark)
 
 "Книголюб" - часть автоматизированной системы по генерации цитат из книг:
 1. QuoteGen - приложение, которое генерирует случайные цитаты из случайно выбранной книги в электронной библиотеке пользователя.
@@ -17,6 +17,7 @@
 3. QuoteGen web - веб-приложение для доступа ко всем возможностям программы через браузер
 
 Использованные технологии и библиотеки:
+
 **Язык программирования:**
 - Java 20, JavaScript
 
