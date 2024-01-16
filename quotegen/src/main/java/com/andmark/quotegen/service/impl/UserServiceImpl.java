@@ -1,6 +1,5 @@
 package com.andmark.quotegen.service.impl;
 
-import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.User;
 import com.andmark.quotegen.domain.enums.UserRole;
 import com.andmark.quotegen.dto.UserDTO;
@@ -64,6 +63,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public UserDTO findByUsername(String username) {
+        log.debug("user service findByUsername = {}", username);
+        Optional<User> byUsername = usersRepository.findByUsername(username);
+        log.info("find byUsername = {}", byUsername);
+        return byUsername.map(this::convertToDTO).orElse(null);
+    }
+
+    @Override
     public List<UserDTO> findAll() {
         log.debug("find all users");
         List<User> userList = usersRepository.findAll();
@@ -93,21 +100,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         log.info("updated user nickname = {}", updatedUser);
         return convertToDTO(updatedUser);
     }
-
-//        String username = updatedUserDTO.getUsername();
-//        log.debug("update user with username = {}", username);
-//        String nickname = updatedUserDTO.getNickname();
-//        log.debug("update user nickname to new : {}", nickname);
-//        try {
-//            usersRepository.updateNickname(username, nickname);
-//        } catch (Exception e) {
-//            log.error("Error updating nickname for user " + username, e);
-//            throw new ServiceException("Failed to update nickname");
-//        }
-//        Optional<User> user = usersRepository.findByUsername(username);
-//        log.info("update user {}", user);
-//        return convertToDTO(user.get());
-//    }
 
     @Override
     @Transactional
@@ -181,19 +173,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserDTO findByUsername(String username) {
-        log.debug("user service findByUsername = {}", username);
-        Optional<User> byUsername = usersRepository.findByUsername(username);
-        log.info("find byUsername = {}", byUsername);
-        return byUsername.map(this::convertToDTO).orElse(null);
-    }
-
-    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.debug("in method loadUserByUsername find username: {}", username);
 
         UserDTO userDTO = findByUsername(username);
-
+        System.out.println("userDTO = " + userDTO);
         if (userDTO == null) {
             log.debug("user not found with username: {}", username);
             throw new UsernameNotFoundException("User not found with username: " + username);
