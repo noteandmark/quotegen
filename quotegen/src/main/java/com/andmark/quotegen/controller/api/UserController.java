@@ -56,7 +56,7 @@ public class UserController {
     public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
         log.debug("user controller in registerUser");
         try {
-            userService.save(userDTO);
+            UserDTO savedUserDTO = userService.save(userDTO);
             log.info("controller success save user, return response");
             return ResponseEntity.ok("User registered successfully");
         } catch (Exception e) {

@@ -1,6 +1,5 @@
 package com.andmark.quotegen.controller.api;
 
-import com.andmark.quotegen.config.SecurityConfig;
 import com.andmark.quotegen.domain.enums.UserRole;
 import com.andmark.quotegen.dto.UserDTO;
 import com.andmark.quotegen.service.UserService;
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,15 +20,43 @@ import static com.andmark.quotegen.domain.enums.UserRole.ROLE_USER;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.is;
 
 @WebMvcTest(UserController.class)
 @ExtendWith(SpringExtension.class)
-//@Import(SecurityConfig.class)
 class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private UserService userService;
+
+    @Test
+    @WithMockUser(username = "testuser", roles = {"USER"})
+    void shouldFindUserByUsertgId() throws Exception {
+        // Arrange
+        long usertgId = 123;
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsertgId(usertgId);
+        when(userService.findOneByUsertgId(usertgId)).thenReturn(userDTO);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/users/finduser-usertgid/{usertgId}", usertgId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.usertgId", is((int) usertgId)));
+    }
+
+    @Test
+    @WithMockUser(username = "testuser", roles = {"USER"})
+    void shouldReturnNotFoundWhenUserNotFound() throws Exception {
+        // Arrange
+        long usertgId = 123;
+        when(userService.findOneByUsertgId(usertgId)).thenReturn(null);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/users/finduser-usertgid/{usertgId}", usertgId))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     @WithMockUser(username = "testuser", roles = {"USER"})
@@ -74,17 +100,17 @@ class UserControllerTest {
 
     @Test
     @WithAnonymousUser
-    @Disabled //don't work with SpringSecurity but work with Postman
+    @Disabled //don't work with SpringSecurity (403 status) but work with Postman
     public void testRegisterUser() throws Exception {
         // Mocking
         UserDTO userDTO = new UserDTO();
         userDTO.setUsertgId(12345L);
         userDTO.setUsername("testuser");
-        userDTO.setPassword("test_pass");
+        userDTO.setPassword("password");
         userDTO.setRole(ROLE_USER);
         userDTO.setNickname("testuser");
 
-        doNothing().when(userService).save(any(UserDTO.class));
+        when(userService.save(any(UserDTO.class))).thenReturn(userDTO);
 
         // Testing
         mockMvc.perform(post("/api/users/register")
