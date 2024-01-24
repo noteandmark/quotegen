@@ -4,6 +4,7 @@ import com.andmark.quotegen.dto.StatsDTO;
 import com.andmark.quotegen.service.EmailService;
 import com.andmark.quotegen.service.ScanService;
 import com.andmark.quotegen.service.WebVersionService;
+import com.andmark.quotegen.util.TimeProvider;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,14 @@ public class PublicController {
     private final ScanService scanService;
     private final WebVersionService versionService;
     private final EmailService emailService;
+    private final TimeProvider timeProvider;
 
     @Autowired
-    public PublicController(ScanService scanService, WebVersionService versionService, EmailService emailService) {
+    public PublicController(ScanService scanService, WebVersionService versionService, EmailService emailService, TimeProvider timeProvider) {
         this.scanService = scanService;
         this.versionService = versionService;
         this.emailService = emailService;
+        this.timeProvider = timeProvider;
     }
 
     @GetMapping("/stats")
@@ -76,7 +79,7 @@ public class PublicController {
 
     @PostMapping("/report")
     public String submitReportForm(String email, String subject, String message, String timeStamp, Model model) {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = timeProvider.getCurrentTimeMillis();
         long formSubmitTime = Long.parseLong(timeStamp);
 
         // checking the time of form submission

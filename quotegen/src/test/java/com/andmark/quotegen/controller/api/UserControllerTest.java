@@ -100,7 +100,7 @@ class UserControllerTest {
 
     @Test
     @WithAnonymousUser
-    @Disabled //don't work with SpringSecurity (403 status) but work with Postman
+    @Disabled //don't work with SpringSecurity (need integrating test), but work checked with Postman
     public void testRegisterUser() throws Exception {
         // Mocking
         UserDTO userDTO = new UserDTO();
@@ -123,7 +123,8 @@ class UserControllerTest {
     }
 
     @Test
-    @Disabled //don't work with SpringSecurity but work with Postman
+    @WithMockUser(username = "testuser", roles = {"USER"})
+//    @Disabled //don't work with SpringSecurity (need integrating test), but work checked with Postman
     public void testDeleteUser() throws Exception {
         // Mocking
         long userId = 1L;
