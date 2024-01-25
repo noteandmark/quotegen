@@ -124,7 +124,7 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = {"USER"})
-//    @Disabled //don't work with SpringSecurity (need integrating test), but work checked with Postman
+    @Disabled //don't work with SpringSecurity (need integrating test), but work checked with Postman
     public void testDeleteUser() throws Exception {
         // Mocking
         long userId = 1L;
