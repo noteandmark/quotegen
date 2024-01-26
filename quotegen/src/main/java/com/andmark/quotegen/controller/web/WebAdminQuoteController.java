@@ -34,7 +34,6 @@ public class WebAdminQuoteController {
                              @RequestParam(name = "sortField", required = false) String sortField,
                              @RequestParam(name = "sortDirection", required = false) String sortDirection) {
         log.debug("web admin quote controller showQuotes");
-
         Page<QuoteDTO> quotesPage = quoteService.findAllSorted(pageable, sortField, sortDirection);
 
         // use getContent to get the list of elements on the current page
@@ -44,22 +43,8 @@ public class WebAdminQuoteController {
         model.addAttribute("sortDirection", sortDirection);
 
         // if the page number is greater than the maximum number of pages, redirect to the last page
-        if (pageable.getPageNumber() >= quotesPage.getTotalPages()) {
-            log.debug("page number is greater than the maximum number of pages");
-            StringBuilder redirectUrl = new StringBuilder("/admin/quote?page=")
-                    .append(quotesPage.getTotalPages() - 1)
-                    .append("&size=")
-                    .append(pageable.getPageSize());
-            log.debug("redirectUrl = {}", redirectUrl);
-
-            // add sorting parameters, if present
-            if (sortField != null && !sortField.isEmpty()) {
-                log.debug("add sorting parameters");
-                redirectUrl.append("&sortField=").append(sortField).append("&sortDirection=").append(sortDirection);
-            }
-
-            log.debug("redirect with sorting url = {}", redirectUrl);
-            return "redirect:" + redirectUrl;
+        if (shouldRedirectToLastPage(pageable, quotesPage, sortField, sortDirection)) {
+            return redirectToLastPage(pageable, quotesPage, sortField, sortDirection);
         }
 
         log.debug("return page list of quotes");
@@ -134,10 +119,32 @@ public class WebAdminQuoteController {
         return "redirect:/admin/quote";
     }
 
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public String deleteQuote(@PathVariable("id") Long id) {
         log.debug("web admin quote controller deleteQuote");
         quoteService.delete(id);
         return "redirect:/admin/quote";
+    }
+
+    private boolean shouldRedirectToLastPage(Pageable pageable, Page<QuoteDTO> quotesPage, String sortField, String sortDirection) {
+        return pageable.getPageNumber() >= quotesPage.getTotalPages();
+    }
+
+    private String redirectToLastPage(Pageable pageable, Page<QuoteDTO> quotesPage, String sortField, String sortDirection) {
+        log.debug("page number is greater than the maximum number of pages");
+        StringBuilder redirectUrl = new StringBuilder("/admin/quote?page=")
+                .append(quotesPage.getTotalPages() - 1)
+                .append("&size=")
+                .append(pageable.getPageSize());
+        log.debug("redirectUrl = {}", redirectUrl);
+
+        // add sorting parameters, if present
+        if (sortField != null && !sortField.isEmpty()) {
+            log.debug("add sorting parameters");
+            redirectUrl.append("&sortField=").append(sortField).append("&sortDirection=").append(sortDirection);
+        }
+
+        log.debug("redirect with sorting url = {}", redirectUrl);
+        return "redirect:" + redirectUrl;
     }
 }

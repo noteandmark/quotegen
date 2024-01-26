@@ -32,6 +32,11 @@ public class WebAdminController {
         this.googleCustomSearchService = googleCustomSearchService;
     }
 
+    @GetMapping("/success")
+    public String successPage() {
+        return "admin/success";
+    }
+
     @GetMapping("/requestquote")
     public String requestQuote(Model model) {
         log.debug("Admin Controller: Request Quote");
@@ -116,11 +121,6 @@ public class WebAdminController {
         redirectAttributes.addFlashAttribute("deletedQuoteId", quoteId);
 
         return "redirect:/admin/success";
-    }
-
-    @GetMapping("/success")
-    public String successPage() {
-        return "admin/success";
     }
 
 }

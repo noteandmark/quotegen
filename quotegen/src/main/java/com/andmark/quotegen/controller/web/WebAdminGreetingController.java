@@ -81,7 +81,7 @@ public class WebAdminGreetingController {
         return "redirect:/admin/greeting";
     }
 
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public String deleteGreeting(@PathVariable("id") Long id) {
         log.debug("web admin greeting controller deleteGreeting");
         greetingService.delete(id);

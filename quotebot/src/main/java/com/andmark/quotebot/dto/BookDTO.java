@@ -2,12 +2,9 @@ package com.andmark.quotebot.dto;
 
 import com.andmark.quotebot.domain.enums.BookFormat;
 import com.andmark.quotebot.domain.enums.BookStatus;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-@RequiredArgsConstructor
+@Builder
 @Getter
 @Setter
 @ToString
@@ -20,4 +17,15 @@ public class BookDTO {
     private String filePath;
     private BookStatus bookStatus;
 
+    public BookDTO() {
+    }
+
+    public BookDTO(Long id, String title, String author, BookFormat format, String filePath, BookStatus bookStatus) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.format = format;
+        this.filePath = filePath;
+        this.bookStatus = bookStatus;
+    }
 }

@@ -1,5 +1,6 @@
 package com.andmark.quotegen.controller.web;
 
+import com.andmark.quotegen.domain.Book;
 import com.andmark.quotegen.domain.enums.BookFormat;
 import com.andmark.quotegen.domain.enums.BookStatus;
 import com.andmark.quotegen.dto.BookDTO;
@@ -16,11 +17,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -156,6 +158,96 @@ public class WebAdminBookControllerTest {
                 .andExpect(view().name("admin/book/edit"))
                 .andExpect(model().attribute("bookDTO", bookDTO))
                 .andExpect(model().attribute("quoteId", quoteId));
+    }
+
+    @Test
+    void shouldEditBookAndRedirectToQuoteViewPageWithQuoteId() throws Exception {
+        // Arrange
+        long bookId = 1L;
+        String quoteId = "123";
+        BookDTO bookDTO = createBookDTO(bookId);
+        when(bookService.update(bookDTO)).thenReturn(bookDTO);
+
+        // Act & Assert
+        mockMvc.perform(post("/admin/book/edit/{id}", bookId)
+                        .param("quoteId", quoteId)
+                        .flashAttr("bookDTO", bookDTO))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/quote/view/" + quoteId));
+    }
+
+    @Test
+    void shouldEditBookAndRedirectToQuoteListPageWithoutQuoteId() throws Exception {
+        // Arrange
+        long bookId = 1L;
+        BookDTO bookDTO = createBookDTO(bookId);
+        when(bookService.update(bookDTO)).thenReturn(bookDTO);
+
+        // Act & Assert
+        mockMvc.perform(post("/admin/book/edit/{id}", bookId)
+                        .flashAttr("bookDTO", bookDTO))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/quote"));
+    }
+
+    @Test
+    void shouldViewDeletedBooksAndReturnViewDeletedPageWithBooks() throws Exception {
+        // Arrange
+        Book deletedBook1 = new Book();
+        deletedBook1.setId(1L);
+        deletedBook1.setTitle("Deleted Book 1");
+        deletedBook1.setAuthor("Author 1");
+        deletedBook1.setFormat(BookFormat.PDF);
+        deletedBook1.setFilePath("/path/to/book1");
+        deletedBook1.setBookStatus(BookStatus.DELETED);
+
+        Book deletedBook2 = new Book();
+        deletedBook2.setId(2L);
+        deletedBook2.setTitle("Deleted Book 2");
+        deletedBook2.setAuthor("Author 2");
+        deletedBook2.setFormat(BookFormat.FB2);
+        deletedBook2.setFilePath("/path/to/book2");
+        deletedBook2.setBookStatus(BookStatus.DELETED);
+
+        List<Book> deletedBooks = Arrays.asList(deletedBook1, deletedBook2);
+
+        when(bookService.getDeletedBooks()).thenReturn(deletedBooks);
+
+        // Act & Assert
+        mockMvc.perform(get("/admin/book/view-deleted"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/book/view-deleted"))
+                .andExpect(model().attributeExists("deletedBooks"))
+                .andExpect(model().attribute("deletedBooks", hasSize(2)))
+                .andExpect(model().attribute("deletedBooks", containsInAnyOrder(
+                        allOf(
+                                hasProperty("id", is(1L)),
+                                hasProperty("title", is("Deleted Book 1")),
+                                hasProperty("author", is("Author 1")),
+                                hasProperty("format", is(BookFormat.PDF)),
+                                hasProperty("filePath", is("/path/to/book1")),
+                                hasProperty("bookStatus", is(BookStatus.DELETED))
+                        ),
+                        allOf(
+                                hasProperty("id", is(2L)),
+                                hasProperty("title", is("Deleted Book 2")),
+                                hasProperty("author", is("Author 2")),
+                                hasProperty("format", is(BookFormat.FB2)),
+                                hasProperty("filePath", is("/path/to/book2")),
+                                hasProperty("bookStatus", is(BookStatus.DELETED))
+                        )
+                )));
+    }
+
+    @Test
+    void shouldCleanDataBaseAndRedirectToViewDeletedPage() throws Exception {
+        // Arrange
+        doNothing().when(bookService).clearDeletedBooks();
+
+        // Act & Assert
+        mockMvc.perform(post("/admin/book/clean-db"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/book/view-deleted"));
     }
 
     private BookDTO createBookDTO(long id) {
