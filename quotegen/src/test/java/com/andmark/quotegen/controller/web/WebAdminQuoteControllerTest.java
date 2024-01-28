@@ -12,8 +12,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.nullValue;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -98,6 +95,20 @@ public class WebAdminQuoteControllerTest {
                 .andExpect(model().attribute("bookDTO", bookDTO))
                 .andExpect(view().name("admin/quote/view"));
     }
+
+    @Test
+    void shouldRedirectIfQuoteNotFound() throws Exception {
+        // Arrange
+        Long quoteId = 1L;
+        when(quoteService.findOne(quoteId)).thenReturn(null);
+
+        // Act & Assert
+        mockMvc.perform(get("/admin/quote/view/{id}", quoteId))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/quote"))
+                .andExpect(view().name("redirect:/admin/quote"));
+    }
+
 
     @Test
     public void shouldShowCreateForm() throws Exception {
