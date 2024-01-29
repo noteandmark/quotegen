@@ -91,14 +91,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public UserDTO updateNickname(UserDTO updatedUserDTO) {
-        String username = updatedUserDTO.getUsername();
-        log.debug("update user by username {}", username);
-        UserDTO userDTO = findByUsername(username);
-        userDTO.setNickname(updatedUserDTO.getNickname());
-        User updatedUser = convertToEntity(userDTO);
-        usersRepository.save(updatedUser);
-        log.info("updated user nickname = {}", updatedUser);
-        return convertToDTO(updatedUser);
+        try {
+            String username = updatedUserDTO.getUsername();
+            log.debug("update user by username {}", username);
+            UserDTO userDTO = findByUsername(username);
+            userDTO.setNickname(updatedUserDTO.getNickname());
+            User updatedUser = convertToEntity(userDTO);
+            usersRepository.save(updatedUser);
+            log.info("updated user nickname = {}", updatedUser);
+            return convertToDTO(updatedUser);
+        } catch (Exception e) {
+            log.error("Error occurred while updating user nickname", e);
+            throw new ServiceException("Error occurred while updating user nickname", e);
+        }
     }
 
     @Override

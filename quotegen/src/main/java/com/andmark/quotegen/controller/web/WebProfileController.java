@@ -24,6 +24,11 @@ public class WebProfileController {
     public String userProfile(@PathVariable String username, Model model) {
         // Получите данные пользователя по username и передайте их в модель
         UserDTO userDTO = userService.findByUsername(username);
+        if (userDTO == null) {
+            log.warn("userDTO with username = {} does not exists", username);
+            model.addAttribute("errorMessage", "Пользователь с именем " + username + " не найден.");
+            return "public/error";
+        }
         model.addAttribute("user", userDTO);
         return "web/profile";
     }
@@ -34,8 +39,10 @@ public class WebProfileController {
         try {
             log.debug("controller updateNickname");
             userService.updateNickname(updatedUser);
+            System.out.println("get to redirect");
             return "redirect:/web/profile/" + username;
         } catch (ServiceException e) {
+            System.out.println("Exception!");
             log.warn("ServiceException in updateNickname");
             model.addAttribute("errorMessage", e.getMessage());
             return "public/error";
@@ -44,7 +51,7 @@ public class WebProfileController {
 
     @GetMapping("/change-password/{username}")
     public String changePasswordForm(@PathVariable String username, Model model) {
-        // Передаем имя пользователя в модель для отображения на странице
+        // pass the username to the model to be displayed on the page
         log.debug("webProfileController changePasswordForm with username = {}", username);
         model.addAttribute("username", username);
         return "web/change-password";

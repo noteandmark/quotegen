@@ -64,9 +64,6 @@ public class UserServiceImplTest {
         lenient().when(mapper.convertToEntity(userDTO, User.class)).thenReturn(user);
     }
 
-    //        String encodedCurrentPassword = "$2a$10$1BnrAJWw0tyHPnWk1m88ReKGJWVeiXyON0USD2Yx51vlc91KzlZLi";
-
-
     @Test
     void testSave() {
         // Mocking behavior
