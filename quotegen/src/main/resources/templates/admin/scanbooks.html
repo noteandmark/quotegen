@@ -39,7 +39,7 @@
                 <h4 class="mt-4" th:if="${scannedBooks}">Результаты сканирования:</h4>
                 <ul th:if="${scannedBooks}" class="list-group">
                     <p>Количество ACTIVE книг всего в БД: </p>
-                    <span th:text="${scannedBooks.size}"></span>
+                    <span th:text="${#lists.size(scannedBooks)}"></span>
                     <li th:each="book : ${scannedBooks}" class="list-group-item">
                         <span th:text="${book.title}"></span>
                         <span th:text="${' - ' + book.author}"></span>

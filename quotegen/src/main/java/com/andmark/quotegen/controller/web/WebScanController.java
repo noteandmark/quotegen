@@ -38,6 +38,9 @@ public class WebScanController {
         List<BookDTO> scannedBooks = scanService.scanBooks(directoryPath);
         log.debug("scannedBooks count = " + scannedBooks.size());
 
+        System.out.println("controller scannedBooks = " + scannedBooks);
+        System.out.println("controller scannedBooks size = " + scannedBooks.size());
+
         model.addAttribute("scannedBooks", scannedBooks);
 
         return "admin/scanbooks :: #result-container";
